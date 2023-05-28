@@ -71,3 +71,17 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 ## License
 
 Nest is [MIT licensed](LICENSE).
+
+
+# Database
+Docker command: docker run --name demo-postgres -p 5432:5432 -e POSTGRES_PASSWORD=password -d postgres
+
+docker exec -it demo-postgres bash
+
+Set up database based on the information in "[.env.example]"
+
+docker pull dpage/pgadmin4:latest
+docker run --name demo-pgadmin -p 80:80 -e PGADMIN_DEFAULT_EMAIL="....." -e PGADMIN_DEFAULT_PASSWORD=password -d dpage/pgadmin4
+docker ps -a
+# Note
+Run "[npm i]" after cloning or pulling the resource from remote repository

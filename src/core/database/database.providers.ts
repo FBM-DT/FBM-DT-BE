@@ -19,6 +19,7 @@ export const databaseProviders = [{
            break;
         default:
            config = databaseConfig.development;
+           break;
         }
         const sequelize = new Sequelize(config);
         sequelize.addModels([User]);
