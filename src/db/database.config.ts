@@ -31,6 +31,6 @@ export const databaseConfig: IDatabaseConfig = {
     port: parseInt(process.env.DB_PORT),
     type: 'postgres',
     entities: ['dist/**/*.entity{.ts,.js}'],
-    migrations: ['dist/db/migrations/*.js'],
+    migrations: ['dist/src/db/migrations/*.js'],
   },
 };

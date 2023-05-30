@@ -1,5 +1,5 @@
 import { DataSource, DataSourceOptions } from 'typeorm';
-import { DEVELOPMENT, PRODUCTION, TEST } from '../src/core/constants';
+import { DEVELOPMENT, PRODUCTION, TEST } from '../core/constants';
 import { databaseConfig } from './database.config';
 export const typeOrmConfig = () => {
   let config: DataSourceOptions;

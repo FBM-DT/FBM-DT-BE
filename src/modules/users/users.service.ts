@@ -1,18 +1,21 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, Post } from '@nestjs/common';
+import { IUserRepository } from 'src/core/abstraction';
+import { UserRepository } from './users.provider';
 @Injectable()
 export class UsersService {
+  private _repository: IUserRepository;
+  constructor(userRepository: UserRepository) {
+    this._repository = userRepository;
+  }
 
-    // constructor(@Inject(USER_REPOSITORY) private readonly userRepository: typeof User) { }
-
-    // async create(user: UserDto): Promise<User> {
-    //     return await this.userRepository.create<User>(user);
-    // }
-
-    // async findOneByEmail(email: string): Promise<User> {
-    //     return await this.userRepository.findOne<User>({ where: { email } });
-    // }
-
-    // async findOneById(id: number): Promise<User> {
-    //     return await this.userRepository.findOne<User>({ where: { id } });
-    // }
+  async addUser(data: Object) {
+    try {
+      const response = await this._repository.add(data);
+    } catch (error) {
+      console.log(
+        '🚀 ~ file: users.service.ts:15 ~ UsersService ~ addUser ~ error:',
+        error,
+      );
+    }
+  }
 }
