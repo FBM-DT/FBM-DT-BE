@@ -76,12 +76,14 @@ Nest is [MIT licensed](LICENSE).
 # Database
 Docker command: docker run --name demo-postgres -p 5432:5432 -e POSTGRES_PASSWORD=password -d postgres
 
-docker exec -it demo-postgres bash
-
-Set up database based on the information in "[.env.example]"
-
-docker pull dpage/pgadmin4:latest
-docker run --name demo-pgadmin -p 80:80 -e PGADMIN_DEFAULT_EMAIL="....." -e PGADMIN_DEFAULT_PASSWORD=password -d dpage/pgadmin4
-docker ps -a
 # Note
 Run "[npm i]" after cloning or pulling the resource from remote repository
+
+# Important note
+After modifying or adding the entity must create migration
+Command: npm run migration:create -- path-to-migrations-folder/name-of-migration-file (ex: npm run migration:create -- db/migrations/addUserMigration)
+
+After create migration, must run to implement into db 
+Command: npm run migration:run
+
+Must not delete any existing migration file.
