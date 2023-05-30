@@ -71,3 +71,19 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 ## License
 
 Nest is [MIT licensed](LICENSE).
+
+
+# Database
+Docker command: docker run --name demo-postgres -p 5432:5432 -e POSTGRES_PASSWORD=password -d postgres
+
+# Note
+Run "[npm i]" after cloning or pulling the resource from remote repository
+
+# Important note
+After modifying or adding the entity must create migration
+Command: npm run migration:create -- path-to-migrations-folder/name-of-migration-file (ex: npm run migration:create -- db/migrations/addUserMigration)
+
+After create migration, must run to implement into db 
+Command: npm run migration:run
+
+Must not delete any existing migration file.

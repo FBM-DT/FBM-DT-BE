@@ -1,30 +1,58 @@
-import { Table, Column, Model, DataType } from 'sequelize-typescript';
+import { ShareEntity } from '../../core/shared';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { Role } from '../role/role.entity';
 
-@Table
-export class User extends Model<User> {
-    @Column({
-        type: DataType.STRING,
-        allowNull: false,
-    })
-    name: string;
+@Entity()
+export class User extends ShareEntity {
+  @Column({
+    type: 'varchar',
+    length: 500,
+    nullable: false,
+  })
+  fullname: string;
 
-    @Column({
-        type: DataType.STRING,
-        unique: true,
-        allowNull: false,
-    })
-    email: string;
+  @Column({
+    type: 'varchar',
+    length: 500,
+    nullable: false,
+    unique: true,
+  })
+  email: string;
 
-    @Column({
-        type: DataType.STRING,
-        allowNull: false,
-    })
-    password: string;
+  @Column({
+    type: 'varchar',
+    length: 5000,
+    nullable: false,
+  })
+  password: string;
 
-    @Column({
-        type: DataType.ENUM,
-        values: ['male', 'female'],
-        allowNull: false,
-    })
-    gender: string;
+  @Column({
+    type: 'varchar',
+    length: 10,
+    nullable: true,
+    unique: true,
+  })
+  phonenumber: string;
+
+  @Column({
+    type: 'date',
+    nullable: true,
+  })
+  dateOfBirth: Date;
+
+  @Column({
+    type: 'varchar',
+    nullable: true,
+    length: 500,
+  })
+  avatar: string;
+
+  @Column({
+    type: 'int',
+    nullable: false,
+  })
+  roleId: number;
+  @ManyToOne(() => Role, (role) => role.users, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'roleId' })
+  role: Role;
 }
