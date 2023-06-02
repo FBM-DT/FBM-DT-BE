@@ -1,6 +1,7 @@
 import { ShareEntity } from '../../core/shared';
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { Role } from '../role/role.entity';
+import { Staff_Shift } from '../shift/entities/staffInShift.entity';
 
 @Entity()
 export class User extends ShareEntity {
@@ -55,4 +56,7 @@ export class User extends ShareEntity {
   @ManyToOne(() => Role, (role) => role.users, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'roleId' })
   role: Role;
+
+  @OneToMany(()=>Staff_Shift, (staffShift)=>staffShift.staffId)
+  staffShifts: Staff_Shift[]
 }
