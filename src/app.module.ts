@@ -6,6 +6,8 @@ import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { RoleModule } from './modules/role/role.module';
 import { DatabaseModule } from './db/database.module';
+import { ShiftModule } from './modules/shift/shift.module';
+import { TaskModule } from './modules/task/task.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env.example' }),
@@ -13,6 +15,8 @@ import { DatabaseModule } from './db/database.module';
     UsersModule,
     AuthModule,
     RoleModule,
+    ShiftModule,
+    TaskModule,
   ],
   controllers: [AppController],
   providers: [AppService],
