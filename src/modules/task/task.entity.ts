@@ -1,4 +1,4 @@
-import { ShareEntity } from 'src/core/shared';
+import { ShareEntity } from '../../core/shared';
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { WorkShift } from '../shift/entities/work-shift.entity';
 

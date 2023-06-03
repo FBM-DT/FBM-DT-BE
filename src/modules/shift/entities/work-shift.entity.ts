@@ -1,8 +1,8 @@
-import { WORKTYPE } from "src/core/constants";
-import { ShareEntity } from "src/core/shared";
+import { WORKTYPE } from "../../../core/constants";
+import { ShareEntity } from "../../../core/shared";
 import { Column, Entity, OneToMany } from "typeorm";
 import { Staff_Shift } from "./staffInShift.entity";
-import { Task } from "src/modules/task/task.entity";
+import { Task } from "../../../modules/task/task.entity";
 
 @Entity()
 export class WorkShift extends ShareEntity{
