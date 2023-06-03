@@ -16,10 +16,10 @@ jobs:
     # A list of available CircleCI Docker Convenience Images are available here: https://circleci.com/developer/images/image/cimg/node
     docker:
       - image: cimg/node:16.10
-      - image: cimg/postgres:15.3.0
-        environment:
-          POSTGRES_USER: postgres
-          POSTGRES_DB: development_database_name
+      # - image: cimg/postgres:15.3.0
+      #   environment:
+      #     POSTGRES_USER: postgres
+      #     POSTGRES_DB: development_database_name
 
     # Then run your tests!
     # CircleCI will report the results back to your VCS provider.
@@ -30,16 +30,15 @@ jobs:
       # The orb install-packages step will also automatically cache them for faster future runs.
       - setup_remote_docker:
           version: 20.10.14
-      # - run:
-      # name: Run docker to setup Postgres database
-      # command: docker run --name DT-postgres -p 5432:5432 -e POSTGRES_USERNAME=postgres -e POSTGRES_PASSWORD=password -e POSTGRES_DB=development_database_name -d postgres
-      # command: sudo service postgresql start
+      - run:
+          name: Run docker to setup Postgres database
+          command: docker run --name DT-postgres -p 5432:5432 -e POSTGRES_USERNAME=postgres -e POSTGRES_PASSWORD=password -e POSTGRES_DB=development_database_name -d postgres
       - node/install-packages:
           # If you are using yarn, change the line below from "npm" to "yarn"
           pkg-manager: npm
       - run:
           name: Wait for Postgres to start
-          command: dockerize -wait tcp://localhost:5432 -timeout 1m
+          command: dockerize -wait tcp://localhost:5432 -timeout 2m
       - run:
           name: Run tests
           command: npm test
