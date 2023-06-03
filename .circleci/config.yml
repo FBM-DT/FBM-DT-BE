@@ -25,6 +25,7 @@ jobs:
           DB_NAME_DEVELOPMENT: development_database_name
           DB_PASS: password
           DB_USER: postgres
+          PSQLS_USERNAME: postgres
 
     # Then run your tests!
     # CircleCI will report the results back to your VCS provider.
