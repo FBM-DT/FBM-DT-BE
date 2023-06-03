@@ -81,13 +81,14 @@ Nest is [MIT licensed](LICENSE).
 
 - Step 3: Run command to create .env
 
-1. For windows: `copy .env.sample path-to-project`
-1. For MacOs: `cp .env.sample .env`
-1. For Linux: `cp .env.sample .env`
+  1. For windows: `copy .env.sample path-to-project`
+  1. For MacOs: `cp .env.sample .env`
+  1. For Linux: `cp .env.sample .env`
 
-- Step 4: Run npm i to install packages
+- Step 4: Run `npm i` to install packages
 
 - Step 5: Run migration to create tables of database.
+  Command: `npm run migration:run`
 # Note
 
 Run "[npm i]" after cloning or pulling the resource from remote repository
