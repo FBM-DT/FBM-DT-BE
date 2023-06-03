@@ -23,11 +23,7 @@ jobs:
           DB_USER: postgres
           DB_PASS: password
           DB_NAME_DEVELOPMENT: development_database_name
-      # - image: cimg/postgres:15.3.0
-      #   environment:
-      #     POSTGRES_USER: postgres
-      #     POSTGRES_DB: development_database_name
-      - image: postgres:10.3
+      - image: cimg/postgres:15.3.0
         environment:
           POSTGRES_USER: postgres
           POSTGRES_DB: development_database_name
@@ -41,15 +37,6 @@ jobs:
       # The orb install-packages step will also automatically cache them for faster future runs.
       - setup_remote_docker:
           version: 20.10.14
-      # - run:
-      #     name: Run docker to setup Postgres database
-      #     command: docker run --name DT-postgres -p 5432:5432 -e POSTGRES_USERNAME=postgres -e POSTGRES_PASSWORD=password -e POSTGRES_DB=development_database_name -d postgres
-      # - run:
-      # name: run_pg_tests
-      # working_directory: /tmp/workspace
-      # command: docker run --name DT-postgres -p 5432:5432 -e POSTGRES_USERNAME=postgres -e POSTGRES_PASSWORD=password -e POSTGRES_DB=development_database_name -d postgres /tmp/workspace/sql/t/run_tests.sh
-      # command: docker run -d --name postgres --env POSTGRES_USER=postgres --env POSTGRES_DB=my_test circleci/postgres:9.6.2-alpine /tmp/workspace/sql/t/run_tests.sh
-
       - node/install-packages:
           # If you are using yarn, change the line below from "npm" to "yarn"
           pkg-manager: npm
