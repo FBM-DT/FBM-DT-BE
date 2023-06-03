@@ -79,9 +79,15 @@ Nest is [MIT licensed](LICENSE).
   
 `docker run --name DT-postgres -p 5432:5432 -e POSTGRES_USERNAME=postgres -e POSTGRES_PASSWORD=password -e POSTGRES_DB=development_database_name -d postgres`
 
-- Step 3: Run npm i to install packages
+- Step 3: Run command to create .env
 
-- Step 4: Run migration to create tables of database.
+1. For windows: `copy .env.sample path-to-project`
+1. For MacOs: `cp .env.sample .env`
+1. For Linux: `cp .env.sample .env`
+
+- Step 4: Run npm i to install packages
+
+- Step 5: Run migration to create tables of database.
 # Note
 
 Run "[npm i]" after cloning or pulling the resource from remote repository
