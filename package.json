@@ -80,6 +80,8 @@
     "testEnvironment": "node"
   },
   "husky": {
-    "pre-commit": "npm run test"
+    "hooks": {
+      "pre-commit": "npm run test"
+    }
   }
 }
