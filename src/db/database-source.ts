@@ -18,6 +18,7 @@ export const typeOrmConfig = () => {
       break;
   }
   return config;
+  
 };
 const config: DataSourceOptions = typeOrmConfig();
 const dataSource = new DataSource(config);
