@@ -1,5 +1,5 @@
 import { Injectable, Inject, Post } from '@nestjs/common';
-import { IUserRepository } from 'src/core/abstraction';
+import { IUserRepository } from '../../core/abstraction';
 import { UserRepository } from './users.provider';
 @Injectable()
 export class UsersService {

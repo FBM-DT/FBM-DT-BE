@@ -1,4 +1,4 @@
-import { ShareEntity } from 'src/core/shared';
+import { ShareEntity } from '../../core/shared';
 import { Column, Entity, OneToMany } from 'typeorm';
 import { User } from '../users/user.entity';
 

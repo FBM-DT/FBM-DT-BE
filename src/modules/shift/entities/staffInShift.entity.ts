@@ -1,7 +1,7 @@
 import { Column, Entity, JoinColumn, ManyToOne, UpdateDateColumn } from "typeorm";
 import { WorkShift } from "./work-shift.entity";
-import { User } from "src/modules/users/user.entity";
-import { ShareEntity } from "src/core/shared";
+import { User } from "../../../modules/users/user.entity";
+import { ShareEntity } from "../../../core/shared";
 
 @Entity()
 export class Staff_Shift extends ShareEntity{
