@@ -30,7 +30,7 @@ jobs:
       - image: postgres:10.3
         environment:
           POSTGRES_USER: postgres
-          POSTGRES_DB: test_database_name
+          POSTGRES_DB: development_database_name
 
     # Then run your tests!
     # CircleCI will report the results back to your VCS provider.
