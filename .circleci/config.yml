@@ -22,10 +22,8 @@ jobs:
       #     POSTGRES_DB: development_database_name
       - image: circleci/postgres:9.6.2-alpine
         environment:
-          DB_NAME_DEVELOPMENT: development_database_name
-          DB_PASS: password
-          DB_USER: postgres
-          PSQLS_USERNAME: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: test_database_name
 
     # Then run your tests!
     # CircleCI will report the results back to your VCS provider.
