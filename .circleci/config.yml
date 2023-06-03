@@ -33,8 +33,6 @@ jobs:
           name: Run docker to setup Postgres database
           # command: docker run --name DT-postgres -p 5432:5432 -e POSTGRES_USERNAME=postgres -e POSTGRES_PASSWORD=password -e POSTGRES_DB=development_database_name -d postgres
           command: sudo service postgresql start
-      - run:
-
       - node/install-packages:
           # If you are using yarn, change the line below from "npm" to "yarn"
           pkg-manager: npm
