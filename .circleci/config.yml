@@ -23,7 +23,11 @@ jobs:
           DB_USER: postgres
           DB_PASS: password
           DB_NAME_DEVELOPMENT: development_database_name
-      - image: cimg/postgres:15.3.0
+      # - image: cimg/postgres:15.3.0
+      #   environment:
+      #     POSTGRES_USER: postgres
+      #     POSTGRES_DB: development_database_name
+      - image: postgres:10.3
         environment:
           POSTGRES_USER: postgres
           POSTGRES_DB: development_database_name
