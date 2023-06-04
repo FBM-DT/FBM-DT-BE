@@ -6,7 +6,7 @@ export const databaseProviders = [
     provide: TYPEORM,
     useFactory: async () => {
       const sourceInitialization = dataSource;
-      return await sourceInitialization.initialize();
+      return sourceInitialization;
     },
   },
 ];
