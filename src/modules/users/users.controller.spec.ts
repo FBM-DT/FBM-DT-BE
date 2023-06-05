@@ -1,4 +1,4 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import { UsersController } from './users.controller';
 import { UsersModule } from './users.module';
 
