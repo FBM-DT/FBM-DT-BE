@@ -1,7 +1,7 @@
 import { Test } from '@nestjs/testing';
 import { ShiftController } from './shift.controller';
 import { ShiftModule } from './shift.module';
-import { AddWorkShiftRequestDto } from './dto';
+import { AddWorkShiftRequestDto, AddWorkShiftResponseDto } from './dto';
 import { WORKTYPE } from '../../core/constants';
 
 describe('ShiftController', () => {
@@ -20,7 +20,12 @@ describe('ShiftController', () => {
   });
   describe('Create new work shift', () => {
     it('should be created', async () => {
-      const result = [1];
+      const result: AddWorkShiftResponseDto = {
+        version: 'v1',
+        status: 200,
+        message: 'Success',
+        data: 1,
+      };
       const dto: AddWorkShiftRequestDto = {
         name: 'test',
         address: '55 Hardvard',
@@ -30,11 +35,21 @@ describe('ShiftController', () => {
       };
       jest
         .spyOn(controller, 'createWorkShift')
-        .mockImplementation(async () => result[0]);
-      expect(await controller.createWorkShift(dto)).toBeCloseTo(1);
+        .mockImplementation(async () => result);
+      expect(await controller.createWorkShift(dto)).toEqual({
+        version: 'v1',
+        status: 200,
+        message: 'Success',
+        data: 1,
+      });
     });
     it('should not be created', async () => {
-      const result = [1];
+      const result: AddWorkShiftResponseDto = {
+        version: 'v1',
+        status: 200,
+        message: 'Success',
+        data: 1,
+      };
       const dto: AddWorkShiftRequestDto = {
         name: 'test',
         address: '55 Hardvard',
@@ -44,11 +59,21 @@ describe('ShiftController', () => {
       };
       jest
         .spyOn(controller, 'createWorkShift')
-        .mockImplementation(async () => result[0]);
-      expect(await controller.createWorkShift(dto)).toBeCloseTo(1);
+        .mockImplementation(async () => result);
+      expect(await controller.createWorkShift(dto)).toEqual({
+        version: 'v1',
+        status: 200,
+        message: 'Success',
+        data: 1,
+      });
     });
     it('should not be created', async () => {
-      const result = [1];
+      const result: AddWorkShiftResponseDto = {
+        version: 'v1',
+        status: 200,
+        message: 'Success',
+        data: 1,
+      };
       const dto: AddWorkShiftRequestDto = {
         name: 'test',
         address: '55 Hardvard',
@@ -58,8 +83,13 @@ describe('ShiftController', () => {
       };
       jest
         .spyOn(controller, 'createWorkShift')
-        .mockImplementation(async () => result[0]);
-      expect(await controller.createWorkShift(dto)).toBeCloseTo(1);
+        .mockImplementation(async () => result);
+      expect(await controller.createWorkShift(dto)).toEqual({
+        version: 'v1',
+        status: 200,
+        message: 'Success',
+        data: 1,
+      });
     });
   });
 });

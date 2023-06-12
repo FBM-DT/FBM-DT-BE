@@ -3,13 +3,14 @@ import { ShiftService } from './shift.service';
 import { ShiftModule } from './shift.module';
 import { AddWorkShiftRequestDto } from './dto';
 import { WORKTYPE } from '../../../src/core/constants';
+import { DatabaseModule } from '../../../src/db/database.module';
 
 describe('ShiftService', () => {
   let service: ShiftService;
 
   beforeEach(async () => {
     const module = await Test.createTestingModule({
-      imports: [ShiftModule],
+      imports: [ShiftModule, DatabaseModule],
       providers: [ShiftService],
     }).compile();
 
