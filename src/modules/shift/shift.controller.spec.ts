@@ -3,13 +3,13 @@ import { ShiftController } from './shift.controller';
 import { ShiftModule } from './shift.module';
 import { AddWorkShiftRequestDto, AddWorkShiftResponseDto } from './dto';
 import { WORKTYPE } from '../../core/constants';
+import { DatabaseModule } from '../../../src/db/database.module';
 
 describe('ShiftController', () => {
   let controller: ShiftController;
-
-  beforeEach(async () => {
+  beforeAll(async () => {
     const module = await Test.createTestingModule({
-      imports: [ShiftModule],
+      imports: [ShiftModule, DatabaseModule],
       controllers: [ShiftController],
     }).compile();
 
@@ -43,6 +43,7 @@ describe('ShiftController', () => {
         data: 1,
       });
     });
+
     it('should not be created', async () => {
       const result: AddWorkShiftResponseDto = {
         version: 'v1',

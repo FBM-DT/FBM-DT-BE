@@ -7,8 +7,8 @@ import { DatabaseModule } from '../../../src/db/database.module';
 
 describe('ShiftService', () => {
   let service: ShiftService;
-
-  beforeEach(async () => {
+  
+  beforeAll(async () => {
     const module = await Test.createTestingModule({
       imports: [ShiftModule, DatabaseModule],
       providers: [ShiftService],

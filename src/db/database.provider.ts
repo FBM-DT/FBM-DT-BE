@@ -1,4 +1,4 @@
-import { TYPEORM } from '../core/constants';
+import { CONNECTION, TYPEORM } from '../core/constants';
 import dataSource from './database-source';
 
 export const databaseProviders = [
@@ -6,7 +6,14 @@ export const databaseProviders = [
     provide: TYPEORM,
     useFactory: async () => {
       const sourceInitialization = dataSource;
-      return sourceInitialization;
+      return await sourceInitialization.initialize();
     },
   },
+  {
+    provide: CONNECTION,
+    useFactory: async () => {
+      const sourceInitialization = dataSource;
+      return sourceInitialization;
+    },
+  }
 ];
