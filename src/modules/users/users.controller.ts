@@ -7,8 +7,5 @@ export class UsersController {
   constructor(private userService: UsersService) {}
 
   @Post('add')
-  async addUser(@Body() dto: UserDto) {
-    console.log("🚀 ~ file: users.controller.ts:11 ~ UsersController ~ addUser ~ dto:", dto)
-    return this.userService.addUser(dto);
-  }
+  async addUser(@Body() dto: UserDto) {}
 }
