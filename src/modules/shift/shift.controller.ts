@@ -1,3 +1,4 @@
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import {
   Body,
   Controller,
@@ -7,6 +8,7 @@ import {
   Query,
   ParseIntPipe,
   Post,
+  HttpStatus,
 } from '@nestjs/common';
 import {
   AddWorkShiftRequestDto,
@@ -21,9 +23,17 @@ import { WorkShift } from './entities/work-shift.entity';
 import { FindManyOptions, FindOptionsWhere } from 'typeorm';
 import { WORKTYPE } from '../../core/constants';
 
+@ApiTags('Work shift')
 @Controller('shift')
 export class ShiftController {
   constructor(private shiftService: ShiftService) {}
+
+  @ApiOperation({ description: 'Create a new work shift' })
+  @ApiResponse({
+    description: `Create successfully`,
+    status: HttpStatus.OK,
+    type: AddWorkShiftResponseDto,
+  })
   @Post('create')
   @HttpCode(201)
   async createWorkShift(
