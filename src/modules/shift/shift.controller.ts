@@ -39,10 +39,7 @@ export class ShiftController {
   async createWorkShift(
     @Body() workShiftDto: AddWorkShiftRequestDto,
   ): Promise<AddWorkShiftResponseDto> {
-    const response: AddWorkShiftResponseDto = new AddWorkShiftResponseDto();
-    const data = await this.shiftService.createWorkShift(workShiftDto);
-    response.status = 201;
-    (response.message = 'Created'), (response.data = data);
+    const response: AddWorkShiftResponseDto = await this.shiftService.createWorkShift(workShiftDto);
     return response;
   }
 
