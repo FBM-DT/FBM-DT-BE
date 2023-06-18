@@ -2,6 +2,7 @@ import { ShareEntity } from '../../core/shared';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { Role } from '../role/role.entity';
 import { Staff_Shift } from '../shift/entities/staffInShift.entity';
+import { Position } from '../position/position.entity';
 
 @Entity()
 export class User extends ShareEntity {
@@ -58,5 +59,8 @@ export class User extends ShareEntity {
   role: Role;
 
   @OneToMany(()=>Staff_Shift, (staffShift)=>staffShift.staffId)
-  staffShifts: Staff_Shift[]
+  staffShifts: Staff_Shift[];
+
+  @OneToMany(()=>Position, (position) => position.id)
+  positions: Position[];
 }

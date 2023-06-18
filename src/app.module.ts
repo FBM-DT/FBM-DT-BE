@@ -8,6 +8,7 @@ import { RoleModule } from './modules/role/role.module';
 import { DatabaseModule } from './db/database.module';
 import { ShiftModule } from './modules/shift/shift.module';
 import { TaskModule } from './modules/task/task.module';
+import { PositionModule } from './modules/position/position.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env.example' }),
@@ -17,6 +18,7 @@ import { TaskModule } from './modules/task/task.module';
     RoleModule,
     ShiftModule,
     TaskModule,
+    PositionModule,
   ],
   controllers: [AppController],
   providers: [AppService],
