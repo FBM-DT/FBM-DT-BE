@@ -1,34 +1,43 @@
 import { Inject, Injectable } from '@nestjs/common';
-import {
-  AddWorkShiftRequestDto,
-} from './dto';
+import { AddWorkShiftRequestDto, AddWorkShiftResponseDto } from './dto';
 import { CONNECTION } from '../../core/constants';
 import { DataSource, FindManyOptions, Repository } from 'typeorm';
 import { WorkShift } from './entities/work-shift.entity';
+import { BaseService } from '../../core/shared/base.service';
 
 @Injectable()
-export class ShiftService {
-  private _workShiftRepository: Repository<WorkShift>
+export class ShiftService extends BaseService {
+  private _workShiftRepository: Repository<WorkShift>;
   constructor(
     @Inject(CONNECTION)
-    dataSource: DataSource
+    dataSource: DataSource,
   ) {
-    this._workShiftRepository = dataSource.getRepository(WorkShift)
+    super();
+    this._workShiftRepository = dataSource.getRepository(WorkShift);
   }
 
-  async createWorkShift(data: AddWorkShiftRequestDto): Promise<number> {
+  async createWorkShift(
+    data: AddWorkShiftRequestDto,
+  ): Promise<AddWorkShiftResponseDto> {
+    const response: AddWorkShiftResponseDto = new AddWorkShiftResponseDto();
     try {
-      const response = await this._workShiftRepository.createQueryBuilder()
-      .insert()
-      .into(WorkShift)
-      .values(data)
-      .execute();
-      return response.identifiers[0].id;
-    } catch (error) {
-      console.log(
-        '🚀 ~ file: shift.service.ts:17 ~ ShiftService ~ createWorkShift ~ error:',
-        error,
+      const result = await this._workShiftRepository
+        .createQueryBuilder()
+        .insert()
+        .into(WorkShift)
+        .values(data)
+        .execute();
+      this.setModifyDataResponse<AddWorkShiftResponseDto>(
+        response,
+        result.identifiers[0].id,
       );
+      return response;
+    } catch (error) {
+      this.setExceptionResponse<AddWorkShiftResponseDto>(
+        response,
+        error.message,
+      );
+      return response;
     }
   }
 
@@ -62,7 +71,9 @@ export class ShiftService {
     option: FindManyOptions,
   ): Promise<WorkShift[]> {
     try {
-      const response: WorkShift[] =  await this._workShiftRepository.find(option);
+      const response: WorkShift[] = await this._workShiftRepository.find(
+        option,
+      );
       return response;
     } catch (error) {
       console.log(
