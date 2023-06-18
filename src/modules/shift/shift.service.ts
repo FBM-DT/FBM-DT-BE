@@ -26,13 +26,13 @@ export class ShiftService {
         .into(WorkShift)
         .values(data)
         .execute();
-      new AppResponse().setSuccessResponse<AddWorkShiftResponseDto>(
+      AppResponse.setSuccessResponse<AddWorkShiftResponseDto>(
         response,
         result.identifiers[0].id,
       );
       return response;
     } catch (error) {
-      new AppResponse().setAppErrorResponse<AddWorkShiftResponseDto>(
+      AppResponse.setAppErrorResponse<AddWorkShiftResponseDto>(
         response,
         error.message,
       );

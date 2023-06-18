@@ -1,6 +1,6 @@
 import { ShareResponseDto } from './share.response.dto';
 
-export class AppResponse {
+export const AppResponse = {
   setSuccessResponse<T extends ShareResponseDto>(
     responseObject: T,
     data: Object,
@@ -21,7 +21,7 @@ export class AppResponse {
       responseObject.message = 'Success';
     }
     responseObject.data = data;
-  }
+  },
 
   setAppErrorResponse<T extends ShareResponseDto>(
     responseObject: T,
@@ -43,7 +43,7 @@ export class AppResponse {
       responseObject.message = 'Failed';
     }
     responseObject.exception = exceptionMessage;
-  }
+  },
 
   setUserErrorResponse<T extends ShareResponseDto>(
     responseObject: T,
@@ -65,5 +65,5 @@ export class AppResponse {
       responseObject.message = 'Failed';
     }
     responseObject.exception = exceptionMessage;
-  }
-}
+  },
+};
