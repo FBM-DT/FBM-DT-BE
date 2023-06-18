@@ -1,8 +1,8 @@
 import { ShareEntity } from '../../core/shared';
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
-import { Role } from '../role/role.entity';
+import { Column, Entity, OneToMany } from 'typeorm';
 import { Staff_Shift } from '../shift/entities/staffInShift.entity';
 import { Position } from '../position/position.entity';
+import { Account } from '../auth/account.entity';
 
 @Entity()
 export class User extends ShareEntity {
@@ -22,21 +22,6 @@ export class User extends ShareEntity {
   email: string;
 
   @Column({
-    type: 'varchar',
-    length: 5000,
-    nullable: false,
-  })
-  password: string;
-
-  @Column({
-    type: 'varchar',
-    length: 10,
-    nullable: true,
-    unique: true,
-  })
-  phonenumber: string;
-
-  @Column({
     type: 'date',
     nullable: true,
   })
@@ -49,18 +34,12 @@ export class User extends ShareEntity {
   })
   avatar: string;
 
-  @Column({
-    type: 'int',
-    nullable: false,
-  })
-  roleId: number;
-  @ManyToOne(() => Role, (role) => role.users, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'roleId' })
-  role: Role;
-
-  @OneToMany(()=>Staff_Shift, (staffShift)=>staffShift.staffId)
+  @OneToMany(()=>Staff_Shift, (staffShift)=>staffShift.userId)
   staffShifts: Staff_Shift[];
 
   @OneToMany(()=>Position, (position) => position.id)
   positions: Position[];
+
+  @OneToMany(() => Account, (account)=>account.userId)
+  accounts: Account[];
 }

@@ -1,5 +1,10 @@
 export enum WORKTYPE {
   DAILY = 'daily',
-  WEEK = 'week',
-  EVENT = 'event'
+  EVENT = 'event',
+}
+
+export enum ACCOUNT_ROLE{
+  ADM = 'admin',
+  SUPERVISOR = 'supervisor',
+  USER = 'user',
 }

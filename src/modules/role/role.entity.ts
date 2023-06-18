@@ -1,16 +1,18 @@
 import { ShareEntity } from '../../core/shared';
-import { Column, Entity, OneToMany } from 'typeorm';
-import { User } from '../users/user.entity';
+import { Column, Entity, OneToOne } from 'typeorm';
+import { Account } from '../auth/account.entity';
+import { ACCOUNT_ROLE } from '../../core/constants';
 
 @Entity()
 export class Role extends ShareEntity {
   @Column({
-    type: 'varchar',
-    length: 255,
-    nullable: false,
-    unique: true,
+    type: 'enum',
+    enum: ACCOUNT_ROLE,
+    default: ACCOUNT_ROLE.USER,
+    unique: true
   })
-  name: string;
-  @OneToMany(() => User, (user) => user.id)
-  users: User[];
+  name: ACCOUNT_ROLE;
+
+  @OneToOne(() => Account, (account) => account.id)
+  account: Account;
 }

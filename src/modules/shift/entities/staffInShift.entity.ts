@@ -20,11 +20,11 @@ export class Staff_Shift extends ShareEntity{
         type: 'int',
         nullable: false
     })
-    staffId: number;
+    userId: number;
 
     @ManyToOne(()=>User, (staff)=>staff.staffShifts, {onDelete:'CASCADE'})
-    @JoinColumn({name: 'staffId'})
-    staff:User
+    @JoinColumn({name: 'userId'})
+    user:User
 
     @Column({
         type: 'date',
