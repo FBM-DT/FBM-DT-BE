@@ -1,7 +1,7 @@
 import { ShareResponseDto } from './share.response.dto';
 
 export class BaseService {
-  setModifyDataResponse<T extends ShareResponseDto>(
+  setSuccessResponse<T extends ShareResponseDto>(
     responseObject: T,
     data: Object,
     otherOptions?: T,
@@ -15,7 +15,7 @@ export class BaseService {
       responseObject.version = 'v1';
     }
     if (!responseObject.hasOwnProperty('status')) {
-      responseObject.status = 201;
+      responseObject.status = 200;
     }
     if (!responseObject.hasOwnProperty('message')) {
       responseObject.message = 'Success';
@@ -23,7 +23,7 @@ export class BaseService {
     responseObject.data = data;
   }
 
-  setExceptionResponse<T extends ShareResponseDto>(
+  setAppErrorResponse<T extends ShareResponseDto>(
     responseObject: T,
     exceptionMessage: string,
     otherOptions?: T,
@@ -45,10 +45,10 @@ export class BaseService {
     responseObject.exception = exceptionMessage;
   }
 
-  setFindDataResponse<T extends ShareResponseDto>(
+  setUserErrorResponse<T extends ShareResponseDto>(
     responseObject: T,
-    data: Object,
-    otherOptions: T,
+    exceptionMessage: string,
+    otherOptions?: T,
   ): void {
     if (otherOptions) {
       Object.keys(otherOptions).forEach((key) => {
@@ -59,11 +59,11 @@ export class BaseService {
       responseObject.version = 'v1';
     }
     if (!responseObject.hasOwnProperty('status')) {
-      responseObject.status = 200;
+      responseObject.status = 400;
     }
     if (!responseObject.hasOwnProperty('message')) {
-      responseObject.message = 'Success';
+      responseObject.message = 'Failed';
     }
-    responseObject.data = data;
+    responseObject.exception = exceptionMessage;
   }
 }

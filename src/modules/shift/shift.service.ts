@@ -6,13 +6,12 @@ import { WorkShift } from './entities/work-shift.entity';
 import { BaseService } from '../../core/shared/base.service';
 
 @Injectable()
-export class ShiftService extends BaseService {
+export class ShiftService {
   private _workShiftRepository: Repository<WorkShift>;
   constructor(
     @Inject(CONNECTION)
     dataSource: DataSource,
   ) {
-    super();
     this._workShiftRepository = dataSource.getRepository(WorkShift);
   }
 
@@ -27,13 +26,13 @@ export class ShiftService extends BaseService {
         .into(WorkShift)
         .values(data)
         .execute();
-      this.setModifyDataResponse<AddWorkShiftResponseDto>(
+      new BaseService().setSuccessResponse<AddWorkShiftResponseDto>(
         response,
         result.identifiers[0].id,
       );
       return response;
     } catch (error) {
-      this.setExceptionResponse<AddWorkShiftResponseDto>(
+      new BaseService().setAppErrorResponse<AddWorkShiftResponseDto>(
         response,
         error.message,
       );
