@@ -1,6 +1,6 @@
 import { ShareResponseDto } from './share.response.dto';
 
-export class BaseService {
+export class AppResponse {
   setSuccessResponse<T extends ShareResponseDto>(
     responseObject: T,
     data: Object,

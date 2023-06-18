@@ -3,7 +3,7 @@ import { AddWorkShiftRequestDto, AddWorkShiftResponseDto } from './dto';
 import { CONNECTION } from '../../core/constants';
 import { DataSource, FindManyOptions, Repository } from 'typeorm';
 import { WorkShift } from './entities/work-shift.entity';
-import { BaseService } from '../../core/shared/base.service';
+import { AppResponse } from '../../core/shared/app.response';
 
 @Injectable()
 export class ShiftService {
@@ -26,13 +26,13 @@ export class ShiftService {
         .into(WorkShift)
         .values(data)
         .execute();
-      new BaseService().setSuccessResponse<AddWorkShiftResponseDto>(
+      new AppResponse().setSuccessResponse<AddWorkShiftResponseDto>(
         response,
         result.identifiers[0].id,
       );
       return response;
     } catch (error) {
-      new BaseService().setAppErrorResponse<AddWorkShiftResponseDto>(
+      new AppResponse().setAppErrorResponse<AddWorkShiftResponseDto>(
         response,
         error.message,
       );
