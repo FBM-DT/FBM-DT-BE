@@ -33,7 +33,7 @@ describe('ShiftService', () => {
       };
       jest
         .spyOn(service, 'createWorkShift')
-        .mockImplementation(async () => result[0]);
+        .mockImplementation(async () => result);
       expect(await service.createWorkShift(dto)).toEqual({
         message: 'Success',
         status: 201,
