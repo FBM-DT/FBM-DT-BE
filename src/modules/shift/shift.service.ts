@@ -40,6 +40,9 @@ export class ShiftService {
     }
   }
 
+
+
+  
   async getWorkShiftList(): Promise<WorkShift[]> {
     try {
       const response: WorkShift[] = await this._workShiftRepository.find();
