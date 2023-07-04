@@ -29,6 +29,7 @@ import {
   GetAllInventoryResponseDto,
   GetInventoryByIdResponseDto,
   UpdateInventoryRequestDto,
+  UpdateInventoryResponseDto,
 } from './dto';
 
 @Controller('inventory')
@@ -36,10 +37,9 @@ import {
 export class InventoryController {
   constructor(private readonly inventoryService: InventoryService) {}
 
-  @UsePipes(ValidationPipe)
   @Post('create')
   @ApiOperation({ description: 'Create a new Inventory' })
-  @ApiCreatedResponse({ type: Inventory })
+  @ApiCreatedResponse({ type: CreateInventoryRequestDto })
   @HttpCode(201)
   async createInventory(
     @Body() InventoryDto: CreateInventoryRequestDto,
@@ -49,8 +49,8 @@ export class InventoryController {
     return response;
   }
 
-  @Get()
-  @ApiOkResponse({ type: Inventory, isArray: true })
+  @Get('list')
+  @ApiOkResponse({ type: CreateInventoryRequestDto, isArray: true })
   @HttpCode(200)
   async findAllInventories(): Promise<GetAllInventoryResponseDto> {
     const response: GetAllInventoryResponseDto =
@@ -67,7 +67,7 @@ export class InventoryController {
   }
 
   @Get(':id')
-  @ApiOkResponse({ type: Inventory })
+  @ApiOkResponse({ type: CreateInventoryRequestDto })
   @HttpCode(200)
   async findAInventoryById(
     @Param('id', ParseIntPipe) id: number,
@@ -83,23 +83,17 @@ export class InventoryController {
     return response;
   }
 
-  @Patch(':id')
-  @ApiOkResponse({ type: Inventory })
+  @Patch('update/:id')
+  @ApiOkResponse({ type: CreateInventoryRequestDto })
   @HttpCode(200)
   async updateInventoryById(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateInventoryDto: UpdateInventoryRequestDto,
-  ): Promise<GetInventoryByIdResponseDto> {
+  ): Promise<UpdateInventoryResponseDto> {
     try {
-      const data = await this.inventoryService.updateInventoryById(
-        id,
-        updateInventoryDto,
-      );
-      const response: GetInventoryByIdResponseDto =
-        new GetInventoryByIdResponseDto();
-      response.status = 200;
-      response.message = 'Success';
-      response.data = data;
+      const response: UpdateInventoryResponseDto =
+        await this.inventoryService.updateInventoryById(id, updateInventoryDto);
+
       return response;
     } catch (error) {
       console.log(
@@ -114,7 +108,7 @@ export class InventoryController {
   }
 
   @Delete(':id')
-  @ApiOkResponse({ type: Inventory })
+  @ApiOkResponse({ type: CreateInventoryRequestDto })
   @HttpCode(200)
   async removeInventoryById(
     @Param('id', ParseIntPipe) id: number,

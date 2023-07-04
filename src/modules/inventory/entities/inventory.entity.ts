@@ -5,31 +5,24 @@ import { ApiProperty } from '@nestjs/swagger';
 
 @Entity()
 export class Inventory extends ShareEntity {
-  @ApiProperty()
   @Column({
     type: 'varchar',
     nullable: false,
   })
   name: string;
 
-  @ApiProperty()
   @Column({
     type: 'int',
     nullable: false,
   })
   quantity: number;
 
-  @ApiProperty()
   @Column({
     type: 'int',
     nullable: false,
   })
   updateBy: number;
 
-  @ApiProperty({
-    default: false,
-    required: false,
-  })
   @Column({
     type: 'boolean',
     default: false,

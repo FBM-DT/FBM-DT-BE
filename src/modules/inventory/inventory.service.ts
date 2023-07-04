@@ -1,8 +1,11 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { CONNECTION } from '../../core/constants';
-import { DataSource, DeleteQueryBuilder, Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { Inventory } from './entities/inventory.entity';
-import { AddInventoryResponseDto } from './dto/Inventory.response.dto';
+import {
+  AddInventoryResponseDto,
+  UpdateInventoryResponseDto,
+} from './dto/Inventory.response.dto';
 import { AppResponse } from '../../core/shared/app.response';
 import { CreateInventoryRequestDto, UpdateInventoryRequestDto } from './dto';
 
@@ -76,10 +79,13 @@ export class InventoryService {
   async updateInventoryById(
     inventoryId: number,
     updateInventoryDto: UpdateInventoryRequestDto,
-  ): Promise<Inventory> {
+  ): Promise<UpdateInventoryResponseDto> {
     const inventory: Inventory = await this._inventoryRepository.findOneBy({
       id: inventoryId,
     });
+    const response: UpdateInventoryResponseDto =
+      new UpdateInventoryResponseDto();
+
     if (!inventory) {
       throw new NotFoundException(
         `Inventory with ID ${inventoryId} not found. `,
@@ -99,7 +105,11 @@ export class InventoryService {
           id: inventoryId,
         });
 
-      return updatedInventory;
+      AppResponse.setSuccessResponse<UpdateInventoryResponseDto>(
+        response,
+        updatedInventory,
+      );
+      return response;
     } catch (error) {
       console.log(
         '🚀 ~ file: inventory.service.ts:104 ~ InventoryService ~ error:',
