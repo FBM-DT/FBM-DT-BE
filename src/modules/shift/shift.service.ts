@@ -1,15 +1,16 @@
 import { Inject, Injectable } from '@nestjs/common';
 import {
   AddWorkShiftRequestDto,
-  AddWorkShiftResponseDto,
-  DeleteWorkShiftByIdResponseDto,
-  GetWorkShiftByIdResponseDto,
-  GetWorkShiftListByQueriesRequestDto,
-  GetWorkShiftListByQueriesResponseDto,
-  GetWorkShiftListResponseDto,
+  GetWorkShiftListRequestDto,
   UpdateWorkShiftRequestDto,
+} from './dto/request';
+import {
   UpdateWorkShiftResponseDto,
-} from './dto';
+  GetWorkShiftListResponseDto,
+  GetWorkShiftByIdResponseDto,
+  DeleteWorkShiftByIdResponseDto,
+  AddWorkShiftResponseDto,
+} from './dto/response';
 import { CONNECTION, WORKTYPE } from '../../core/constants';
 import {
   DataSource,
@@ -105,11 +106,11 @@ export class ShiftService {
     }
   }
 
-  async getWorkShiftFilteredList(
-    queries: GetWorkShiftListByQueriesRequestDto,
-  ): Promise<GetWorkShiftListByQueriesResponseDto> {
-    const response: GetWorkShiftListByQueriesResponseDto =
-      new GetWorkShiftListByQueriesResponseDto();
+  async getFilteredWorkShiftList(
+    queries: GetWorkShiftListRequestDto,
+  ): Promise<GetWorkShiftListResponseDto> {
+    const response: GetWorkShiftListResponseDto =
+      new GetWorkShiftListResponseDto();
     try {
       let options: FindManyOptions;
       let whereConditions: FindOptionsWhere<WorkShift>;
@@ -121,6 +122,7 @@ export class ShiftService {
           take: queries.pageSize,
         };
       }
+      
       if (queries.sortBy && queries.sortValue) {
         options = {
           ...options,
@@ -144,7 +146,7 @@ export class ShiftService {
       }
 
       const result: WorkShift[] = await this._workShiftRepository.find(options);
-      AppResponse.setSuccessResponse<GetWorkShiftListByQueriesResponseDto>(
+      AppResponse.setSuccessResponse<GetWorkShiftListResponseDto>(
         response,
         result,
         {

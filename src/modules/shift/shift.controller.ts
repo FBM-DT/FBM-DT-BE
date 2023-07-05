@@ -14,15 +14,16 @@ import {
 } from '@nestjs/common';
 import {
   AddWorkShiftRequestDto,
+  GetWorkShiftListRequestDto,
+  UpdateWorkShiftRequestDto,
+} from './dto/request';
+import {
   AddWorkShiftResponseDto,
   DeleteWorkShiftByIdResponseDto,
   GetWorkShiftByIdResponseDto,
-  GetWorkShiftListByQueriesRequestDto,
-  GetWorkShiftListByQueriesResponseDto,
   GetWorkShiftListResponseDto,
-  UpdateWorkShiftRequestDto,
   UpdateWorkShiftResponseDto,
-} from './dto';
+} from './dto/response';
 import { ShiftService } from './shift.service';
 
 @ApiTags('Work shift')
@@ -48,19 +49,16 @@ export class ShiftController {
 
   @Get('list')
   @HttpCode(200)
-  async getWorkShiftList(): Promise<GetWorkShiftListResponseDto> {
+  async getWorkShiftList(
+    @Query() queries: GetWorkShiftListRequestDto,
+  ): Promise<GetWorkShiftListResponseDto> {
+    if (Object.keys(queries).length > 0) {
+      const response: GetWorkShiftListResponseDto =
+        await this.shiftService.getFilteredWorkShiftList(queries);
+      return response;
+    }
     const response: GetWorkShiftListResponseDto =
       await this.shiftService.getWorkShiftList();
-    return response;
-  }
-
-  @Get('filteredList')
-  @HttpCode(200)
-  async getWorkShiftFilteredList(
-    @Query() queries: GetWorkShiftListByQueriesRequestDto,
-  ): Promise<GetWorkShiftListByQueriesResponseDto> {
-    const response: GetWorkShiftListByQueriesResponseDto =
-      await this.shiftService.getWorkShiftFilteredList(queries);
     return response;
   }
 

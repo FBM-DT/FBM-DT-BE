@@ -1,7 +1,8 @@
 import { Test } from '@nestjs/testing';
 import { ShiftService } from './shift.service';
 import { ShiftModule } from './shift.module';
-import { AddWorkShiftRequestDto, AddWorkShiftResponseDto } from './dto';
+import { AddWorkShiftRequestDto } from './dto/request';
+import { AddWorkShiftResponseDto } from './dto/response';
 import { WORKTYPE } from '../../../src/core/constants';
 import { DatabaseModule } from '../../../src/db/database.module';
 
@@ -22,7 +23,7 @@ describe('ShiftService', () => {
       const result: AddWorkShiftResponseDto = new AddWorkShiftResponseDto();
       result.data = 1;
       result.message = 'Success';
-      result.version = 'v1'
+      result.version = 'v1';
       result.status = 201;
       const dto: AddWorkShiftRequestDto = {
         name: 'test',
@@ -38,7 +39,7 @@ describe('ShiftService', () => {
         message: 'Success',
         status: 201,
         data: 1,
-        version: 'v1'
+        version: 'v1',
       });
     });
   });
