@@ -10,13 +10,19 @@ async function bootstrap() {
     .setDescription('The FBM API description')
     .setVersion('1.0')
     .addTag('api')
+    .addBearerAuth(
+      { type: 'http', scheme: 'bearer', bearerFormat: 'Token' },
+      'Token',
+    )
     .build();
-  const document = SwaggerModule.createDocument(app, config);
+  app.setGlobalPrefix('api/v1');
+  const document = SwaggerModule.createDocument(app, config, {
+    ignoreGlobalPrefix: false,
+  });
   SwaggerModule.setup('api', app, document);
 
-  app.useGlobalPipes(new ValidationPipe({transform: true}));
+  app.useGlobalPipes(new ValidationPipe({ transform: true }));
   app.enableCors();
-  app.setGlobalPrefix('api/v1');
   await app.listen(3001);
 }
 bootstrap();

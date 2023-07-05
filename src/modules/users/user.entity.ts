@@ -34,12 +34,12 @@ export class User extends ShareEntity {
   })
   avatar: string;
 
-  @OneToMany(()=>Staff_Shift, (staffShift)=>staffShift.userId)
+  @OneToMany(() => Staff_Shift, (staffShift) => staffShift.userId)
   staffShifts: Staff_Shift[];
 
-  @OneToMany(()=>Position, (position) => position.id)
+  @OneToMany(() => Position, (position) => position.id)
   positions: Position[];
 
-  @OneToMany(() => Account, (account)=>account.userId)
+  @OneToMany(() => Account, (account) => account.userId)
   accounts: Account[];
 }

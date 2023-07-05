@@ -3,7 +3,7 @@ export enum WORKTYPE {
   EVENT = 'event',
 }
 
-export enum ACCOUNT_ROLE{
+export enum ACCOUNT_ROLE {
   ADM = 'admin',
   SUPERVISOR = 'supervisor',
   USER = 'user',
