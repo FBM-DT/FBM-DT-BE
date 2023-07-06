@@ -83,7 +83,6 @@ export class AccountService {
   ): Promise<CreateAccountResponseDto> {
     const response: CreateAccountResponseDto = new CreateAccountResponseDto();
     try {
-      const saltOrRounds = 10;
       const { phonenumber, password } = payload;
 
       const existPhoneNumber = await this._accountRepository.findOne({
@@ -96,7 +95,7 @@ export class AccountService {
           HttpStatus.BAD_REQUEST,
         );
       } else {
-        const hashPassword = await bcrypt.hash(password, saltOrRounds);
+        const hashPassword = this.handleHashPassword(password);
         const data = { ...payload, password: hashPassword };
 
         const account = await this._accountRepository
@@ -133,7 +132,8 @@ export class AccountService {
   ): Promise<UpdateAccountResponseDto> {
     const response: UpdateAccountResponseDto = new UpdateAccountResponseDto();
     try {
-      const { phonenumber } = accountDto;
+      let newPassword: string;
+      const { phonenumber, password } = accountDto;
       const existPhoneNumber = await this._accountRepository.findOne({
         where: { phonenumber },
       });
@@ -146,17 +146,34 @@ export class AccountService {
         return response;
       }
 
-      const result = await this._accountRepository
-        .createQueryBuilder('account')
-        .update(Account)
-        .where('account.id = :accountId', { accountId: accountId })
-        .set(accountDto)
-        .execute();
-      AppResponse.setSuccessResponse<UpdateAccountResponseDto>(
-        response,
-        result.affected,
-      );
-      return response;
+      if (!password) {
+        const result = await this._accountRepository
+          .createQueryBuilder('account')
+          .update(Account)
+          .where('account.id = :accountId', { accountId: accountId })
+          .set(accountDto)
+          .execute();
+        AppResponse.setSuccessResponse<UpdateAccountResponseDto>(
+          response,
+          result.affected,
+        );
+        return response;
+      } else {
+        newPassword = this.handleHashPassword(password);
+        console.log(newPassword);
+        const account = { ...accountDto, password: newPassword };
+        const result = await this._accountRepository
+          .createQueryBuilder('account')
+          .update(Account)
+          .where('account.id = :accountId', { accountId: accountId })
+          .set(account)
+          .execute();
+        AppResponse.setSuccessResponse<UpdateAccountResponseDto>(
+          response,
+          result.affected,
+        );
+        return response;
+      }
     } catch (error) {
       if (error.status !== 500) {
         console.log(error.message);
@@ -181,5 +198,11 @@ export class AccountService {
       }
       throw new InternalServerErrorException();
     }
+  }
+
+  private handleHashPassword(password: string) {
+    const saltOrRounds = 10;
+    const hashPassword = bcrypt.hashSync(password, saltOrRounds);
+    return hashPassword;
   }
 }
