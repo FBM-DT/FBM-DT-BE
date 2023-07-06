@@ -69,7 +69,6 @@ export class AccountController {
     return this.accountService.getAccountList();
   }
 
-  // @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Get account by id' })
   @Get('/:id')
   async getAccountByPhoneNumber(
@@ -88,7 +87,6 @@ export class AccountController {
   }
 
   @ApiOperation({ summary: 'Create a new account' })
-  @UsePipes(ValidationPipe)
   @ApiBody({ type: CreateAccountRequestDto })
   @ApiCreatedResponse({ description: 'Created Successfully' })
   @ApiBadRequestResponse({ description: 'Bad Request' })
