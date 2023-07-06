@@ -1,0 +1,59 @@
+version: '3.5'
+
+services:
+  db:
+    image: postgres:14
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=${DB_PASS}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_DB=${DB_NAME_DEVELOPMENT}
+    container_name: postgres
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+
+  development-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: nestjs-app
+    environment:
+      - PORT:${PORT}
+    command: npm run start:dev
+    ports:
+      - '3000:3000'
+    depends_on:
+      - db
+    volumes:
+      - .:/backend/dt/app # host:guest
+      # - ./backend/dt/app/node_modules
+      # - /src/node_modules
+      # - .:/app
+
+  pgadmin:
+    image: dpage/pgadmin4
+    restart: always
+    container_name: pgadmin4
+    # target: development
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@admin.com
+      - PGADMIN_DEFAULT_PASSWORD=pgadmin4
+    ports:
+      - '5050:80'
+    depends_on:
+      - db
+  
+  # production-app:
+  #   build:
+  #     context: .
+  #     target: production
+  #   ports:
+  #     - 8080:3000
+  #   environment:
+  #     - NODE_ENV=production
+# networks:
+#   app-network:
+#     driver: bridge
