@@ -69,7 +69,7 @@ export class AccountController {
     return this.accountService.getAccountList();
   }
 
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Get account by id' })
   @Get('/:id')
   async getAccountByPhoneNumber(
