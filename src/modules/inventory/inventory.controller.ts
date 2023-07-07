@@ -66,7 +66,7 @@ export class InventoryController {
     return response;
   }
 
-  @Get(':id')
+  @Get('find-one/:id')
   @ApiOkResponse({ type: CreateInventoryRequestDto })
   @HttpCode(200)
   async findAInventoryById(
@@ -107,7 +107,7 @@ export class InventoryController {
     }
   }
 
-  @Delete(':id')
+  @Delete('delete/:id')
   @ApiOkResponse({ type: CreateInventoryRequestDto })
   @HttpCode(200)
   async removeInventoryById(
