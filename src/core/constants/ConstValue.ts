@@ -5,3 +5,7 @@ export const TEST = 'test';
 export const PRODUCTION = 'production';
 export const USER_REPOSITORY = 'USER_REPOSITORY';
 export const SHIFT_REPOSITORY = 'SHIFT_REPOSITORY';
+export const JWT_ACCESS_SECRET_KEY = 'pbmdtphonenumberstrategyjwtsecretkey';
+export const ACCESS_EXPIRES_TIME = '15m';
+export const JWT_REFRESH_SECRET_KEY = 'pbmdtphonenumberrefreshsecretkey';
+export const REFRESH_EXPIRES_TIME = '7d';

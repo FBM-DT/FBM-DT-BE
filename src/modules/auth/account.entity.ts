@@ -1,5 +1,5 @@
 import { ShareEntity } from '../../core/shared';
-import { Column, Entity, JoinColumn, ManyToOne, OneToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { Role } from '../role/role.entity';
 import { User } from '../users/user.entity';
 
@@ -21,20 +21,30 @@ export class Account extends ShareEntity {
   password: string;
 
   @Column({
+    type: 'varchar',
+    nullable: true,
+  })
+  refreshToken: string;
+
+  @Column({
     type: 'int',
     nullable: false,
+    unique: false,
   })
   roleId: number;
-  @OneToOne(() => Role, (role) => role.account, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Role, (role) => role.account, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'roleId' })
   role: Role;
 
   @Column({
     type: 'int',
-    nullable: false
+    nullable: false,
   })
   userId: number;
-  @ManyToOne(()=>User, (user) => user.accounts, {onDelete: 'CASCADE', onUpdate: 'SET NULL'})
-  @JoinColumn({name: 'userId'})
+  @ManyToOne(() => User, (user) => user.accounts, {
+    onDelete: 'CASCADE',
+    onUpdate: 'SET NULL',
+  })
+  @JoinColumn({ name: 'userId' })
   user: User;
 }
