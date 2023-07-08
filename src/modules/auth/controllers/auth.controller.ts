@@ -1,19 +1,10 @@
 import { ApiTags, ApiOperation, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
-import {
-  Controller,
-  Get,
-  Req,
-  Post,
-  UseFilters,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Req, Post, UseGuards } from '@nestjs/common';
 import { Request } from 'express';
 import { AuthService } from '../services';
-import { SignInRequestDto } from '../dto';
-import { HttpExceptionFilter } from '../../../core/shared/exception.filter';
 import { JwtAuthGuard, RefreshTokenGuard } from '../guards';
+import { SignInRequestDto } from '../dto/request';
 
-@UseFilters(new HttpExceptionFilter())
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {

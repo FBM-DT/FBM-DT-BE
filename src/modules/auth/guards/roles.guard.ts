@@ -1,12 +1,6 @@
-import {
-  Injectable,
-  CanActivate,
-  ExecutionContext,
-  HttpStatus,
-} from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ACCOUNT_ROLE } from '../../../core/constants';
-import { CustomHttpException } from '../../../core/shared/custom.http.exception';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -23,7 +17,7 @@ export class RolesGuard implements CanActivate {
     const { user } = context.switchToHttp().getRequest();
     const account = user['payload'];
     if (requiredRoles !== account.role) {
-      throw new CustomHttpException('Access denied', HttpStatus.FORBIDDEN);
+      return false;
     }
 
     if (requiredRoles === account.role) return true;

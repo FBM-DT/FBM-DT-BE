@@ -2,7 +2,8 @@ import { Test } from '@nestjs/testing';
 import { DatabaseModule } from '../../../../src/db/database.module';
 import { AuthModule } from '../auth.module';
 import { AccountService } from './account.service';
-import { CreateAccountRequestDto, CreateAccountResponseDto } from '../dto';
+import { CreateAccountResDto } from '../dto/response';
+import { CreateAccountReqDto } from '../dto/request';
 
 describe('AccountService', () => {
   let accountService: AccountService;
@@ -26,12 +27,12 @@ describe('AccountService', () => {
     });
 
     it('Should be created successfully', async () => {
-      const response: CreateAccountResponseDto = new CreateAccountResponseDto();
+      const response: CreateAccountResDto = new CreateAccountResDto();
       response.data = 1;
       response.message = 'Success';
       response.version = 'v1';
       response.status = 201;
-      const accountRequestDto: CreateAccountRequestDto = {
+      const accountRequestDto: CreateAccountReqDto = {
         phonenumber: '0979889446',
         password: 'password',
         userId: 1,

@@ -1,5 +1,4 @@
 import {
-  HttpStatus,
   Inject,
   Injectable,
   InternalServerErrorException,
@@ -11,14 +10,12 @@ import { DataSource, Repository } from 'typeorm';
 import { AppResponse } from '../../../core/shared/app.response';
 import { Account } from '../account.entity';
 import {
-  CreateAccountResponseDto,
-  CreateAccountRequestDto,
-  UpdateAccountRequestDto,
-  GetAccountByIdResponseDto,
-  UpdateAccountResponseDto,
-  UpdateAccountByIdRequestDto,
-} from '../dto';
-import { CustomHttpException } from '../../../core/shared/custom.http.exception';
+  CreateAccountResDto,
+  GetAccountResDto,
+  GetAllAccountsResDto,
+  UpdateAccountResDto,
+} from '../dto/response';
+import { CreateAccountReqDto, UpdateAccountReqDto } from '../dto/request';
 
 @Injectable()
 export class AccountService {
@@ -27,7 +24,8 @@ export class AccountService {
     this._accountRepository = this.dataSource.getRepository(Account);
   }
 
-  async getAccountList(): Promise<Account[]> {
+  async getAccountList(): Promise<GetAllAccountsResDto> {
+    const response: GetAllAccountsResDto = new GetAllAccountsResDto();
     try {
       const account = await this._accountRepository
         .createQueryBuilder('account')
@@ -35,17 +33,23 @@ export class AccountService {
         .leftJoinAndSelect('account.user', 'user')
         .orderBy('account.id', 'ASC')
         .getMany();
-      return account;
+
+      AppResponse.setSuccessResponse<GetAllAccountsResDto>(
+        response,
+        (response.data = account),
+      );
+      return response;
     } catch (error) {
-      if (error.status !== 500) {
-        throw error;
-      }
-      throw new InternalServerErrorException();
+      AppResponse.setAppErrorResponse<GetAllAccountsResDto>(
+        response,
+        error.message,
+      );
+      return response;
     }
   }
 
-  async getAccountById(id: number): Promise<GetAccountByIdResponseDto> {
-    const response: GetAccountByIdResponseDto = new GetAccountByIdResponseDto();
+  async getAccountById(id: number): Promise<GetAccountResDto> {
+    const response: GetAccountResDto = new GetAccountResDto();
     try {
       const account = await this._accountRepository.findOne({
         where: { id },
@@ -53,13 +57,17 @@ export class AccountService {
       });
       if (!account) throw new NotFoundException(`Account ${id} not found`);
 
-      AppResponse.setSuccessResponse<GetAccountByIdResponseDto>(
+      AppResponse.setSuccessResponse<GetAccountResDto>(
         response,
         (response.data = account),
       );
       return response;
     } catch (error) {
-      console.log(error.message);
+      AppResponse.setAppErrorResponse<GetAccountResDto>(
+        response,
+        error.message,
+      );
+      return response;
     }
   }
 
@@ -79,9 +87,9 @@ export class AccountService {
   }
 
   async createAccount(
-    payload: CreateAccountRequestDto,
-  ): Promise<CreateAccountResponseDto> {
-    const response: CreateAccountResponseDto = new CreateAccountResponseDto();
+    payload: CreateAccountReqDto,
+  ): Promise<CreateAccountResDto> {
+    const response: CreateAccountResDto = new CreateAccountResDto();
     try {
       const { phonenumber, password } = payload;
 
@@ -90,10 +98,7 @@ export class AccountService {
       });
 
       if (phonenumber === existPhoneNumber?.phonenumber) {
-        throw new CustomHttpException(
-          'The Phone number already exists',
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new Error('The Phone number already exists');
       } else {
         const hashPassword = this.handleHashPassword(password);
         const data = { ...payload, password: hashPassword };
@@ -105,32 +110,26 @@ export class AccountService {
           .values(data)
           .execute();
 
-        AppResponse.setSuccessResponse<CreateAccountResponseDto>(
+        AppResponse.setSuccessResponse<CreateAccountResDto>(
           response,
           account.identifiers[0].id,
         );
         return response;
       }
     } catch (error) {
-      AppResponse.setAppErrorResponse<CreateAccountResponseDto>(
+      AppResponse.setAppErrorResponse<CreateAccountResDto>(
         response,
         error.message,
       );
-      if (response.status === 500) {
-        throw new CustomHttpException(
-          response.exception,
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
-      }
       return response;
     }
   }
 
   async updateAccount(
     accountId: number,
-    accountDto: UpdateAccountByIdRequestDto,
-  ): Promise<UpdateAccountResponseDto> {
-    const response: UpdateAccountResponseDto = new UpdateAccountResponseDto();
+    accountDto: UpdateAccountReqDto,
+  ): Promise<UpdateAccountResDto> {
+    const response: UpdateAccountResDto = new UpdateAccountResDto();
     try {
       let newPassword: string;
       const { phonenumber, password } = accountDto;
@@ -139,7 +138,7 @@ export class AccountService {
       });
 
       if (phonenumber === existPhoneNumber?.phonenumber) {
-        AppResponse.setUserErrorResponse<CreateAccountResponseDto>(
+        AppResponse.setUserErrorResponse<UpdateAccountResDto>(
           response,
           'The Phone number already exists',
         );
@@ -153,7 +152,7 @@ export class AccountService {
           .where('account.id = :accountId', { accountId: accountId })
           .set(accountDto)
           .execute();
-        AppResponse.setSuccessResponse<UpdateAccountResponseDto>(
+        AppResponse.setSuccessResponse<UpdateAccountResDto>(
           response,
           result.affected,
         );
@@ -168,35 +167,31 @@ export class AccountService {
           .where('account.id = :accountId', { accountId: accountId })
           .set(account)
           .execute();
-        AppResponse.setSuccessResponse<UpdateAccountResponseDto>(
+        AppResponse.setSuccessResponse<UpdateAccountResDto>(
           response,
           result.affected,
         );
         return response;
       }
     } catch (error) {
-      if (error.status !== 500) {
-        console.log(error.message);
-        throw error;
-      }
-      throw new InternalServerErrorException();
+      AppResponse.setAppErrorResponse<UpdateAccountResDto>(
+        response,
+        error.message,
+      );
+      return response;
     }
   }
 
-  async updateRefreshTokenAccount(
+  async updateRefreshToken(
     id: number,
-    payload: UpdateAccountRequestDto,
+    payload: UpdateAccountReqDto,
   ): Promise<Account> {
     try {
       const account = await this._accountRepository.findOneBy({ id });
       account.refreshToken = payload.refreshToken;
       return await this._accountRepository.save(account);
     } catch (error) {
-      if (error.status !== 500) {
-        console.log(error.message);
-        throw error;
-      }
-      throw new InternalServerErrorException();
+      throw error;
     }
   }
 

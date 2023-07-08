@@ -1,40 +1,23 @@
-import {
-  ForbiddenException,
-  HttpStatus,
-  Injectable,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { AccountService } from './account.service';
-import {
-  SignInRequestDto,
-  SignInResponseDto,
-  ValidateAccountResponseDto,
-} from '../dto';
 import { Account } from '../account.entity';
-import {
-  ACCESS_EXPIRES_TIME,
-  JWT_ACCESS_SECRET_KEY,
-  JWT_REFRESH_SECRET_KEY,
-  REFRESH_EXPIRES_TIME,
-} from '../../../core/constants';
 import { IAuthAccess, IAuthPayload } from '../interfaces';
 import { AppResponse } from '../../../core/shared/app.response';
-import { CustomHttpException } from '../../../core/shared/custom.http.exception';
+import { SignInRequestDto } from '../dto/request';
+import { SignInResDto } from '../dto/response';
 
 @Injectable()
 export class AuthService {
   constructor(
     private jwtService: JwtService,
     private accountService: AccountService,
+    private readonly configService: ConfigService,
   ) {}
 
-  async validate(
-    payload: SignInRequestDto,
-  ): Promise<ValidateAccountResponseDto> {
-    const response: ValidateAccountResponseDto =
-      new ValidateAccountResponseDto();
+  async validateAccount(payload: SignInRequestDto) {
     try {
       const { phonenumber, password } = payload;
       const account = await this.accountService.getAccountByPhoneNumber(
@@ -43,57 +26,36 @@ export class AuthService {
       const passwordIsValid = await bcrypt.compare(password, account.password);
 
       if (!account || !passwordIsValid) {
-        AppResponse.setUserErrorResponse<ValidateAccountResponseDto>(
-          response,
-          'The phone number or password is invalid',
-          (response.data = {
-            message: 'The phone number or password is invalid',
-            status: 400,
-          }),
-        );
-        return response;
+        throw new Error('The phone number or password is invalid');
       }
-
-      AppResponse.setSuccessResponse<ValidateAccountResponseDto>(
-        response,
-        (response.data = account),
-      );
-      return response;
+      return account;
     } catch (error) {
-      if (error.status !== 500) {
-        console.log(error.message);
-        throw error;
-      }
-      throw new InternalServerErrorException();
+      throw new Error(error);
     }
   }
 
-  async handleSignIn(payload: SignInRequestDto): Promise<SignInResponseDto> {
+  async handleSignIn(payload: SignInRequestDto): Promise<SignInResDto> {
+    const response: SignInResDto = new SignInResDto();
     try {
-      const validationAccount = await this.validate(payload);
-      const account = Object.getOwnPropertyDescriptors(validationAccount?.data);
-      if (account?.status?.value === 400) {
-        throw new CustomHttpException(
-          account.message.value,
-          HttpStatus.BAD_REQUEST,
-        );
-      }
+      const account = await this.validateAccount(payload);
 
       const authPayload: IAuthPayload = {
-        accountId: account.id.value,
-        fullname: account.user.value.fullname,
-        phonenumber: account.phonenumber.value,
-        role: account.role.value.name,
+        accountId: account.id,
+        fullname: account.user.fullname,
+        phonenumber: account.phonenumber,
+        role: account.role.name,
       };
 
       const tokens = await this.handleGenerateTokens(authPayload);
-      await this.updateRefreshToken(account.id.value, tokens.refreshToken);
-      return tokens;
+      await this.updateRefreshToken(account.id, tokens.refreshToken);
+      AppResponse.setSuccessResponse<SignInResDto>(
+        response,
+        (response.data = tokens),
+      );
+      return response;
     } catch (error) {
-      if (error.status !== 500) {
-        throw error;
-      }
-      throw new InternalServerErrorException();
+      AppResponse.setAppErrorResponse<SignInResDto>(response, error.message);
+      return response;
     }
   }
 
@@ -101,7 +63,7 @@ export class AuthService {
     try {
       const token = payload.authorization.replace('Bearer', '').trim();
       const account = await this.verifyAccessToken(token);
-      const response = await this.accountService.updateRefreshTokenAccount(
+      const response = await this.accountService.updateRefreshToken(
         account.id,
         {
           refreshToken: null,
@@ -109,17 +71,14 @@ export class AuthService {
       );
       return response.refreshToken;
     } catch (error) {
-      if (error.status !== 500) {
-        throw error;
-      }
-      throw new InternalServerErrorException();
+      throw new Error(error);
     }
   }
 
   async verifyAccessToken(token: string): Promise<Account> {
     try {
       const decodedToken = this.jwtService.verify(token, {
-        secret: JWT_ACCESS_SECRET_KEY,
+        secret: this.configService.get<string>('JWT_ACCESS_SECRET_KEY'),
       });
 
       const account = await this.accountService.getAccountByPhoneNumber(
@@ -132,11 +91,7 @@ export class AuthService {
 
       return account;
     } catch (error) {
-      if (error.status !== 500) {
-        console.log(error.message);
-        throw error.message;
-      }
-      throw new InternalServerErrorException();
+      throw new Error(error);
     }
   }
 
@@ -164,35 +119,32 @@ export class AuthService {
       await this.updateRefreshToken(account.id, tokens.refreshToken);
       return tokens;
     } catch (error) {
-      console.log(error.message);
+      throw new Error(error);
     }
   }
 
-  async updateRefreshToken(accountId: number, refreshToken: string) {
+  private async updateRefreshToken(accountId: number, refreshToken: string) {
     try {
       const saltOrRounds = 10;
       const hashedRefreshToken = await bcrypt.hash(refreshToken, saltOrRounds);
-      const result = await this.accountService.updateRefreshTokenAccount(
-        accountId,
-        {
-          refreshToken: hashedRefreshToken,
-        },
-      );
+      const result = await this.accountService.updateRefreshToken(accountId, {
+        refreshToken: hashedRefreshToken,
+      });
       return result.refreshToken;
     } catch (error) {
-      console.log(error.message);
+      throw new Error(error);
     }
   }
 
-  async handleGenerateTokens(payload: IAuthPayload) {
+  private async handleGenerateTokens(payload: IAuthPayload) {
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(
         {
           payload,
         },
         {
-          secret: JWT_ACCESS_SECRET_KEY,
-          expiresIn: ACCESS_EXPIRES_TIME,
+          secret: this.configService.get<string>('JWT_ACCESS_SECRET_KEY'),
+          expiresIn: this.configService.get<string>('ACCESS_TOKEN_EXPIRATION'),
         },
       ),
       this.jwtService.signAsync(
@@ -200,8 +152,8 @@ export class AuthService {
           payload,
         },
         {
-          secret: JWT_REFRESH_SECRET_KEY,
-          expiresIn: REFRESH_EXPIRES_TIME,
+          secret: this.configService.get<string>('JWT_REFRESH_SECRET_KEY'),
+          expiresIn: this.configService.get<string>('REFRESH_TOKEN_EXPIRATION'),
         },
       ),
     ]);

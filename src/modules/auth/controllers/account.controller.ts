@@ -14,11 +14,8 @@ import {
   Get,
   Param,
   Post,
-  UseFilters,
   UseGuards,
   Req,
-  UsePipes,
-  ValidationPipe,
   Patch,
   ParseIntPipe,
 } from '@nestjs/common';
@@ -26,17 +23,15 @@ import { Request } from 'express';
 import { JwtAuthGuard, RolesGuard } from '../guards';
 import { ACCOUNT_ROLE } from '../../../core/constants';
 import { AccountService } from '../services';
-import {
-  CreateAccountResponseDto,
-  CreateAccountRequestDto,
-  GetAccountByIdResponseDto,
-  UpdateAccountResponseDto,
-  UpdateAccountByIdRequestDto,
-} from '../dto';
-import { HttpExceptionFilter } from '../../../core/shared/exception.filter';
 import { HasRoles } from '../decorators/role.decorator';
+import {
+  CreateAccountResDto,
+  GetAccountResDto,
+  GetAllAccountsResDto,
+  UpdateAccountResDto,
+} from '../dto/response';
+import { CreateAccountReqDto, UpdateAccountReqDto } from '../dto/request';
 
-@UseFilters(new HttpExceptionFilter())
 @ApiTags('Account')
 @ApiBearerAuth()
 @Controller('account')
@@ -64,50 +59,44 @@ export class AccountController {
   @ApiOperation({ summary: 'Get all account' })
   @ApiOkResponse({ description: 'The list account were returned successfully' })
   @ApiForbiddenResponse({ description: 'Unauthorized Request' })
-  @Get()
-  getAccountList() {
-    return this.accountService.getAccountList();
+  @Get('list')
+  async getAccountList() {
+    const response: GetAllAccountsResDto =
+      await this.accountService.getAccountList();
+    return response;
   }
 
   @ApiOperation({ summary: 'Get account by id' })
   @Get('/:id')
-  async getAccountByPhoneNumber(
-    @Param('id') id: number,
-  ): Promise<GetAccountByIdResponseDto> {
-    const response: GetAccountByIdResponseDto = new GetAccountByIdResponseDto();
-
-    const data = await this.accountService.getAccountById(id);
-    response.status = 200;
-    response.message = 'Success';
-    response.data = data;
-    response.page = 1;
-    response.pageSize = 1;
-    response.searchBy = { id };
+  async getAccount(@Param('id') id: number): Promise<GetAccountResDto> {
+    const response: GetAccountResDto = await this.accountService.getAccountById(
+      id,
+    );
     return response;
   }
 
   @ApiOperation({ summary: 'Create a new account' })
-  @ApiBody({ type: CreateAccountRequestDto })
+  @ApiBody({ type: CreateAccountReqDto })
   @ApiCreatedResponse({ description: 'Created Successfully' })
   @ApiBadRequestResponse({ description: 'Bad Request' })
   @Post()
   async createAccount(
-    @Body() accountDto: CreateAccountRequestDto,
-  ): Promise<CreateAccountResponseDto> {
-    const response: CreateAccountResponseDto =
+    @Body() accountDto: CreateAccountReqDto,
+  ): Promise<CreateAccountResDto> {
+    const response: CreateAccountResDto =
       await this.accountService.createAccount(accountDto);
     return response;
   }
 
   @ApiOperation({ summary: 'Update account by id' })
-  @ApiBody({ type: UpdateAccountByIdRequestDto })
+  @ApiBody({ type: UpdateAccountReqDto })
   @ApiOkResponse({ description: 'The account was updated successfully' })
   @Patch('/:accountId')
   async updateAccountById(
-    @Body() accountDto: UpdateAccountByIdRequestDto,
+    @Body() accountDto: UpdateAccountReqDto,
     @Param('accountId', ParseIntPipe) accountId: number,
-  ): Promise<UpdateAccountResponseDto> {
-    const response: UpdateAccountResponseDto =
+  ): Promise<UpdateAccountResDto> {
+    const response: UpdateAccountResDto =
       await this.accountService.updateAccount(accountId, accountDto);
     return response;
   }
