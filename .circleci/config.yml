@@ -50,7 +50,7 @@ jobs:
       - run:
           name: Copy env.sample and read variables
           command: |
-            cp env.sample .env
+            cp ../env.sample .env
             source .env
       - run:
           name: Run tests
