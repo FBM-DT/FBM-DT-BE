@@ -1,7 +1,7 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
 import { IsInt, IsString, IsNotEmpty } from 'class-validator';
 
-export class CreateInventoryRequestDto {
+export class CreateInventoryReqDto {
   @IsNotEmpty({ message: 'The name is required' })
   @IsString({ message: 'The name must be string type' })
   @ApiProperty({
@@ -22,6 +22,4 @@ export class CreateInventoryRequestDto {
   isDeleted: boolean;
 }
 
-export class UpdateInventoryRequestDto extends PartialType(
-  CreateInventoryRequestDto,
-) {}
+export class UpdateInventoryReqDto extends PartialType(CreateInventoryReqDto) {}

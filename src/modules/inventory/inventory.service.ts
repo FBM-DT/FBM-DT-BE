@@ -1,24 +1,28 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { CONNECTION } from '../../core/constants';
+import { Inject, Injectable } from '@nestjs/common';
+import { TYPEORM } from '../../core/constants';
 import { DataSource, Repository } from 'typeorm';
 import { Inventory } from './entities/inventory.entity';
-import {
-  AddInventoryResponseDto,
-  UpdateInventoryResponseDto,
-} from './dto/Inventory.response.dto';
 import { AppResponse } from '../../core/shared/app.response';
-import { CreateInventoryRequestDto, UpdateInventoryRequestDto } from './dto';
+import { CreateInventoryReqDto, UpdateInventoryReqDto } from './dto/request';
+import {
+  AddInventoryResDto,
+  DeleteInventoryResDto,
+  GetAllInventoryResDto,
+  GetInventoryResDto,
+  UpdateInventoryResDto,
+} from './dto/response';
+import { ErrorMessage } from './constants/errorMessage';
 
 @Injectable()
 export class InventoryService {
   private _inventoryRepository: Repository<Inventory>;
-  constructor(@Inject(CONNECTION) dataSource: DataSource) {
+  constructor(@Inject(TYPEORM) dataSource: DataSource) {
     this._inventoryRepository = dataSource.getRepository(Inventory);
   }
   async createInventory(
-    data: CreateInventoryRequestDto,
-  ): Promise<AddInventoryResponseDto> {
-    const response: AddInventoryResponseDto = new AddInventoryResponseDto();
+    data: CreateInventoryReqDto,
+  ): Promise<AddInventoryResDto> {
+    const response: AddInventoryResDto = new AddInventoryResDto();
 
     try {
       const result = await this._inventoryRepository
@@ -28,68 +32,72 @@ export class InventoryService {
         .values(data)
         .execute();
 
-      AppResponse.setSuccessResponse<AddInventoryResponseDto>(
+      AppResponse.setSuccessResponse<AddInventoryResDto>(
         response,
         result.identifiers[0].id,
+        {
+          status: 201,
+          message: 'Created',
+        },
       );
 
       return response;
     } catch (error) {
-      console.log(
-        '🚀 ~ file: inventory.service.ts:30 ~ InventoryService ~ createInventory ~ error:',
-        error.message,
-      );
-      throw new Error(error.message);
+      AppResponse.setAppErrorResponse(response, error.message);
     }
   }
 
-  async getAllInventories(): Promise<Inventory[]> {
+  async getAllInventories(): Promise<GetAllInventoryResDto> {
+    const response: GetAllInventoryResDto = new GetAllInventoryResDto();
     try {
-      const response: Inventory[] = await this._inventoryRepository.find();
-      console.log(
-        '🚀 ~ file: inventory.service.ts:39 ~ InventoryService ~ getAllInventories ~ response:',
-        response,
-      );
-
+      const data: Inventory[] = await this._inventoryRepository.find();
+      AppResponse.setSuccessResponse<GetAllInventoryResDto>(response, data, {
+        page: 1,
+        pageSize: data.length,
+      });
       return response;
     } catch (error) {
-      console.log(
-        '🚀 ~ file: inventory.service.ts:30 ~ InventoryService ~ getWorkShiftList ~ error:',
-        error,
-      );
+      AppResponse.setAppErrorResponse(response, error.message);
     }
   }
 
-  async getInventoryById(inventoryId: number): Promise<Inventory> {
+  async getInventoryById(inventoryId: number): Promise<GetInventoryResDto> {
+    const response: GetInventoryResDto = new GetInventoryResDto();
     try {
-      const response: Inventory = await this._inventoryRepository.findOneBy({
+      const data: Inventory = await this._inventoryRepository.findOneBy({
         id: inventoryId,
       });
+      if (!data) {
+        AppResponse.setUserErrorResponse(
+          response,
+          ErrorMessage.INVENTORY_NOT_FOUND,
+        );
+        return response;
+      }
+
+      AppResponse.setSuccessResponse<GetInventoryResDto>(response, data);
 
       return response;
     } catch (error) {
-      console.log(
-        '🚀 ~ file: inventory.service.ts:30 ~ InventoryService ~ getWorkShiftList ~ error:',
-        error,
-      );
-      throw new Error(error.message);
+      AppResponse.setAppErrorResponse(response, error.message);
     }
   }
 
   async updateInventoryById(
     inventoryId: number,
-    updateInventoryDto: UpdateInventoryRequestDto,
-  ): Promise<UpdateInventoryResponseDto> {
+    updateInventoryDto: UpdateInventoryReqDto,
+  ): Promise<UpdateInventoryResDto> {
     const inventory: Inventory = await this._inventoryRepository.findOneBy({
       id: inventoryId,
     });
-    const response: UpdateInventoryResponseDto =
-      new UpdateInventoryResponseDto();
+    const response: UpdateInventoryResDto = new UpdateInventoryResDto();
 
     if (!inventory) {
-      throw new NotFoundException(
-        `Inventory with ID ${inventoryId} not found. `,
+      AppResponse.setUserErrorResponse(
+        response,
+        ErrorMessage.INVENTORY_NOT_FOUND,
       );
+      return response;
     }
 
     try {
@@ -105,23 +113,33 @@ export class InventoryService {
           id: inventoryId,
         });
 
-      AppResponse.setSuccessResponse<UpdateInventoryResponseDto>(
+      AppResponse.setSuccessResponse<UpdateInventoryResDto>(
         response,
         updatedInventory,
       );
       return response;
     } catch (error) {
-      console.log(
-        '🚀 ~ file: inventory.service.ts:104 ~ InventoryService ~ error:',
-        error,
-      );
-
-      throw new Error(error.message);
+      AppResponse.setAppErrorResponse(response, error.message);
     }
   }
 
-  async deleteInventoryById(inventoryId: number): Promise<Inventory> {
+  async deleteInventoryById(
+    inventoryId: number,
+  ): Promise<DeleteInventoryResDto> {
+    const response: DeleteInventoryResDto = new DeleteInventoryResDto();
     try {
+      const inventory: Inventory = await this._inventoryRepository.findOneBy({
+        id: inventoryId,
+      });
+
+      if (inventory.isDeleted === true) {
+        AppResponse.setUserErrorResponse(
+          response,
+          ErrorMessage.INVENTORY_ALREADY_DELETED,
+        );
+        return response;
+      }
+
       const deletedInventory = await this._inventoryRepository
         .createQueryBuilder('inventory')
         .update(Inventory)
@@ -131,15 +149,20 @@ export class InventoryService {
         .execute();
 
       if (deletedInventory.affected === 0) {
-        throw new NotFoundException(
-          `Inventory with ID ${inventoryId} not found.`,
+        AppResponse.setUserErrorResponse(
+          response,
+          ErrorMessage.INVENTORY_NOT_FOUND,
         );
+        return response;
       }
 
-      return deletedInventory.raw[0];
+      AppResponse.setSuccessResponse<DeleteInventoryResDto>(
+        response,
+        deletedInventory.raw[0],
+      );
+      return response;
     } catch (error) {
-      console.log('Error occurred during deletion:', error.message);
-      throw error;
+      AppResponse.setAppErrorResponse(response, error.message);
     }
   }
 }
