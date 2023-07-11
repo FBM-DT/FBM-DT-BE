@@ -5,3 +5,4 @@ export interface IDatabaseConfig {
   test: DataSourceOptions;
   production: DataSourceOptions;
 }
+

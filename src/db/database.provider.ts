@@ -15,5 +15,5 @@ export const databaseProviders = [
       const sourceInitialization = dataSource;
       return sourceInitialization;
     },
-  }
+  },
 ];

@@ -25,7 +25,7 @@ export class Account extends ShareEntity {
     nullable: false,
   })
   roleId: number;
-  @OneToOne(() => Role, (role) => role.account, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Role, (role) => role.account, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'roleId' })
   role: Role;
 

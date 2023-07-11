@@ -6,7 +6,4 @@ export class ShareResponseDto {
   public exception?: string;
   public page?: number;
   public pageSize?: number;
-  public sortBy?: string;
-  public sortValue?: string;
-  public searchBy?: Object;
 }

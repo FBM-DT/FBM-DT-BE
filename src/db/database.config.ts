@@ -11,7 +11,7 @@ export const databaseConfig: IDatabaseConfig = {
     host: process.env.DB_HOST,
     port: parseInt(process.env.DB_PORT),
     entities: ['dist/**/*.entity{.ts,.js}'],
-    migrations: ['dist/db/migrations/*.js'],    
+    migrations: ['dist/db/migrations/*.js'],
   },
   test: {
     username: process.env.DB_USER,
@@ -19,7 +19,7 @@ export const databaseConfig: IDatabaseConfig = {
     database: process.env.DB_NAME_TEST,
     host: process.env.DB_HOST,
     port: parseInt(process.env.DB_PORT),
-    type: 'postgres',    
+    type: 'postgres',
     entities: ['dist/**/*.entity{.ts,.js}'],
     migrations: ['dist/db/migrations/*.js'],
   },
