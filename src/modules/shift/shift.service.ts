@@ -70,11 +70,6 @@ export class ShiftService {
         id: workShiftId,
       });
       AppResponse.setSuccessResponse<GetWorkShiftResDto>(response, result);
-      const responseData = await this.getWorkShiftList({});
-      console.log(
-        '🚀 ~ file: shift.service.ts:74 ~ ShiftService ~ getWorkShift ~ responseData:',
-        responseData.data,
-      );
       return response;
     } catch (error) {
       AppResponse.setAppErrorResponse<AddWorkShiftResDto>(

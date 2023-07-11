@@ -59,7 +59,7 @@ export class ShiftController {
 
   @Get('workshift/:id')
   @HttpCode(200)
-  async getAWorkShiftById(
+  async getWorkShift(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<GetWorkShiftResDto> {
     const response: GetWorkShiftResDto =
