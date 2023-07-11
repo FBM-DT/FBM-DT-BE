@@ -1,4 +1,4 @@
-export class ShareResponseDto {
+export class ShareResDto {
   public version?: string;
   public status?: number;
   public message?: string;

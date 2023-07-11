@@ -13,16 +13,16 @@ import {
   Patch,
 } from '@nestjs/common';
 import {
-  AddWorkShiftRequestDto,
-  GetWorkShiftListRequestDto,
-  UpdateWorkShiftRequestDto,
+  AddWorkShiftReqDto,
+  GetWorkShiftListReqDto,
+  UpdateWorkShiftReqDto,
 } from './dto/request';
 import {
-  AddWorkShiftResponseDto,
-  DeleteWorkShiftByIdResponseDto,
-  GetWorkShiftByIdResponseDto,
-  GetWorkShiftListResponseDto,
-  UpdateWorkShiftResponseDto,
+  AddWorkShiftResDto,
+  DeleteWorkShiftResDto,
+  GetWorkShiftResDto,
+  GetWorkShiftListResDto,
+  UpdateWorkShiftResDto,
 } from './dto/response';
 import { ShiftService } from './shift.service';
 
@@ -35,14 +35,14 @@ export class ShiftController {
   @ApiResponse({
     description: `Create successfully`,
     status: HttpStatus.OK,
-    type: AddWorkShiftResponseDto,
+    type: AddWorkShiftResDto,
   })
   @Post('create')
   @HttpCode(201)
   async createWorkShift(
-    @Body() workShiftDto: AddWorkShiftRequestDto,
-  ): Promise<AddWorkShiftResponseDto> {
-    const response: AddWorkShiftResponseDto =
+    @Body() workShiftDto: AddWorkShiftReqDto,
+  ): Promise<AddWorkShiftResDto> {
+    const response: AddWorkShiftResDto =
       await this.shiftService.createWorkShift(workShiftDto);
     return response;
   }
@@ -50,15 +50,10 @@ export class ShiftController {
   @Get('list')
   @HttpCode(200)
   async getWorkShiftList(
-    @Query() queries: GetWorkShiftListRequestDto,
-  ): Promise<GetWorkShiftListResponseDto> {
-    if (Object.keys(queries).length > 0) {
-      const response: GetWorkShiftListResponseDto =
-        await this.shiftService.getFilteredWorkShiftList(queries);
-      return response;
-    }
-    const response: GetWorkShiftListResponseDto =
-      await this.shiftService.getWorkShiftList();
+    @Query() queries: GetWorkShiftListReqDto,
+  ): Promise<GetWorkShiftListResDto> {
+    const response: GetWorkShiftListResDto =
+      await this.shiftService.getWorkShiftList(queries);
     return response;
   }
 
@@ -66,9 +61,9 @@ export class ShiftController {
   @HttpCode(200)
   async getAWorkShiftById(
     @Param('id', ParseIntPipe) id: number,
-  ): Promise<GetWorkShiftByIdResponseDto> {
-    const response: GetWorkShiftByIdResponseDto =
-      await this.shiftService.getAWorkShiftById(id);
+  ): Promise<GetWorkShiftResDto> {
+    const response: GetWorkShiftResDto =
+      await this.shiftService.getWorkShift(id);
     return response;
   }
 
@@ -76,19 +71,19 @@ export class ShiftController {
   @HttpCode(200)
   async deleteWorkShift(
     @Param('id', ParseIntPipe) id: number,
-  ): Promise<DeleteWorkShiftByIdResponseDto> {
-    const response: DeleteWorkShiftByIdResponseDto =
-      await this.shiftService.deleteWorkShiftById(id);
+  ): Promise<DeleteWorkShiftResDto> {
+    const response: DeleteWorkShiftResDto =
+      await this.shiftService.deleteWorkShift(id);
     return response;
   }
 
   @Patch('update/:workShiftId')
   @HttpCode(200)
   async updateWorkShift(
-    @Body() workShiftDto: UpdateWorkShiftRequestDto,
+    @Body() workShiftDto: UpdateWorkShiftReqDto,
     @Param('workShiftId', ParseIntPipe) workShiftId: number,
-  ): Promise<UpdateWorkShiftResponseDto> {
-    const response: UpdateWorkShiftResponseDto =
+  ): Promise<UpdateWorkShiftResDto> {
+    const response: UpdateWorkShiftResDto =
       await this.shiftService.updateWorkShift(workShiftId, workShiftDto);
     return response;
   }

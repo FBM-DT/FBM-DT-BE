@@ -1,8 +1,8 @@
 import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { WORKTYPE } from '../../../../core/constants';
-import { PaginationRequestDto } from '../../../../core/shared/pagination.request.dto';
+import { PaginationReqDto } from '../../../../core/shared/request';
 
-export class AddWorkShiftRequestDto {
+export class AddWorkShiftReqDto {
   @IsNotEmpty({ message: 'The work shift name is required' })
   @IsString({ message: 'The workshift name must be string type' })
   readonly name: string;
@@ -26,7 +26,7 @@ export class AddWorkShiftRequestDto {
   readonly description: string;
 }
 
-export class GetWorkShiftListRequestDto extends PaginationRequestDto {
+export class GetWorkShiftListReqDto extends PaginationReqDto {
   @IsOptional()
   @IsString({ message: 'The sort option must be a string' })
   readonly sortBy?: string;
@@ -48,7 +48,7 @@ export class GetWorkShiftListRequestDto extends PaginationRequestDto {
   readonly position?: string;
 }
 
-export class UpdateWorkShiftRequestDto {
+export class UpdateWorkShiftReqDto {
   @IsOptional()
   @IsString({ message: 'The workshift name must be string type' })
   readonly name?: string;

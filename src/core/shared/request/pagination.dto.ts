@@ -1,7 +1,7 @@
 import { Transform } from 'class-transformer';
 import { IsInt, IsOptional, Min } from 'class-validator';
 
-export class PaginationRequestDto {
+export class PaginationReqDto {
   @IsOptional()
   @Transform(({ value }) => parseInt(value))
   @IsInt({ message: 'The page must be a number' })

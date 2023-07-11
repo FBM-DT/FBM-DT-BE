@@ -22,6 +22,7 @@
     "migration:create": "npm run typeorm -- migration:generate",
     "migration:run": "npm run typeorm -- migration:run",
     "migration:down": "npm run typeorm -- migration:revert",
+    "seed:create": "typeorm migration:create",
     "prepare": "husky install"
   },
   "dependencies": {

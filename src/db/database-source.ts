@@ -1,29 +1,18 @@
-import { DataSource, DataSourceOptions } from 'typeorm';
-import { DEVELOPMENT, PRODUCTION, TEST } from '../core/constants';
-import { databaseConfig } from './database.config';
+import { DataSource } from 'typeorm';
+import { ConfigService } from '@nestjs/config';
+import { config } from 'dotenv';
 
-console.log("🚀 ~ file: database-source.ts:8 ~ typeOrmConfig ~ process.env.NODE_ENV:", process.env.NODE_ENV)
+config();
 
-export const typeOrmConfig = () => {
-  let config: DataSourceOptions;
-  switch (process.env.NODE_ENV) {
-    case DEVELOPMENT:
-      config = databaseConfig.development;
-      break;
-    case TEST:
-      config = databaseConfig.test;
-      break;
-    case PRODUCTION:
-      config = databaseConfig.production;
-      break;
-    default:
-      config = databaseConfig.development;
-      break;
-  }
-  return config;
-  
-};
-console.log("🚀 ~ file: database-source.ts:26 ~ typeOrmConfig ~ typeOrmConfig:", typeOrmConfig)
-const config: DataSourceOptions = typeOrmConfig();
-const dataSource = new DataSource(config);
-export default dataSource;
+const configService = new ConfigService();
+
+export default new DataSource({
+    type: 'postgres',
+    username: configService.get<string>('DB_USER'),
+    password: configService.get<string>('DB_PASS'),
+    database: configService.get<string>('DB_NAME_DEVELOPMENT'),
+    host: configService.get<string>('DB_HOST'),
+    port: parseInt(configService.get<string>('DB_PORT')),
+    entities: ['dist/**/*.entity{.ts,.js}'],
+    migrations: ['dist/db/{migrations,seeders}/*.js'],
+});

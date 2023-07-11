@@ -1,17 +1,22 @@
 import { Test } from '@nestjs/testing';
 import { ShiftService } from './shift.service';
 import { ShiftModule } from './shift.module';
-import { AddWorkShiftRequestDto } from './dto/request';
-import { AddWorkShiftResponseDto } from './dto/response';
+import { AddWorkShiftReqDto } from './dto/request';
+import { AddWorkShiftResDto } from './dto/response';
 import { WORKTYPE } from '../../../src/core/constants';
 import { DatabaseModule } from '../../../src/db/database.module';
+import { ConfigModule } from '@nestjs/config';
 
 describe('ShiftService', () => {
   let service: ShiftService;
 
   beforeAll(async () => {
     const module = await Test.createTestingModule({
-      imports: [ShiftModule, DatabaseModule],
+      imports: [
+        ConfigModule.forRoot({ isGlobal: true, envFilePath: ['.env'] }),
+        ShiftModule,
+        DatabaseModule,
+      ],
       providers: [ShiftService],
     }).compile();
 
@@ -20,12 +25,12 @@ describe('ShiftService', () => {
 
   describe('Create new work shift', () => {
     it('should be created', async () => {
-      const result: AddWorkShiftResponseDto = new AddWorkShiftResponseDto();
+      const result: AddWorkShiftResDto = new AddWorkShiftResDto();
       result.data = 1;
       result.message = 'Success';
       result.version = 'v1';
       result.status = 201;
-      const dto: AddWorkShiftRequestDto = {
+      const dto: AddWorkShiftReqDto = {
         name: 'test',
         address: '55 Hardvard',
         duration: '1y',

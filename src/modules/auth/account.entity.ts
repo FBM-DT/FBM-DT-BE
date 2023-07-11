@@ -1,5 +1,5 @@
 import { ShareEntity } from '../../core/shared';
-import { Column, Entity, JoinColumn, ManyToOne, OneToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { Role } from '../role/role.entity';
 import { User } from '../users/user.entity';
 
