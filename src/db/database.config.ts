@@ -1,36 +1,58 @@
-import * as dotenv from 'dotenv';
+import { ConfigService } from '@nestjs/config';
+import { DataSourceOptions } from 'typeorm';
 import { IDatabaseConfig } from './interfaces/dbConfig.interface';
-dotenv.config();
+import { DEVELOPMENT, PRODUCTION, TEST } from '../core/constants';
+import { Injectable } from '@nestjs/common';
 
-export const databaseConfig: IDatabaseConfig = {
-  development: {
-    type: 'postgres',
-    username: process.env.DB_USER,
-    password: process.env.DB_PASS,
-    database: process.env.DB_NAME_DEVELOPMENT,
-    host: process.env.DB_HOST,
-    port: parseInt(process.env.DB_PORT),
-    entities: ['dist/**/*.entity{.ts,.js}'],
-    migrations: ['dist/db/migrations/*.js'],    
-  },
-  test: {
-    username: process.env.DB_USER,
-    password: process.env.DB_PASS,
-    database: process.env.DB_NAME_TEST,
-    host: process.env.DB_HOST,
-    port: parseInt(process.env.DB_PORT),
-    type: 'postgres',    
-    entities: ['dist/**/*.entity{.ts,.js}'],
-    migrations: ['dist/db/migrations/*.js'],
-  },
-  production: {
-    username: process.env.DB_USER,
-    password: process.env.DB_PASS,
-    database: process.env.DB_NAME_PRODUCTION,
-    host: process.env.DB_HOST,
-    port: parseInt(process.env.DB_PORT),
-    type: 'postgres',
-    entities: ['dist/**/*.entity{.ts,.js}'],
-    migrations: ['dist/src/db/migrations/*.js'],
-  },
-};
+@Injectable()
+export class DatabaseConfig {
+  constructor(private configService: ConfigService) {}
+  getConfig(): DataSourceOptions {
+    const setting: IDatabaseConfig = {
+      development: {
+        type: 'postgres',
+        username: this.configService.get<string>('DB_USER'),
+        password: this.configService.get<string>('DB_PASS'),
+        database: this.configService.get<string>('DB_NAME'),
+        host: this.configService.get<string>('DB_HOST'),
+        port: parseInt(this.configService.get<string>('DB_PORT')),
+        entities: ['dist/**/*.entity{.ts,.js}'],
+      },
+      production: {
+        type: 'postgres',
+        username: this.configService.get<string>('DB_USER'),
+        password: this.configService.get<string>('DB_PASS'),
+        database: this.configService.get<string>('DB_NAME'),
+        host: this.configService.get<string>('DB_HOST'),
+        port: parseInt(this.configService.get<string>('DB_PORT')),
+        entities: ['dist/**/*.entity{.ts,.js}'],
+      },
+      test: {
+        type: 'postgres',
+        username: this.configService.get<string>('DB_USER'),
+        password: this.configService.get<string>('DB_PASS'),
+        database: this.configService.get<string>('DB_NAME'),
+        host: this.configService.get<string>('DB_HOST'),
+        port: parseInt(this.configService.get<string>('DB_PORT')),
+        entities: ['dist/**/*.entity{.ts,.js}'],
+      },
+    };
+
+    let config: DataSourceOptions;
+    switch (this.configService.get<string>('NODE_ENV')) {
+      case DEVELOPMENT:
+        config = setting.development;
+        break;
+      case TEST:
+        config = setting.test;
+        break;
+      case PRODUCTION:
+        config = setting.production;
+        break;
+      default:
+        config = setting.development;
+        break;
+    }
+    return config;
+  }
+}

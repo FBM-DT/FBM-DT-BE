@@ -1,5 +1,5 @@
 import { ShareEntity } from '../../core/shared';
-import { Column, Entity, JoinColumn, ManyToOne, OneToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { Role } from '../role/role.entity';
 import { User } from '../users/user.entity';
 
@@ -25,7 +25,7 @@ export class Account extends ShareEntity {
     nullable: false,
   })
   roleId: number;
-  @OneToOne(() => Role, (role) => role.account, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Role, (role) => role.account, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'roleId' })
   role: Role;
 

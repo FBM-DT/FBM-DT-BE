@@ -11,7 +11,10 @@ import { TaskModule } from './modules/task/task.module';
 import { PositionModule } from './modules/position/position.module';
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env.example' }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: '.env',
+    }),
     DatabaseModule,
     UsersModule,
     AuthModule,

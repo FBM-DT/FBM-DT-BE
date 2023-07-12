@@ -1,4 +1,4 @@
-export class ShareResponseDto {
+export class ShareResDto {
   public version?: string;
   public status?: number;
   public message?: string;
@@ -6,7 +6,4 @@ export class ShareResponseDto {
   public exception?: string;
   public page?: number;
   public pageSize?: number;
-  public sortBy?: string;
-  public sortValue?: string;
-  public searchBy?: Object;
 }

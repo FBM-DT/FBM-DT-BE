@@ -1,15 +1,8 @@
-import {
-  IsEnum,
-  IsInt,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  Min,
-} from 'class-validator';
-import { WORKTYPE } from '../../../core/constants';
-import { Transform } from 'class-transformer';
+import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { WORKTYPE } from '../../../../core/constants';
+import { PaginationReqDto } from '../../../../core/shared/request';
 
-export class AddWorkShiftRequestDto {
+export class AddWorkShiftReqDto {
   @IsNotEmpty({ message: 'The work shift name is required' })
   @IsString({ message: 'The workshift name must be string type' })
   readonly name: string;
@@ -33,19 +26,7 @@ export class AddWorkShiftRequestDto {
   readonly description: string;
 }
 
-export class GetWorkShiftListByQueriesRequestDto {
-  @IsOptional()
-  @Transform(({value})=> parseInt(value))
-  @IsInt({ message: 'The page must be a number' })
-  @Min(0)
-  readonly page?: number;
-
-  @IsOptional()
-  @Transform(({value})=> parseInt(value))
-  @IsInt({ message: 'The size of a page must be a number' })
-  @Min(0)
-  readonly pageSize?: number;
-
+export class GetWorkShiftListReqDto extends PaginationReqDto {
   @IsOptional()
   @IsString({ message: 'The sort option must be a string' })
   readonly sortBy?: string;
@@ -65,4 +46,28 @@ export class GetWorkShiftListByQueriesRequestDto {
   @IsOptional()
   @IsString({ message: 'The position must be a string' })
   readonly position?: string;
+}
+
+export class UpdateWorkShiftReqDto {
+  @IsOptional()
+  @IsString({ message: 'The workshift name must be string type' })
+  readonly name?: string;
+
+  @IsOptional()
+  @IsEnum(WORKTYPE, {
+    message: 'The type of work shift must be belonged to the enum',
+  })
+  readonly type?: WORKTYPE;
+
+  @IsOptional()
+  @IsString({ message: 'The work shift address must be string type' })
+  readonly address?: string;
+
+  @IsOptional()
+  @IsString({ message: 'The work shift duration must be string type' })
+  readonly duration?: string;
+
+  @IsOptional()
+  @IsString({ message: 'The work shift description must be string type' })
+  readonly description?: string;
 }

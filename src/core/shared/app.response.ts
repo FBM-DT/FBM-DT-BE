@@ -1,7 +1,7 @@
-import { ShareResponseDto } from './share.response.dto';
+import { ShareResDto } from './response';
 
 export const AppResponse = {
-  setSuccessResponse<T extends ShareResponseDto>(
+  setSuccessResponse<T extends ShareResDto>(
     responseObject: T,
     data: Object,
     otherOptions?: T,
@@ -23,7 +23,7 @@ export const AppResponse = {
     responseObject.data = data;
   },
 
-  setAppErrorResponse<T extends ShareResponseDto>(
+  setAppErrorResponse<T extends ShareResDto>(
     responseObject: T,
     exceptionMessage: string,
     otherOptions?: T,
@@ -45,7 +45,7 @@ export const AppResponse = {
     responseObject.exception = exceptionMessage;
   },
 
-  setUserErrorResponse<T extends ShareResponseDto>(
+  setUserErrorResponse<T extends ShareResDto>(
     responseObject: T,
     exceptionMessage: string,
     otherOptions?: T,

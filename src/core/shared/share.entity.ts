@@ -7,7 +7,7 @@ export abstract class ShareEntity extends BaseEntity{
     })
     id: number;
 
-    
+
     @CreateDateColumn({name: 'createdAt'})
     createdAt: Date;
 
