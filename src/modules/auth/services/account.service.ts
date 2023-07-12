@@ -57,10 +57,7 @@ export class AccountService {
       });
       if (!account) throw new NotFoundException(`Account ${id} not found`);
 
-      AppResponse.setSuccessResponse<GetAccountResDto>(
-        response,
-        (response.data = account),
-      );
+      AppResponse.setSuccessResponse<GetAccountResDto>(response, account);
       return response;
     } catch (error) {
       AppResponse.setAppErrorResponse<GetAccountResDto>(
@@ -159,7 +156,6 @@ export class AccountService {
         return response;
       } else {
         newPassword = this.handleHashPassword(password);
-        console.log(newPassword);
         const account = { ...accountDto, password: newPassword };
         const result = await this._accountRepository
           .createQueryBuilder('account')
