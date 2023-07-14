@@ -102,3 +102,14 @@ After create migration, must run to implement into db
 Command: npm run migration:run
 
 Must not delete any existing migration file.
+
+# New Note - 11-7-2023
+
+In order to create a seeding file for the database, 
+- Step 1: You must run "[npm run seed:create <path-to-seed-folder/seedingFileName>]".
+- Step 2:  You must create a SQL statement to seed the database.
+- Finally, run the command "[npm run migration:run]" to seed the database.
+
+
+# ENV Note - 11-7-2023
+Change DB_NAME_DEVELOPMENT to DB_NAME for dev environment.

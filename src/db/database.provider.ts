@@ -1,19 +1,13 @@
-import { CONNECTION, TYPEORM } from '../core/constants';
-import dataSource from './database-source';
-
+import { DataSource } from 'typeorm';
+import { TYPEORM } from '../core/constants';
+import { DatabaseConfig } from './database.config';
 export const databaseProviders = [
   {
     provide: TYPEORM,
-    useFactory: async () => {
-      const sourceInitialization = dataSource;
+    useFactory: async (databaseConfig: DatabaseConfig) => {
+      const sourceInitialization = new DataSource(databaseConfig.getConfig());
       return await sourceInitialization.initialize();
     },
+    inject: [DatabaseConfig],
   },
-  {
-    provide: CONNECTION,
-    useFactory: async () => {
-      const sourceInitialization = dataSource;
-      return sourceInitialization;
-    },
-  }
 ];

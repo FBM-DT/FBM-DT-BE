@@ -9,9 +9,13 @@ import { DatabaseModule } from './db/database.module';
 import { ShiftModule } from './modules/shift/shift.module';
 import { TaskModule } from './modules/task/task.module';
 import { PositionModule } from './modules/position/position.module';
+import { InventoryModule } from './modules/inventory/inventory.module';
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env.example' }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: '.env',
+    }),
     DatabaseModule,
     UsersModule,
     AuthModule,
@@ -19,6 +23,7 @@ import { PositionModule } from './modules/position/position.module';
     ShiftModule,
     TaskModule,
     PositionModule,
+    InventoryModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,6 +1,6 @@
 import { ShareEntity } from '../../core/shared';
 import { Column, Entity, OneToMany } from 'typeorm';
-import { Staff_Shift } from '../shift/entities/staffInShift.entity';
+import { StaffShift } from '../shift/entities/staffInShift.entity';
 import { Position } from '../position/position.entity';
 import { Account } from '../auth/account.entity';
 
@@ -34,8 +34,8 @@ export class User extends ShareEntity {
   })
   avatar: string;
 
-  @OneToMany(()=>Staff_Shift, (staffShift)=>staffShift.userId)
-  staffShifts: Staff_Shift[];
+  @OneToMany(()=>StaffShift, (staffShift)=>staffShift.userId)
+  staffShifts: StaffShift[];
 
   @OneToMany(()=>Position, (position) => position.id)
   positions: Position[];
