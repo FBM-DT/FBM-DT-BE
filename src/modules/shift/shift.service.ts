@@ -95,7 +95,7 @@ export class ShiftService {
             options,
           );
         }
-        
+
         if (queries.sortBy && queries.sortValue) {
           // FilterConvert.convertSearchOptions(
           //   { sortBy: queries.sortBy, sortValue: queries.sortValue },
@@ -104,7 +104,7 @@ export class ShiftService {
           options = {
             ...options,
             order: { [queries.sortBy]: queries.sortValue },
-          }
+          };
         }
 
         if (queries.address) {

@@ -2,6 +2,7 @@ import { ShareEntity } from '../../core/shared';
 import { Column, Entity, OneToOne } from 'typeorm';
 import { Account } from '../auth/account.entity';
 import { ACCOUNT_ROLE } from '../../core/constants';
+import { User } from '../users/user.entity';
 
 @Entity()
 export class Role extends ShareEntity {
@@ -9,7 +10,7 @@ export class Role extends ShareEntity {
     type: 'enum',
     enum: ACCOUNT_ROLE,
     default: ACCOUNT_ROLE.USER,
-    unique: true
+    unique: true,
   })
   name: ACCOUNT_ROLE;
 

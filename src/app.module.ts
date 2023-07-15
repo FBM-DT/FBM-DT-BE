@@ -9,6 +9,7 @@ import { DatabaseModule } from './db/database.module';
 import { ShiftModule } from './modules/shift/shift.module';
 import { TaskModule } from './modules/task/task.module';
 import { PositionModule } from './modules/position/position.module';
+import { ProfileModule } from './modules/profile/profile.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -22,6 +23,7 @@ import { PositionModule } from './modules/position/position.module';
     ShiftModule,
     TaskModule,
     PositionModule,
+    ProfileModule,
   ],
   controllers: [AppController],
   providers: [AppService],

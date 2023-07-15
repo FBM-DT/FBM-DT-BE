@@ -14,17 +14,17 @@ export class Task extends ShareEntity {
   @Column({
     type: 'boolean',
     default: true,
-    nullable: false
+    nullable: false,
   })
   status: boolean;
 
   @Column({
     type: 'int',
-    nullable: false
+    nullable: false,
   })
   workShiftId: number;
 
-  @ManyToOne(()=>WorkShift,(ws)=>ws.tasks,{onDelete: 'CASCADE'})
-  @JoinColumn({name: 'workShiftId'})
-  workShift:WorkShift
+  @ManyToOne(() => WorkShift, (ws) => ws.tasks, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'workShiftId' })
+  workShift: WorkShift;
 }
