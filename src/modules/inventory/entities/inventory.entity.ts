@@ -26,7 +26,6 @@ export class Inventory extends ShareEntity {
   @Column({
     type: 'boolean',
     default: false,
-    nullable: false,
   })
   isDeleted: boolean;
 }
