@@ -31,10 +31,13 @@ export class Account extends ShareEntity {
 
   @Column({
     type: 'int',
-    nullable: false
+    nullable: false,
   })
   userId: number;
-  @ManyToOne(()=>User, (user) => user.accounts, {onDelete: 'CASCADE', onUpdate: 'SET NULL'})
-  @JoinColumn({name: 'userId'})
+  @ManyToOne(() => User, (user) => user.accounts, {
+    onDelete: 'CASCADE',
+    onUpdate: 'SET NULL',
+  })
+  @JoinColumn({ name: 'userId' })
   user: User;
 }
