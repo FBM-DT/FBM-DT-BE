@@ -10,6 +10,7 @@ import { ShiftModule } from './modules/shift/shift.module';
 import { TaskModule } from './modules/task/task.module';
 import { PositionModule } from './modules/position/position.module';
 import { InventoryModule } from './modules/inventory/inventory.module';
+import { ProfileModule } from './modules/profile/profile.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -24,6 +25,7 @@ import { InventoryModule } from './modules/inventory/inventory.module';
     TaskModule,
     PositionModule,
     InventoryModule,
+    ProfileModule,
   ],
   controllers: [AppController],
   providers: [AppService],

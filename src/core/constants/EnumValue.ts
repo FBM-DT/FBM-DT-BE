@@ -13,3 +13,20 @@ export enum SEARCH_TYPE {
   AND = 'and',
   OR = 'or',
 }
+
+export enum GENDER {
+  MALE = 'male',
+  FEMALE = 'female',
+  OTHER = 'other',
+}
+
+export enum DEPARTMENT {
+  COFFEESHOP = 'Coffeeshop',
+  BAKERY = 'Bakery',
+  BAR = 'Bar',
+  LOUNGE = 'Lounge',
+  RESTAURANT = 'Restaurant',
+  BANQUET = 'Banquet',
+  ROOMSERVICE = 'RoomService',
+  OTHER = 'other',
+}
