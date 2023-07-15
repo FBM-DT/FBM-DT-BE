@@ -1,5 +1,5 @@
 import { ShareEntity } from '../../core/shared';
-import { Column, Entity, OneToOne } from 'typeorm';
+import { Column, Entity, OneToMany } from 'typeorm';
 import { Account } from '../auth/account.entity';
 import { ACCOUNT_ROLE } from '../../core/constants';
 
@@ -9,10 +9,10 @@ export class Role extends ShareEntity {
     type: 'enum',
     enum: ACCOUNT_ROLE,
     default: ACCOUNT_ROLE.USER,
-    unique: true
+    unique: true,
   })
   name: ACCOUNT_ROLE;
 
-  @OneToOne(() => Account, (account) => account.id)
+  @OneToMany(() => Account, (account) => account.id)
   account: Account;
 }
