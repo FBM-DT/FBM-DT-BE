@@ -1,7 +1,5 @@
-import { IsInt } from 'class-validator';
 import { Column, Entity } from 'typeorm';
 import { ShareEntity } from '../../../core/shared';
-import { ApiProperty } from '@nestjs/swagger';
 
 @Entity()
 export class Inventory extends ShareEntity {
