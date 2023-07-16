@@ -1,26 +1,42 @@
-version: '3.5'
-
 services:
-  db:
+  postgres:
     image: postgres:14
-    restart: always
+    command: postgres -c stats_temp_directory=/tmp
+    env_file:
+      - .env
     environment:
       - POSTGRES_PASSWORD=${DB_PASS}
       - POSTGRES_USER=${DB_USER}
-      - POSTGRES_DB=${DB_NAME_PRODUCTION}
+      - POSTGRES_DB=${DB_NAME}
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 10s
+      timeout: 5s
+      retries: 5
     container_name: postgres
     volumes:
       - ./pgdata:/var/lib/postgresql/data
     ports:
       - '5432:5432'
-  
-  production-app:
+    networks:
+      - postgres
+    restart: unless-stopped
+
+  production:
     build:
       context: .
       target: production
     ports:
-      - 8080:3000
+      - 3000:3000
     depends_on:
-      - db
+      postgres: 
+        condition: service_healthy
     environment:
       - NODE_ENV=production
+    links:
+      - postgres:postgres
+    networks:
+      - postgres
+networks:
+  postgres:
+    driver: bridge
