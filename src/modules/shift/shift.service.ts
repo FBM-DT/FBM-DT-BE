@@ -11,18 +11,13 @@ import {
   DeleteWorkShiftResDto,
   AddWorkShiftResDto,
 } from './dto/response';
-import { TYPEORM, WORKTYPE } from '../../core/constants';
-import {
-  DataSource,
-  FindManyOptions,
-  FindOptionsWhere,
-  Repository,
-} from 'typeorm';
+import { SEARCH_TYPE, TYPEORM, WORKTYPE } from '../../core/constants';
+import { DataSource, FindManyOptions, Repository } from 'typeorm';
 import { WorkShift } from './entities/workShift.entity';
 import { AppResponse } from '../../core/shared/app.response';
 import { StaffShift } from './entities/staffInShift.entity';
 import { Task } from '../task/entities/task.entity';
-import { TransformTypeormOption } from '../../core/utils/tranform.typeorm';
+import { ExtraQuery } from '../../core/utils';
 
 @Injectable()
 export class ShiftService {
@@ -86,42 +81,29 @@ export class ShiftService {
     const response: GetWorkShiftListResDto = new GetWorkShiftListResDto();
     try {
       if (Object.keys(queries).length > 0) {
-        let options: FindManyOptions;
-        let whereConditions: FindOptionsWhere<WorkShift>;
-
-        if (queries.page && queries.pageSize) {
-          TransformTypeormOption.convertPaginationOptions(
-            { page: queries.page, pageSize: queries.pageSize },
-            options,
-          );
-        }
-        
-        if (queries.sortBy && queries.sortValue) {
-          // FilterConvert.convertSearchOptions(
-          //   { sortBy: queries.sortBy, sortValue: queries.sortValue },
-          //   whereConditions,
-          // );
-          options = {
-            ...options,
-            order: { [queries.sortBy]: queries.sortValue },
-          }
-        }
-
-        if (queries.address) {
-          whereConditions = { ...whereConditions, address: queries.address };
-        }
-
-        if (queries.type) {
-          whereConditions = {
-            ...whereConditions,
-            type: WORKTYPE[queries.type.toUpperCase()],
-          };
-        }
-
-        if (whereConditions) {
-          options = { ...options, where: whereConditions };
-        }
-
+        let options: FindManyOptions = new Object();
+        ExtraQuery.paginateBy(
+          {
+            page: queries.page,
+            pageSize: queries.pageSize,
+          },
+          options,
+        );
+        ExtraQuery.sortBy<WorkShift>(queries.sort, options);
+        ExtraQuery.searchBy<WorkShift>(
+          {
+            address: queries.address,
+            name: queries.name?.toLowerCase(),
+            position: queries.position,
+          },
+          options,
+          SEARCH_TYPE.AND
+        );
+        ExtraQuery.searchByEnum<WorkShift>(
+          { type: WORKTYPE[queries.type?.toUpperCase()] },
+          options,
+          SEARCH_TYPE.AND,
+        );
         const result: WorkShift[] = await this._workShiftRepository.find(
           options,
         );
