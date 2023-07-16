@@ -15,24 +15,6 @@ services:
       - ./pgdata:/var/lib/postgresql/data
     ports:
       - '5432:5432'
-
-  # development-app:
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #     target: development
-  #   env_file:
-  #     - .env
-  #   container_name: nestjs-app
-  #   environment:
-  #     - PORT:${PORT}
-  #   command: npm run start:dev
-  #   ports:
-  #     - '3000:3000'
-  #   depends_on:
-  #     - db
-  #   volumes:
-  #     - .:/backend/dt/app # host:guest
       
   pgadmin:
     image: dpage/pgadmin4
@@ -62,14 +44,6 @@ services:
     depends_on:
       - db
     volumes:
-      - .:/backend/dt/app 
+      - .:/backend/dt/app #host:guest
       - /backend/dt/app/node_modules
     restart: unless-stopped
-
- 
-
-# networks:
-#   nesjs-network:
-# networks:
-#   app-network:
-#     driver: bridge
