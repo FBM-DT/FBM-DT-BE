@@ -97,7 +97,7 @@ export class ShiftService {
             position: queries.position,
           },
           options,
-          SEARCH_TYPE.AND
+          SEARCH_TYPE.AND,
         );
         ExtraQuery.searchByEnum<WorkShift>(
           { type: WORKTYPE[queries.type?.toUpperCase()] },

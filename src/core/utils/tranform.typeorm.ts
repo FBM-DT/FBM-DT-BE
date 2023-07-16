@@ -3,6 +3,7 @@ import {
   FindOptionsWhere,
   FindOptionsOrder,
   Like,
+  FindOptionsSelect,
 } from 'typeorm';
 import { PaginationReqDto } from '../shared/request';
 import { ShareEntity } from '../shared';
@@ -93,7 +94,7 @@ export const ExtraQuery = {
     searchObject: Object,
     options: FindManyOptions,
     searchType: SEARCH_TYPE = SEARCH_TYPE.AND,
-  ) {
+  ): void {
     if (Object.keys(searchObject)?.length === 0) {
       return;
     }
@@ -128,6 +129,21 @@ export const ExtraQuery = {
       } else {
         Object.assign(options, { where: [typeormWhereConditions] });
       }
+    }
+  },
+  selectColums<T extends ShareEntity>(
+    columns: Array<string>,
+    options: FindManyOptions,
+  ): void {
+    if (columns.length > 0) {
+      let selectedColumns: FindOptionsSelect<T> = {};
+      columns.forEach((column: string) => {
+        selectedColumns = {
+          ...selectedColumns,
+          [column]: true,
+        };
+      });
+      Object.assign(options, { select: selectedColumns });
     }
   },
 };
