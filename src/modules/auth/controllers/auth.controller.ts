@@ -27,7 +27,6 @@ export class AuthController {
   @Get('refresh')
   refreshTokens(@Req() req: Request) {
     const account = req.user['payload'];
-    console.log(account);
     const refreshToken = req.user['refreshToken'];
     return this.authService.handleRefreshTokens(
       account.accountId,

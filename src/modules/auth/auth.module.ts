@@ -8,7 +8,7 @@ import { JwtStrategy, RefreshTokenStrategy } from './strategies';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env.sample' }),
     PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],

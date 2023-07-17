@@ -14,11 +14,9 @@ import {
   Param,
   Post,
   UseGuards,
-  Req,
   Patch,
   ParseIntPipe,
 } from '@nestjs/common';
-import { Request } from 'express';
 import { JwtAuthGuard, RolesGuard } from '../guards';
 import { ACCOUNT_ROLE } from '../../../core/constants';
 import { AccountService } from '../services';
@@ -35,20 +33,6 @@ import { CreateAccountReqDto, UpdateAccountReqDto } from '../dto/request';
 @Controller('account')
 export class AccountController {
   constructor(private accountService: AccountService) {}
-
-  @UseGuards(JwtAuthGuard)
-  @Get('profile')
-  getProfile(@Req() req: Request) {
-    return req.user;
-  }
-
-  @ApiOperation({ summary: 'Get data by admin role' })
-  @HasRoles(ACCOUNT_ROLE.ADM)
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Get('admin')
-  async onlyAdmin(@Req() req: Request) {
-    return req.user;
-  }
 
   @HasRoles(ACCOUNT_ROLE.ADM)
   @UseGuards(JwtAuthGuard, RolesGuard)
