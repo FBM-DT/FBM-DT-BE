@@ -1,7 +1,19 @@
-import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  ArrayMinSize,
+  ValidateNested,
+} from 'class-validator';
 import { WORKTYPE } from '../../../../core/constants';
 import { PaginationReqDto } from '../../../../core/shared/request';
 
+class Sort {
+  sortBy: string;
+  sortValue: string;
+}
 export class AddWorkShiftReqDto {
   @IsNotEmpty({ message: 'The work shift name is required' })
   @IsString({ message: 'The workshift name must be string type' })
@@ -28,12 +40,10 @@ export class AddWorkShiftReqDto {
 
 export class GetWorkShiftListReqDto extends PaginationReqDto {
   @IsOptional()
-  @IsString({ message: 'The sort option must be a string' })
-  readonly sortBy?: string;
-
-  @IsOptional()
-  @IsString({ message: 'The sort value must be a string' })
-  readonly sortValue?: string;
+  @IsArray({ message: 'The sort must be an array' })
+  @ArrayMinSize(1)
+  @ValidateNested({ each: true, context: Sort })
+  readonly sort?: Sort[];
 
   @IsOptional()
   @IsString({ message: 'The type must be a string' })
@@ -42,6 +52,10 @@ export class GetWorkShiftListReqDto extends PaginationReqDto {
   @IsOptional()
   @IsString({ message: 'The address must be a string' })
   readonly address?: string;
+
+  @IsOptional()
+  @IsString({ message: 'The name must be a string' })
+  readonly name?: string;
 
   @IsOptional()
   @IsString({ message: 'The position must be a string' })
