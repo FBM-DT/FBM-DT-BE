@@ -10,7 +10,7 @@ import { SigninReqDto } from '../dto/request';
 export class AuthController {
   constructor(private authService: AuthService) {}
 
-  @ApiOperation({ summary: 'SignIn by account' })
+  @ApiOperation({ summary: 'Signin' })
   @ApiBody({ type: SigninReqDto })
   @Post('/signin')
   async signIn(@Req() req: Request) {
