@@ -34,12 +34,6 @@ export class User extends ShareEntity {
   })
   avatar: string;
 
-  @Column({
-    type: 'varchar',
-    nullable: false,
-  })
-  phoneNumber: string;
-
   @OneToMany(() => StaffShift, (staffShift) => staffShift.userId)
   staffShifts: StaffShift[];
 
