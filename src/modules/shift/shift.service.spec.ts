@@ -32,7 +32,7 @@ describe('ShiftService', () => {
       result.status = 201;
       const dto: AddWorkShiftReqDto = {
         name: 'test',
-        address: '55 Hardvard',
+        address: '55 Harvard',
         duration: '1y',
         type: WORKTYPE.DAILY,
         description: 'test',
