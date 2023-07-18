@@ -1,5 +1,5 @@
 export const errorMessageRes = {
-  cannotFindById(id: string, resource: string): string {
+  cannotFindById(id: string | number, resource: string): string {
     return `Cannot find ${resource} with id: ${id}`;
   },
 };

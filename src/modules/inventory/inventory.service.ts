@@ -1,3 +1,4 @@
+import { errorMessageRes } from './../../core/shared/response/errorMessage';
 import { Inject, Injectable } from '@nestjs/common';
 import { TYPEORM } from '../../core/constants';
 import { DataSource, Repository } from 'typeorm';
@@ -80,9 +81,7 @@ export class InventoryService {
     });
 
     if (!inventory) {
-      return AppResponse.setUserErrorResponse(
-        ErrorMessage.INVENTORY_NOT_FOUND,
-      );
+      return AppResponse.setUserErrorResponse(ErrorMessage.INVENTORY_NOT_FOUND);
     }
 
     try {
@@ -98,7 +97,9 @@ export class InventoryService {
           id: inventoryId,
         });
 
-      return AppResponse.setSuccessResponse<UpdateInventoryResDto>(updatedInventory);
+      return AppResponse.setSuccessResponse<UpdateInventoryResDto>(
+        updatedInventory,
+      );
     } catch (error) {
       return AppResponse.setAppErrorResponse(error.message);
     }
