@@ -6,7 +6,6 @@ import {
   Patch,
   Param,
   Delete,
-  UseGuards,
 } from '@nestjs/common';
 import { ProfileService } from './profile.service';
 import { ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
