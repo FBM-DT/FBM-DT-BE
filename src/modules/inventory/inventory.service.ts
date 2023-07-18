@@ -1,3 +1,4 @@
+import { errorMessageRes } from './../../core/shared/response/errorMessage';
 import { Inject, Injectable } from '@nestjs/common';
 import { TYPEORM } from '../../core/constants';
 import { DataSource, Repository } from 'typeorm';
@@ -70,7 +71,7 @@ export class InventoryService {
       if (!data) {
         AppResponse.setUserErrorResponse(
           response,
-          ErrorMessage.INVENTORY_NOT_FOUND,
+          errorMessageRes.cannotFindById(inventoryId, 'Inventory'),
         );
         return response;
       }
@@ -95,7 +96,7 @@ export class InventoryService {
     if (!inventory) {
       AppResponse.setUserErrorResponse(
         response,
-        ErrorMessage.INVENTORY_NOT_FOUND,
+        errorMessageRes.cannotFindById(inventoryId, 'Inventory'),
       );
       return response;
     }
@@ -151,7 +152,7 @@ export class InventoryService {
       if (deletedInventory.affected === 0) {
         AppResponse.setUserErrorResponse(
           response,
-          ErrorMessage.INVENTORY_NOT_FOUND,
+          errorMessageRes.cannotFindById(inventoryId, 'Inventory'),
         );
         return response;
       }
