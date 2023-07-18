@@ -9,8 +9,10 @@ import {
   IsPhoneNumber,
   Matches,
   IsDateString,
+  ValidateNested,
 } from 'class-validator';
 import { DEPARTMENT, GENDER } from 'src/core/constants';
+import { IsAfterStartDate } from './IsAfterStartDate';
 
 export class AddProfileReqDto {
   @IsNotEmpty({ message: 'The full name is required' })
@@ -20,7 +22,9 @@ export class AddProfileReqDto {
 
   @IsOptional()
   @IsDateString({}, { message: 'The date of birth must be date type' })
-  @ApiProperty()
+  @ApiProperty({
+    example: '2021-01-01',
+  })
   dateOfBirth?: Date;
 
   @IsOptional()
@@ -35,14 +39,9 @@ export class AddProfileReqDto {
   @ApiProperty({ example: '15 Mai Thuc Lan' })
   address?: string;
 
-  @IsOptional()
-  @IsPhoneNumber('VN', { message: 'The phone number is invalid' })
-  @ApiProperty({ example: '0327054873' })
-  phoneNumber?: string;
-
   @IsNotEmpty({ message: 'The email is required' })
   @IsEmail({}, { message: 'The email is invalid' })
-  @ApiProperty({ example: 'example.gmail.com' })
+  @ApiProperty({ example: 'example@gmail.com' })
   email: string;
 
   @IsOptional()
@@ -53,13 +52,13 @@ export class AddProfileReqDto {
   department?: DEPARTMENT;
 
   @IsOptional()
-  @IsDate({ message: 'The start date must be date type' })
+  @IsDateString({}, { message: 'The start date must be date type' })
   @ApiProperty({ example: '2021-01-01' })
   startDate?: Date;
 
   @IsOptional()
-  @IsDate({ message: 'The end date must be date type' })
-  @Matches('endDate', 'startDate', {
+  @IsDateString({}, { message: 'The end date must be date type' })
+  @IsAfterStartDate('startDate', {
     message: 'The end date must be after start date',
   })
   @ApiProperty({ example: '2021-01-02' })

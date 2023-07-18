@@ -34,6 +34,18 @@ export class User extends ShareEntity {
   })
   avatar: string;
 
+  @Column({
+    type: 'date',
+    nullable: false,
+  })
+  startDate: Date;
+
+  @Column({
+    type: 'date',
+    nullable: true,
+  })
+  endDate: Date;
+
   @OneToMany(() => StaffShift, (staffShift) => staffShift.userId)
   staffShifts: StaffShift[];
 
