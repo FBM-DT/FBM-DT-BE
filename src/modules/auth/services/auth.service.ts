@@ -11,6 +11,7 @@ import { AppResponse } from '../../../core/shared/app.response';
 import { SigninReqDto } from '../dto/request';
 import { SigninResDto } from '../dto/response';
 import { ErrorMessage } from '../constrants/errorMessages';
+import { ErrorHandler } from '../../../core/shared/common/error';
 
 @Injectable()
 export class AuthService {
@@ -33,7 +34,7 @@ export class AuthService {
       const passwordIsValid = await bcrypt.compare(password, account.password);
 
       if (!account || !passwordIsValid) {
-        throw new Error(ErrorMessage.THE_PHONE_NUMBER_OR_PASSWORD_IS_INVALID);
+        ErrorHandler.invalid('The phone number or password');
       }
       return account;
     } catch (error) {
@@ -90,7 +91,7 @@ export class AuthService {
       );
 
       if (!account) {
-        throw new Error(ErrorMessage.UNABLE_TO_GET_ACCOUNT_FROM_DECODED_TOKEN);
+        ErrorHandler.invalid('Access token');
       }
 
       return account;
@@ -113,8 +114,7 @@ export class AuthService {
         refreshToken,
         account.refreshToken,
       );
-      if (!refreshTokenIsValid)
-        throw new ForbiddenException(ErrorMessage.REFRESH_TOKEN_IS_NOT_VALID);
+      if (!refreshTokenIsValid) ErrorHandler.invalid('Refresh token');
 
       const authPayload: IAuthPayload = {
         accountId: account.id,

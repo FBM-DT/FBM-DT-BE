@@ -9,7 +9,7 @@ WORKDIR /backend/dt/app
 # A wildcard is used to ensure both package.json AND package-lock.json are copied
 COPY package*.json ./
 
-RUN npm ci
+RUN npm install
 
 # Bundle app source / copy all other files
 COPY . .
@@ -23,15 +23,20 @@ RUN npm run build
 # Build another image named production
 FROM node:18 AS production
 
-# Set node env to prod
 ARG NODE_ENV=production
 ENV NODE_ENV=${NODE_ENV}
 
 # Set Working Directory
 WORKDIR /backend/dt/app
 
+COPY package*.json ./
+# RUN npm ci --omit=dev --ignore-scripts
+RUN npm install --only=production --ignore-scripts
+
+# COPY . .
+
 # Copy all from development stage
-COPY --from=development /backend/dt/app .
+COPY --from=development /backend/dt/app/ .
 
 # Run app
 CMD [ "node", "dist/main" ]

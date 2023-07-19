@@ -1,4 +1,4 @@
-/dist
-/node_modules
-
-.Dockerfile
+Dockerfile
+.dockerignore
+node_modules
+npm-debug.log

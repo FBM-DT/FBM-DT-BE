@@ -15,7 +15,7 @@ import {
   UpdateAccountResDto,
 } from '../dto/response';
 import { CreateAccountReqDto, UpdateAccountReqDto } from '../dto/request';
-import { ErrorMessage } from '../constrants/errorMessages';
+import { ErrorHandler } from '../../../core/shared/common/error';
 
 @Injectable()
 export class AccountService {
@@ -60,7 +60,7 @@ export class AccountService {
       if (!account) {
         AppResponse.setUserErrorResponse<GetAccountResDto>(
           response,
-          ErrorMessage.ACCOUNT_NOT_FOUND,
+          ErrorHandler.notFound(`Account ${id}`),
         );
         return response;
       }
@@ -103,7 +103,7 @@ export class AccountService {
       });
 
       if (phonenumber === existPhoneNumber?.phonenumber) {
-        throw new Error(ErrorMessage.THE_PHONE_NUMBER_ALREADY_EXISTS);
+        ErrorHandler.alreadyExists('The phone number');
       } else {
         const hashPassword = this.handleHashPassword(password);
         const data = { ...payload, password: hashPassword };
@@ -149,7 +149,7 @@ export class AccountService {
       if (phonenumber === existPhoneNumber?.phonenumber) {
         AppResponse.setUserErrorResponse<UpdateAccountResDto>(
           response,
-          ErrorMessage.THE_PHONE_NUMBER_ALREADY_EXISTS,
+          ErrorHandler.alreadyExists('The phone number'),
         );
         return response;
       }

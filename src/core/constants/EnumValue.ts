@@ -8,3 +8,8 @@ export enum ACCOUNT_ROLE {
   SUPERVISOR = 'supervisor',
   USER = 'user',
 }
+
+export enum SEARCH_TYPE {
+  AND = 'and',
+  OR = 'or',
+}
