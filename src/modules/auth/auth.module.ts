@@ -10,13 +10,7 @@ import { JwtStrategy, RefreshTokenStrategy } from './strategies';
   imports: [
     ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
     PassportModule,
-    JwtModule.registerAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_ACCESS_SECRET_KEY'),
-      }),
-    }),
+    JwtModule.register({}),
   ],
   controllers: [AccountController, AuthController],
   providers: [AccountService, AuthService, JwtStrategy, RefreshTokenStrategy],
