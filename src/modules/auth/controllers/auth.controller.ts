@@ -32,7 +32,9 @@ export class AuthController {
 
   @UseGuards(RefreshTokenGuard)
   @Get('refresh')
-  async refreshTokens(@Req() req: Request): Promise<RefreshTokenResDto> {
+  async refreshTokens(
+    @Req() req: Request,
+  ): Promise<string | RefreshTokenResDto> {
     const account = req.user['payload'];
     const refreshToken = req.user['refreshToken'];
     const response = await this.authService.handleRefreshTokens(

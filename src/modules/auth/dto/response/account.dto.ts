@@ -29,12 +29,12 @@ export class GetAccountResDto extends ShareResDto {
 }
 export class GetAccountByPhoneNumberResDto extends ShareResDto {}
 export class SigninResDto extends ShareResDto {
-  accessToken: string;
-  refreshToken: string;
+  accessToken?: string;
+  refreshToken?: string;
 }
 export class RefreshTokenResDto extends ShareResDto {
-  accessToken: string;
-  refreshToken: string;
+  accessToken?: string;
+  refreshToken?: string;
 }
 export class LogoutResDto extends ShareResDto {}
 export class UpdateAccountResDto extends ShareResDto {}

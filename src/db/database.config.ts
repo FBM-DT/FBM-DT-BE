@@ -53,14 +53,6 @@ export class DatabaseConfig {
         config = setting.development;
         break;
     }
-    console.log(
-      '🚀 ~ file: database.config.ts:43 ~ DatabaseConfig ~ getConfig ~ NODE_ENV:',
-      this.configService.get<string>('NODE_ENV'),
-    );
-    console.log(
-      '🚀 ~ file: database.config.ts:42 ~ DatabaseConfig ~ getConfig ~ config:',
-      config,
-    );
     return config;
   }
 }

@@ -1,8 +1,4 @@
-import {
-  Inject,
-  Injectable,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { TYPEORM } from '../../../core/constants';
 import { DataSource, Repository } from 'typeorm';
@@ -76,7 +72,9 @@ export class AccountService {
     }
   }
 
-  async getAccountByPhoneNumber(phoneNumber: string): Promise<Account> {
+  async getAccountByPhoneNumber(
+    phoneNumber: string,
+  ): Promise<Account | string> {
     try {
       const response = await this._accountRepository.findOne({
         where: { phonenumber: phoneNumber },
@@ -84,10 +82,7 @@ export class AccountService {
       });
       return response;
     } catch (error) {
-      if (error.status !== 500) {
-        throw error;
-      }
-      throw new InternalServerErrorException();
+      return error.message;
     }
   }
 
@@ -203,7 +198,7 @@ export class AccountService {
       account.refreshToken = payload.refreshToken;
       return await this._accountRepository.save(account);
     } catch (error) {
-      throw error;
+      return error.message;
     }
   }
 
