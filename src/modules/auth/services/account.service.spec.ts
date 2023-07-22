@@ -14,7 +14,7 @@ describe('AccountService', () => {
       imports: [
         AuthModule,
         DatabaseModule,
-        ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
+        ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env.sample' }),
       ],
       providers: [AccountService],
     }).compile();
