@@ -14,6 +14,6 @@ import { JwtStrategy, RefreshTokenStrategy } from './strategies';
   ],
   controllers: [AccountController, AuthController],
   providers: [AccountService, AuthService, JwtStrategy, RefreshTokenStrategy],
-  exports: [AccountService, AuthService],
+  exports: [AccountService, AuthService, JwtStrategy, RefreshTokenStrategy],
 })
 export class AuthModule {}
