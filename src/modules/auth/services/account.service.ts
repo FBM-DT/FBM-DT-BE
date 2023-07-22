@@ -103,7 +103,11 @@ export class AccountService {
       });
 
       if (phonenumber === existPhoneNumber?.phonenumber) {
-        ErrorHandler.alreadyExists('The phone number');
+        AppResponse.setUserErrorResponse<UpdateAccountResDto>(
+          response,
+          ErrorHandler.alreadyExists('The phone number'),
+        );
+        return response;
       } else {
         const hashPassword = this.handleHashPassword(password);
         const data = { ...payload, password: hashPassword };

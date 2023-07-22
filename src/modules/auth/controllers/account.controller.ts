@@ -40,7 +40,7 @@ export class AccountController {
   @ApiOkResponse({ description: 'The list account were returned successfully' })
   @ApiForbiddenResponse({ description: 'Unauthorized Request' })
   @Get('list')
-  async getAccountList() {
+  async getAccountList(): Promise<GetAllAccountsResDto> {
     const response: GetAllAccountsResDto =
       await this.accountService.getAccountList();
     return response;

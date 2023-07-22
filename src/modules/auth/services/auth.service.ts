@@ -9,7 +9,11 @@ import { Account } from '../account.entity';
 import { IAuthAccess, IAuthPayload } from '../interfaces';
 import { AppResponse } from '../../../core/shared/app.response';
 import { SigninReqDto } from '../dto/request';
-import { SigninResDto } from '../dto/response';
+import {
+  LogoutResDto,
+  RefreshTokenResDto,
+  SigninResDto,
+} from '../dto/response';
 import { ErrorMessage } from '../constrants/errorMessages';
 import { ErrorHandler } from '../../../core/shared/common/error';
 
@@ -34,7 +38,7 @@ export class AuthService {
       const passwordIsValid = await bcrypt.compare(password, account.password);
 
       if (!account || !passwordIsValid) {
-        ErrorHandler.invalid('The phone number or password');
+        throw new Error(ErrorHandler.invalid('The phone number or password'));
       }
       return account;
     } catch (error) {
@@ -64,17 +68,22 @@ export class AuthService {
     }
   }
 
-  async handleLogout(payload: IAuthAccess) {
+  async handleLogout(payload: IAuthAccess): Promise<LogoutResDto> {
+    const response: LogoutResDto = new LogoutResDto();
     try {
       const token = payload.authorization.replace('Bearer', '').trim();
       const account = await this.verifyAccessToken(token);
-      const response = await this.accountService.updateRefreshToken(
+      const updateRefreshToken = await this.accountService.updateRefreshToken(
         account.id,
         {
           refreshToken: null,
         },
       );
-      return response.refreshToken;
+      const result = {
+        refreshToken: updateRefreshToken.refreshToken,
+      };
+      AppResponse.setSuccessResponse<LogoutResDto>(response, result);
+      return response;
     } catch (error) {
       throw new Error(error);
     }
@@ -91,7 +100,7 @@ export class AuthService {
       );
 
       if (!account) {
-        ErrorHandler.invalid('Access token');
+        throw new Error(ErrorHandler.invalid('Access token'));
       }
 
       return account;
@@ -100,7 +109,11 @@ export class AuthService {
     }
   }
 
-  async handleRefreshTokens(accountId: number, refreshToken: string) {
+  async handleRefreshTokens(
+    accountId: number,
+    refreshToken: string,
+  ): Promise<RefreshTokenResDto> {
+    const response: RefreshTokenResDto = new RefreshTokenResDto();
     try {
       const account = await this._accountRepository.findOne({
         where: { id: accountId },
@@ -114,7 +127,8 @@ export class AuthService {
         refreshToken,
         account.refreshToken,
       );
-      if (!refreshTokenIsValid) ErrorHandler.invalid('Refresh token');
+      if (!refreshTokenIsValid)
+        throw new Error(ErrorHandler.invalid('Refresh token'));
 
       const authPayload: IAuthPayload = {
         accountId: account.id,
@@ -124,7 +138,8 @@ export class AuthService {
       };
       const tokens = await this.handleGenerateTokens(authPayload);
       await this.updateRefreshToken(account.id, tokens.refreshToken);
-      return tokens;
+      AppResponse.setSuccessResponse<SigninResDto>(response, tokens);
+      return response;
     } catch (error) {
       throw new Error(error);
     }

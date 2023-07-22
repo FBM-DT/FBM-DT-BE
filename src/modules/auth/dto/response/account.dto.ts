@@ -32,4 +32,9 @@ export class SigninResDto extends ShareResDto {
   accessToken: string;
   refreshToken: string;
 }
+export class RefreshTokenResDto extends ShareResDto {
+  accessToken: string;
+  refreshToken: string;
+}
+export class LogoutResDto extends ShareResDto {}
 export class UpdateAccountResDto extends ShareResDto {}
