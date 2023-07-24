@@ -1,10 +1,17 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { User } from '../users/user.entity';
-import { DataSource, Repository } from 'typeorm';
-import { TYPEORM } from 'src/core/constants';
+import { DataSource, Repository, FindManyOptions } from 'typeorm';
+import { GENDER, SEARCH_TYPE, TYPEORM, DEPARTMENT } from 'src/core/constants';
 import { AddProfileReqDto, UpdateProfileReqDto } from './dto/req';
-import { AddProfileResDto, UpdateProfileResDto } from './dto/res';
+import {
+  AddProfileResDto,
+  GetProfileListResDto,
+  UpdateProfileResDto,
+} from './dto/res';
 import { AppResponse } from 'src/core/shared/app.response';
+import GetProfilesReqDto from './dto/req/profile.dto';
+import { ExtraQuery } from 'src/core/utils';
+import { errorMessageRes } from './../../core/shared/response/errorMessage';
 
 @Injectable()
 export class ProfileService {
@@ -34,17 +41,65 @@ export class ProfileService {
       return res;
     } catch (error) {
       AppResponse.setAppErrorResponse(res, error.message);
+      return res;
     }
   }
 
-  async getAllProfile(): Promise<AddProfileResDto> {
+  async getProfiles(queries: GetProfilesReqDto): Promise<AddProfileResDto> {
     const res: AddProfileResDto = new AddProfileResDto();
     try {
-      const users = await this._userRepository.find();
-      AppResponse.setSuccessResponse(res, users);
+      if (Object.keys(queries).length > 0) {
+        const options: FindManyOptions = new Object();
+
+        ExtraQuery.paginateBy(
+          {
+            page: queries.page,
+            pageSize: queries.pageSize,
+          },
+          options,
+        );
+        ExtraQuery.sortBy<User>(queries.sort, options);
+        ExtraQuery.searchBy<User>(
+          {
+            address: queries?.address?.toLowerCase(),
+            fullname: queries?.fullname,
+            email: queries?.email?.toLowerCase(),
+          },
+          options,
+        );
+
+        ExtraQuery.searchByEnum<User>(
+          {
+            gender: GENDER[queries.gender?.toUpperCase()],
+            department: DEPARTMENT[queries.department?.toUpperCase()],
+          },
+          options,
+          SEARCH_TYPE.AND,
+        );
+
+        const result: User[] = await this._userRepository.find(options);
+
+        if (result.length === 0) {
+          AppResponse.setUserErrorResponse<GetProfileListResDto>(
+            res,
+            `Can not find user with ${JSON.stringify(queries)}`,
+          );
+          return res;
+        }
+
+        AppResponse.setSuccessResponse<GetProfileListResDto>(res, result, {
+          page: queries.page,
+          pageSize: queries.pageSize,
+        });
+        return res;
+      }
+      const result: User[] = await this._userRepository.find();
+
+      AppResponse.setSuccessResponse<GetProfileListResDto>(res, result);
       return res;
     } catch (error) {
       AppResponse.setAppErrorResponse(res, error.message);
+      return res;
     }
   }
 
@@ -71,24 +126,40 @@ export class ProfileService {
         id: id,
       });
       if (!user) {
-        AppResponse.setAppErrorResponse(res, 'Not found');
+        AppResponse.setAppErrorResponse(
+          res,
+          errorMessageRes.cannotFindById(id, 'User'),
+        );
         return res;
       }
-      const updatedUser = await this._userRepository
+
+      await this._userRepository
         .createQueryBuilder()
         .update(User)
         .set(updateProfileDto)
         .where('id = :id', { id: id })
         .execute();
 
-      AppResponse.setSuccessResponse(res, updatedUser);
+      const userUpdated = await this._userRepository.findOneBy({
+        id: id,
+      });
+
+      AppResponse.setSuccessResponse<UpdateProfileResDto>(res, userUpdated);
       return res;
     } catch (error) {
-      AppResponse.setAppErrorResponse(res, error.message);
+      AppResponse.setAppErrorResponse<UpdateProfileResDto>(res, error.message);
+      return res;
     }
   }
 
   remove(id: number) {
     return `This action removes a #${id} profile`;
+  }
+
+  async getEmail(email: string): Promise<User> {
+    const res: User = await this._userRepository.findOneBy({
+      email: email,
+    });
+    return res;
   }
 }

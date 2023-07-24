@@ -1,18 +1,23 @@
-import { ApiProperty, PartialType } from '@nestjs/swagger';
+import { ApiProperty, OmitType, PartialType } from '@nestjs/swagger';
 import {
   IsEnum,
   IsNotEmpty,
   IsOptional,
   IsString,
   IsEmail,
-  IsDate,
-  IsPhoneNumber,
-  Matches,
   IsDateString,
   ValidateNested,
+  IsArray,
+  ArrayMinSize,
+  Validate,
 } from 'class-validator';
 import { DEPARTMENT, GENDER } from 'src/core/constants';
 import { IsAfterStartDate } from './IsAfterStartDate';
+import { PaginationReqDto } from 'src/core/shared/request';
+class Sort {
+  sortBy: string;
+  sortValue: string;
+}
 
 export class AddProfileReqDto {
   @IsNotEmpty({ message: 'The full name is required' })
@@ -24,19 +29,22 @@ export class AddProfileReqDto {
   @IsDateString({}, { message: 'The date of birth must be date type' })
   @ApiProperty({
     example: '2021-01-01',
+    required: false,
   })
   dateOfBirth?: Date;
 
   @IsOptional()
   @IsEnum(GENDER, {
-    message: 'The type of gender must be belonged to the enum',
+    message: `The type of gender must be belonged to the enum ${Object.values(
+      GENDER,
+    )}`,
   })
-  @ApiProperty({ enum: [...Object.values(GENDER)] })
+  @ApiProperty({ enum: [GENDER.FEMALE, GENDER.MALE, GENDER.OTHER] })
   gender?: GENDER;
 
   @IsNotEmpty({ message: 'The phone number is required' })
   @IsOptional()
-  @ApiProperty({ example: '15 Mai Thuc Lan' })
+  @ApiProperty({ example: '15 Mai Thuc Lan', required: false })
   address?: string;
 
   @IsNotEmpty({ message: 'The email is required' })
@@ -61,11 +69,42 @@ export class AddProfileReqDto {
   @IsAfterStartDate('startDate', {
     message: 'The end date must be after start date',
   })
-  @ApiProperty({ example: '2021-01-02' })
+  @ApiProperty({ example: '2021-01-02', required: false })
   endDate?: Date;
 
   @IsOptional()
+  @ApiProperty({ example: 'https://i.pravatar.cc/300', required: false })
   avatar?: string;
 }
 
-export class UpdateProfileReqDto extends PartialType(AddProfileReqDto) {}
+export class UpdateProfileReqDto extends PartialType(
+  OmitType(AddProfileReqDto, ['department', 'startDate', 'endDate'] as const),
+) {}
+
+export default class GetProfilesReqDto extends PaginationReqDto {
+  @IsOptional()
+  @IsArray({ message: 'The sort must be an array' })
+  @ArrayMinSize(1)
+  @ValidateNested({ each: true, context: Sort })
+  readonly sort?: Sort[];
+
+  @IsOptional()
+  @IsString({ message: 'The email must be a string' })
+  readonly email?: string;
+
+  @IsOptional()
+  @IsString({ message: 'The address must be a string' })
+  readonly address?: string;
+
+  @IsOptional()
+  @IsString({ message: 'The fullname must be a string' })
+  readonly fullname?: string;
+
+  @IsOptional()
+  @IsString({ message: 'The gender must be a string' })
+  readonly gender?: string;
+
+  @IsOptional()
+  @IsString({ message: 'The department must be a string' })
+  readonly department?: string;
+}
