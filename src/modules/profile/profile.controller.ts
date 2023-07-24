@@ -6,9 +6,16 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { ProfileService } from './profile.service';
-import { ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 import { AddProfileReqDto } from './dto/req';
 import { AddProfileResDto } from './dto/res';
 import { ACCOUNT_ROLE } from '../../core/constants';
