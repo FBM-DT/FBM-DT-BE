@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
 import { TYPEORM } from '../../../core/constants';
 import * as bcrypt from 'bcrypt';
@@ -49,6 +49,15 @@ export class AuthService {
     }
   }
 
+  private createAuthPayload(account: Account): IAuthPayload {
+    return {
+      accountId: account['id'],
+      fullname: account['user']['fullname'],
+      phonenumber: account['phonenumber'],
+      role: account['role']['name'],
+    };
+  }
+
   async handleSignin(payload: SigninReqDto): Promise<SigninResDto> {
     const response: SigninResDto = new SigninResDto();
     try {
@@ -61,12 +70,7 @@ export class AuthService {
         return response;
       }
 
-      const authPayload: IAuthPayload = {
-        accountId: account['id'],
-        fullname: account['user']['fullname'],
-        phonenumber: account['phonenumber'],
-        role: account['role']['name'],
-      };
+      const authPayload: IAuthPayload = this.createAuthPayload(account);
 
       const tokens = await this.handleGenerateTokens(authPayload);
       await this.updateRefreshToken(account['id'], tokens.refreshToken);
@@ -138,12 +142,7 @@ export class AuthService {
       );
       if (!refreshTokenIsValid) return ErrorHandler.invalid('Refresh token');
 
-      const authPayload: IAuthPayload = {
-        accountId: account.id,
-        fullname: account.user.fullname,
-        phonenumber: account.phonenumber,
-        role: account.role.name,
-      };
+      const authPayload: IAuthPayload = this.createAuthPayload(account);
       const tokens = await this.handleGenerateTokens(authPayload);
       await this.updateRefreshToken(account.id, tokens.refreshToken);
       AppResponse.setSuccessResponse<SigninResDto>(response, tokens);

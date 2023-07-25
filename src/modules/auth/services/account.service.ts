@@ -5,12 +5,17 @@ import { DataSource, Repository } from 'typeorm';
 import { AppResponse } from '../../../core/shared/app.response';
 import { Account } from '../account.entity';
 import {
+  ChangePasswordResDto,
   CreateAccountResDto,
   GetAccountResDto,
   GetAllAccountsResDto,
   UpdateAccountResDto,
 } from '../dto/response';
-import { CreateAccountReqDto, UpdateAccountReqDto } from '../dto/request';
+import {
+  ChangePasswordReqDto,
+  CreateAccountReqDto,
+  UpdateAccountReqDto,
+} from '../dto/request';
 import { ErrorHandler } from '../../../core/shared/common/error';
 
 @Injectable()
@@ -189,6 +194,78 @@ export class AccountService {
     }
   }
 
+  async changePassword(
+    accountId: number,
+    payload: ChangePasswordReqDto,
+  ): Promise<ChangePasswordResDto> {
+    const response: ChangePasswordResDto = new ChangePasswordResDto();
+    const { currentPassword, newPassword, confirmPassword } = payload;
+    try {
+      const account = await this._accountRepository.findOne({
+        where: { id: accountId },
+      });
+
+      if (!account) {
+        AppResponse.setUserErrorResponse<ChangePasswordResDto>(
+          response,
+          ErrorHandler.notFound(`Account ${accountId}`),
+          {
+            status: 404,
+          },
+        );
+        return response;
+      }
+
+      const isValidPassword = await bcrypt.compare(
+        currentPassword,
+        account?.password,
+      );
+
+      if (!isValidPassword) {
+        AppResponse.setUserErrorResponse<ChangePasswordResDto>(
+          response,
+          ErrorHandler.invalid('The current password'),
+        );
+        return response;
+      }
+
+      if (confirmPassword !== newPassword) {
+        AppResponse.setUserErrorResponse<ChangePasswordResDto>(
+          response,
+          ErrorHandler.invalid('The confirm password'),
+        );
+        return response;
+      }
+
+      const isValidFormatPassword = await this.isPasswordValid(newPassword);
+      if (isValidFormatPassword === false) {
+        AppResponse.setUserErrorResponse<ChangePasswordResDto>(
+          response,
+          'The password and confirm password are not correct format',
+        );
+        return response;
+      }
+
+      const hashPassword = await this.handleHashPassword(newPassword);
+      const password = hashPassword;
+      const result = await this._accountRepository.update(accountId, {
+        password: password,
+      });
+
+      AppResponse.setSuccessResponse<ChangePasswordResDto>(
+        response,
+        result.affected,
+      );
+      return response;
+    } catch (error) {
+      AppResponse.setAppErrorResponse<ChangePasswordResDto>(
+        response,
+        error.message,
+      );
+      return response;
+    }
+  }
+
   async updateRefreshToken(
     id: number,
     payload: UpdateAccountReqDto,
@@ -199,6 +276,24 @@ export class AccountService {
       return await this._accountRepository.save(account);
     } catch (error) {
       return error.message;
+    }
+  }
+
+  private async isPasswordValid(password: string): Promise<boolean> {
+    const uppercaseRegex = /[A-Z]/;
+    const lowercaseRegex = /[a-z]/;
+    const numberRegex = /[0-9]/;
+    const specialRegex = /[!@#$%^&*()_+\-=[\]{}|;:,.<>?]/;
+
+    const hasUppercase = uppercaseRegex.test(password);
+    const hasLowercase = lowercaseRegex.test(password);
+    const hasNumber = numberRegex.test(password);
+    const hasSpecialChar = specialRegex.test(password);
+
+    if (!hasUppercase || !hasLowercase || !hasNumber || !hasSpecialChar) {
+      return false;
+    } else if (hasUppercase && hasLowercase && hasNumber && hasSpecialChar) {
+      return true;
     }
   }
 

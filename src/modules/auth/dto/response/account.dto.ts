@@ -38,3 +38,4 @@ export class RefreshTokenResDto extends ShareResDto {
 }
 export class LogoutResDto extends ShareResDto {}
 export class UpdateAccountResDto extends ShareResDto {}
+export class ChangePasswordResDto extends ShareResDto {}
