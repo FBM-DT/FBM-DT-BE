@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
 import { TYPEORM } from '../../../core/constants';
 import * as bcrypt from 'bcrypt';

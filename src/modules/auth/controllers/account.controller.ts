@@ -9,6 +9,7 @@ import {
 } from '@nestjs/swagger';
 import {
   Body,
+  Req,
   Controller,
   Get,
   Param,
@@ -17,17 +18,24 @@ import {
   Patch,
   ParseIntPipe,
 } from '@nestjs/common';
+import { Request } from 'express';
 import { JwtAuthGuard, RolesGuard } from '../guards';
 import { ACCOUNT_ROLE } from '../../../core/constants';
 import { AccountService } from '../services';
 import { HasRoles } from '../decorators/role.decorator';
 import {
+  ChangePasswordResDto,
   CreateAccountResDto,
   GetAccountResDto,
   GetAllAccountsResDto,
   UpdateAccountResDto,
 } from '../dto/response';
-import { CreateAccountReqDto, UpdateAccountReqDto } from '../dto/request';
+import {
+  ChangePasswordReqDto,
+  CreateAccountReqDto,
+  ForgotPasswordReqDto,
+  UpdateAccountReqDto,
+} from '../dto/request';
 
 @ApiTags('Account')
 @Controller('account')
@@ -79,5 +87,32 @@ export class AccountController {
     const response: UpdateAccountResDto =
       await this.accountService.updateAccount(accountId, accountDto);
     return response;
+  }
+
+  @ApiOperation({ summary: 'Change password' })
+  @ApiBody({ type: ChangePasswordReqDto })
+  @ApiOkResponse({ description: 'The password was updated successfully' })
+  @Patch('/:accountId/change-password')
+  async changePassword(
+    @Param('accountId', ParseIntPipe) accountId: number,
+    @Body() payload: ChangePasswordReqDto,
+  ): Promise<ChangePasswordResDto> {
+    const response: ChangePasswordResDto =
+      await this.accountService.changePassword(accountId, payload);
+    return response;
+  }
+
+  @Post('forgot-password')
+  @ApiBody({ type: ForgotPasswordReqDto })
+  async initiatePhoneNumberVerification(@Req() request: Request) {
+    // if (request.user.isPhoneNumberConfirmed) {
+    //   throw new Error('Phone number already confirmed');
+    // }
+    const account = request.user['payload'];
+    console.log(account);
+    console.log('Forgot pw');
+    await this.accountService.initiatePhoneNumberVerification(
+      account.phoneNumber,
+    );
   }
 }
