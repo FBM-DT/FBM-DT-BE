@@ -1,17 +1,11 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { User } from '../users/user.entity';
-import { DataSource, Repository, FindManyOptions } from 'typeorm';
-import { GENDER, SEARCH_TYPE, TYPEORM, DEPARTMENT } from 'src/core/constants';
-import { AddProfileReqDto, UpdateProfileReqDto } from './dto/req';
-import {
-  AddProfileResDto,
-  GetProfileListResDto,
-  UpdateProfileResDto,
-} from './dto/res';
-import { AppResponse } from 'src/core/shared/app.response';
-import GetProfilesReqDto from './dto/req/profile.dto';
-import { ExtraQuery } from 'src/core/utils';
-import { errorMessageRes } from './../../core/shared/response/errorMessage';
+import { DataSource, Repository } from 'typeorm';
+import { TYPEORM } from '../../core/constants';
+import { AddProfileReqDto } from './dto/req';
+import { AddProfileResDto } from './dto/res';
+import { AppResponse } from '../../core/shared/app.response';
+import { AccountService } from '../auth/services';
 
 @Injectable()
 export class ProfileService {
@@ -20,146 +14,66 @@ export class ProfileService {
   constructor(
     @Inject(TYPEORM)
     dataSource: DataSource,
+    private readonly accountService: AccountService,
   ) {
     this._dataSource = dataSource;
     this._userRepository = dataSource.getRepository(User);
   }
+
   async createProfile(data: AddProfileReqDto): Promise<AddProfileResDto> {
     const res: AddProfileResDto = new AddProfileResDto();
+
+    const { phonenumber, password, roleId, ...rest } = data;
+
+    const userData = {
+      ...rest,
+    };
+
+    const account = {
+      phonenumber,
+      password,
+      roleId,
+    };
+
     try {
       const user = await this._userRepository
         .createQueryBuilder()
         .insert()
         .into(User)
-        .values(data)
+        .values(userData)
         .execute();
 
-      AppResponse.setSuccessResponse(res, user.identifiers[0].id, {
-        message: 'Created',
-        status: 201,
-      });
-      return res;
-    } catch (error) {
-      AppResponse.setAppErrorResponse(res, error.message);
-      return res;
-    }
-  }
+      if (user && user.identifiers.length > 0) {
+        const accountData = {
+          ...account,
+          userId: user.identifiers[0].id,
+        };
 
-  async getProfiles(queries: GetProfilesReqDto): Promise<AddProfileResDto> {
-    const res: AddProfileResDto = new AddProfileResDto();
-    try {
-      if (Object.keys(queries).length > 0) {
-        const options: FindManyOptions = new Object();
-
-        ExtraQuery.paginateBy(
-          {
-            page: queries.page,
-            pageSize: queries.pageSize,
-          },
-          options,
-        );
-        ExtraQuery.sortBy<User>(queries.sort, options);
-        ExtraQuery.searchBy<User>(
-          {
-            address: queries?.address?.toLowerCase(),
-            fullname: queries?.fullname,
-            email: queries?.email?.toLowerCase(),
-          },
-          options,
-        );
-
-        ExtraQuery.searchByEnum<User>(
-          {
-            gender: GENDER[queries.gender?.toUpperCase()],
-            department: DEPARTMENT[queries.department?.toUpperCase()],
-          },
-          options,
-          SEARCH_TYPE.AND,
-        );
-
-        const result: User[] = await this._userRepository.find(options);
-
-        if (result.length === 0) {
-          AppResponse.setUserErrorResponse<GetProfileListResDto>(
-            res,
-            `Can not find user with ${JSON.stringify(queries)}`,
-          );
-          return res;
+        const accountRes = await this.accountService.createAccount(accountData);
+        if (accountRes.status === 400 || accountRes.status === 500) {
+          await this._userRepository.delete(user.identifiers[0].id);
+          return accountRes;
         }
 
-        AppResponse.setSuccessResponse<GetProfileListResDto>(res, result, {
-          page: queries.page,
-          pageSize: queries.pageSize,
+        const { password, ...createdData } = {
+          ...rest,
+          ...accountData,
+          accountId: accountRes.data,
+        };
+
+        AppResponse.setSuccessResponse<AddProfileResDto>(res, createdData, {
+          status: 201,
+          message: 'Created',
         });
         return res;
       }
-      const result: User[] = await this._userRepository.find();
-
-      AppResponse.setSuccessResponse<GetProfileListResDto>(res, result);
-      return res;
     } catch (error) {
-      AppResponse.setAppErrorResponse(res, error.message);
-      return res;
-    }
-  }
-
-  async findProfileById(id: number): Promise<AddProfileResDto> {
-    const res: AddProfileResDto = new AddProfileResDto();
-    try {
-      const user = await this._userRepository.findOneBy({
-        id: id,
-      });
-      AppResponse.setSuccessResponse(res, user);
-      return res;
-    } catch (error) {
-      AppResponse.setAppErrorResponse(res, error.message);
-    }
-  }
-
-  async update(
-    id: number,
-    updateProfileDto: UpdateProfileReqDto,
-  ): Promise<UpdateProfileResDto> {
-    const res: UpdateProfileResDto = new UpdateProfileResDto();
-    try {
-      const user = await this._userRepository.findOneBy({
-        id: id,
-      });
-      if (!user) {
-        AppResponse.setAppErrorResponse(
-          res,
-          errorMessageRes.cannotFindById(id, 'User'),
-        );
+      if (error.message.includes('duplicate key')) {
+        AppResponse.setAppErrorResponse<AddProfileResDto>(res, 'Email existed');
         return res;
       }
-
-      await this._userRepository
-        .createQueryBuilder()
-        .update(User)
-        .set(updateProfileDto)
-        .where('id = :id', { id: id })
-        .execute();
-
-      const userUpdated = await this._userRepository.findOneBy({
-        id: id,
-      });
-
-      AppResponse.setSuccessResponse<UpdateProfileResDto>(res, userUpdated);
-      return res;
-    } catch (error) {
-      AppResponse.setAppErrorResponse<UpdateProfileResDto>(res, error.message);
+      AppResponse.setAppErrorResponse<AddProfileResDto>(res, error.message);
       return res;
     }
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} profile`;
-  }
-
-  async getEmail(email: string): Promise<User> {
-    const res: User = await this._userRepository.findOneBy({
-      email: email,
-    });
-    return res;
   }
 }
