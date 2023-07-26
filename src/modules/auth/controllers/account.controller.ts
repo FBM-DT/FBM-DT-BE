@@ -18,7 +18,6 @@ import {
   Patch,
   ParseIntPipe,
 } from '@nestjs/common';
-import { Request } from 'express';
 import { JwtAuthGuard, RolesGuard } from '../guards';
 import { ACCOUNT_ROLE } from '../../../core/constants';
 import { AccountService } from '../services';
