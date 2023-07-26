@@ -9,11 +9,13 @@ import {
   ValidateNested,
   IsArray,
   ArrayMinSize,
-  Validate,
+  IsInt,
+  MaxLength,
+  MinLength,
 } from 'class-validator';
-import { DEPARTMENT, GENDER } from 'src/core/constants';
+import { DEPARTMENT, GENDER } from '../../../../core/constants';
 import { IsAfterStartDate } from './IsAfterStartDate';
-import { PaginationReqDto } from 'src/core/shared/request';
+import { PaginationReqDto } from '../../../../core/shared/request';
 class Sort {
   sortBy: string;
   sortValue: string;
@@ -75,10 +77,38 @@ export class AddProfileReqDto {
   @IsOptional()
   @ApiProperty({ example: 'https://i.pravatar.cc/300', required: false })
   avatar?: string;
+
+  @IsNotEmpty({ message: 'The phone number is required' })
+  @IsString()
+  @MaxLength(10)
+  @ApiProperty({
+    example: '0123456789',
+  })
+  phonenumber: string;
+
+  @IsNotEmpty({ message: 'The password is required' })
+  @IsString()
+  @MinLength(8)
+  @ApiProperty({
+    example: '12345678',
+  })
+  password: string;
+
+  @IsNotEmpty({ message: 'The roleId is required' })
+  @IsInt()
+  @ApiProperty({
+    example: 1,
+  })
+  roleId: number;
 }
 
 export class UpdateProfileReqDto extends PartialType(
-  OmitType(AddProfileReqDto, ['department', 'startDate', 'endDate'] as const),
+  OmitType(AddProfileReqDto, [
+    'department',
+    'startDate',
+    'endDate',
+    'roleId',
+  ] as const),
 ) {}
 
 export default class GetProfilesReqDto extends PaginationReqDto {
