@@ -24,16 +24,12 @@ import { Twilio } from 'twilio';
 export class AccountService {
   private _accountRepository: Repository<Account>;
   private _dataSource: DataSource;
-  private twilioClient: Twilio;
   constructor(
     @Inject(TYPEORM) dataSource: DataSource,
     private readonly configService: ConfigService,
   ) {
     this._dataSource = dataSource;
     this._accountRepository = dataSource.getRepository(Account);
-    const accountSid = configService.get('TWILIO_ACCOUNT_SID');
-    const authToken = configService.get('TWILIO_AUTH_TOKEN');
-    this.twilioClient = new Twilio(accountSid, authToken);
   }
 
   async getAccountList(): Promise<GetAllAccountsResDto> {
@@ -273,22 +269,6 @@ export class AccountService {
         error.message,
       );
       return response;
-    }
-  }
-
-  async initiatePhoneNumberVerification(phoneNumber: string) {
-    try {
-      const serviceSid = this.configService.get(
-        'TWILIO_VERIFICATION_SERVICE_SID',
-      );
-
-      console.log('phonenumber', phoneNumber);
-
-      return this.twilioClient.verify
-        .services(serviceSid)
-        .verifications.create({ to: phoneNumber, channel: 'sms' });
-    } catch (error) {
-      console.log(error);
     }
   }
 

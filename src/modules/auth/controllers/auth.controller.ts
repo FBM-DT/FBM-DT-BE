@@ -50,10 +50,7 @@ export class AuthController {
   @ApiBody({ type: ForgotPasswordReqDto })
   @Post('/send-otp')
   async sendOtp(@Body() phoneNumber: string): Promise<{ message: string }> {
-    const otp = '123456';
-
-    await this.otpService.sendOtp(phoneNumber, otp);
-
+    await this.otpService.sendOtp(phoneNumber);
     return { message: 'OTP sent successfully!' };
   }
 }

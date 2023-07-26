@@ -18,7 +18,9 @@ import { OtpService } from './services/otp.service';
       useFactory: async (configService: ConfigService) => ({
         accountSid: configService.get<string>('TWILIO_ACCOUNT_SID'),
         authToken: configService.get<string>('TWILIO_AUTH_TOKEN'),
-        serviceSid: configService.get('TWILIO_VERIFICATION_SERVICE_SID'),
+        serviceSid: configService.get<string>(
+          'TWILIO_VERIFICATION_SERVICE_SID',
+        ),
       }),
     }),
   ],

@@ -18,7 +18,6 @@ import {
   Patch,
   ParseIntPipe,
 } from '@nestjs/common';
-import { Request } from 'express';
 import { JwtAuthGuard, RolesGuard } from '../guards';
 import { ACCOUNT_ROLE } from '../../../core/constants';
 import { AccountService } from '../services';
@@ -33,7 +32,6 @@ import {
 import {
   ChangePasswordReqDto,
   CreateAccountReqDto,
-  ForgotPasswordReqDto,
   UpdateAccountReqDto,
 } from '../dto/request';
 
@@ -100,19 +98,5 @@ export class AccountController {
     const response: ChangePasswordResDto =
       await this.accountService.changePassword(accountId, payload);
     return response;
-  }
-
-  @Post('forgot-password')
-  @ApiBody({ type: ForgotPasswordReqDto })
-  async initiatePhoneNumberVerification(@Req() request: Request) {
-    // if (request.user.isPhoneNumberConfirmed) {
-    //   throw new Error('Phone number already confirmed');
-    // }
-    const account = request.user['payload'];
-    console.log(account);
-    console.log('Forgot pw');
-    await this.accountService.initiatePhoneNumberVerification(
-      account.phoneNumber,
-    );
   }
 }
