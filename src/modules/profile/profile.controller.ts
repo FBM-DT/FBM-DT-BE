@@ -11,13 +11,10 @@ import {
 import { ProfileService } from './profile.service';
 import { ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
 import { AddProfileReqDto } from './dto/req';
-import {
-  AddProfileResDto,
-  GetProfileListResDto,
-  UpdateProfileResDto,
-} from './dto/res';
-import GetProfilesReqDto, { UpdateProfileReqDto } from './dto/req/profile.dto';
-import { DEPARTMENT, GENDER } from 'src/core/constants';
+import { AddProfileResDto } from './dto/res';
+import { ACCOUNT_ROLE } from '../../core/constants';
+import { HasRoles } from '../auth/decorators/role.decorator';
+import { JwtAuthGuard, RolesGuard } from '../auth/guards';
 
 @ApiTags('Profile')
 @Controller('profile')
@@ -36,6 +33,8 @@ export class ProfileController {
       },
     },
   })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @HasRoles(ACCOUNT_ROLE.SUPERVISOR)
   async createProfile(
     @Body() createProfileDto: AddProfileReqDto,
   ): Promise<AddProfileResDto> {

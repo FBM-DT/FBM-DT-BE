@@ -1,17 +1,11 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { User } from '../users/user.entity';
-import { DataSource, Repository, FindManyOptions } from 'typeorm';
-import { GENDER, SEARCH_TYPE, TYPEORM, DEPARTMENT } from 'src/core/constants';
-import { AddProfileReqDto, UpdateProfileReqDto } from './dto/req';
-import {
-  AddProfileResDto,
-  GetProfileListResDto,
-  UpdateProfileResDto,
-} from './dto/res';
-import { AppResponse } from 'src/core/shared/app.response';
-import GetProfilesReqDto from './dto/req/profile.dto';
-import { ExtraQuery } from 'src/core/utils';
-import { errorMessageRes } from './../../core/shared/response/errorMessage';
+import { DataSource, Repository } from 'typeorm';
+import { TYPEORM } from '../../core/constants';
+import { AddProfileReqDto } from './dto/req';
+import { AddProfileResDto } from './dto/res';
+import { AppResponse } from '../../core/shared/app.response';
+import { AccountService } from '../auth/services';
 
 @Injectable()
 export class ProfileService {
@@ -20,27 +14,65 @@ export class ProfileService {
   constructor(
     @Inject(TYPEORM)
     dataSource: DataSource,
+    private readonly accountService: AccountService,
   ) {
     this._dataSource = dataSource;
     this._userRepository = dataSource.getRepository(User);
   }
+
   async createProfile(data: AddProfileReqDto): Promise<AddProfileResDto> {
     const res: AddProfileResDto = new AddProfileResDto();
+
+    const { phonenumber, password, roleId, ...rest } = data;
+
+    const userData = {
+      ...rest,
+    };
+
+    const account = {
+      phonenumber,
+      password,
+      roleId,
+    };
+
     try {
       const user = await this._userRepository
         .createQueryBuilder()
         .insert()
         .into(User)
-        .values(data)
+        .values(userData)
         .execute();
 
-      AppResponse.setSuccessResponse(res, user.identifiers[0].id, {
-        message: 'Created',
-        status: 201,
-      });
-      return res;
+      if (user && user.identifiers.length > 0) {
+        const accountData = {
+          ...account,
+          userId: user.identifiers[0].id,
+        };
+
+        const accountRes = await this.accountService.createAccount(accountData);
+        if (accountRes.status === 400 || accountRes.status === 500) {
+          await this._userRepository.delete(user.identifiers[0].id);
+          return accountRes;
+        }
+
+        const { password, ...createdData } = {
+          ...rest,
+          ...accountData,
+          accountId: accountRes.data,
+        };
+
+        AppResponse.setSuccessResponse<AddProfileResDto>(res, createdData, {
+          status: 201,
+          message: 'Created',
+        });
+        return res;
+      }
     } catch (error) {
-      AppResponse.setAppErrorResponse(res, error.message);
+      if (error.message.includes('duplicate key')) {
+        AppResponse.setAppErrorResponse<AddProfileResDto>(res, 'Email existed');
+        return res;
+      }
+      AppResponse.setAppErrorResponse<AddProfileResDto>(res, error.message);
       return res;
     }
   }
