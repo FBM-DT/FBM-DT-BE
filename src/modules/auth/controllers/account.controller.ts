@@ -22,12 +22,17 @@ import { ACCOUNT_ROLE } from '../../../core/constants';
 import { AccountService } from '../services';
 import { HasRoles } from '../decorators/role.decorator';
 import {
+  ChangePasswordResDto,
   CreateAccountResDto,
   GetAccountResDto,
   GetAllAccountsResDto,
   UpdateAccountResDto,
 } from '../dto/response';
-import { CreateAccountReqDto, UpdateAccountReqDto } from '../dto/request';
+import {
+  ChangePasswordReqDto,
+  CreateAccountReqDto,
+  UpdateAccountReqDto,
+} from '../dto/request';
 
 @ApiTags('Account')
 @Controller('account')
@@ -78,6 +83,19 @@ export class AccountController {
   ): Promise<UpdateAccountResDto> {
     const response: UpdateAccountResDto =
       await this.accountService.updateAccount(accountId, accountDto);
+    return response;
+  }
+
+  @ApiOperation({ summary: 'Change password' })
+  @ApiBody({ type: ChangePasswordReqDto })
+  @ApiOkResponse({ description: 'The password was updated successfully' })
+  @Patch('/:accountId/change-password')
+  async changePassword(
+    @Param('accountId', ParseIntPipe) accountId: number,
+    @Body() payload: ChangePasswordReqDto,
+  ): Promise<ChangePasswordResDto> {
+    const response: ChangePasswordResDto =
+      await this.accountService.changePassword(accountId, payload);
     return response;
   }
 }
