@@ -211,7 +211,6 @@ export class AccountService {
       });
 
       if (!account) {
-        console.log('Step2');
         AppResponse.setUserErrorResponse<ChangePasswordResDto>(
           response,
           ErrorHandler.notFound(`Account ${accountId}`),

@@ -4,6 +4,7 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
+  MaxLength,
   MinLength,
 } from 'class-validator';
 import { PartialType } from '@nestjs/mapped-types';
@@ -13,11 +14,14 @@ import { ACCOUNT_ROLE } from '../../../../core/constants';
 export class CreateAccountReqDto {
   @IsNotEmpty({ message: 'The phone number is required' })
   @IsString()
+  @MinLength(10)
+  @MaxLength(10)
   @ApiProperty()
   readonly phonenumber: string;
 
   @IsNotEmpty({ message: 'The password is required' })
   @IsString()
+  @MinLength(8)
   @ApiProperty()
   readonly password: string;
 

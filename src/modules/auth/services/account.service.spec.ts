@@ -4,7 +4,12 @@ import { DatabaseModule } from '../../../../src/db/database.module';
 import { AuthModule } from '../auth.module';
 import { AccountService } from './account.service';
 import { CreateAccountReqDto } from '../dto/request';
-import { CreateAccountResDto } from '../dto/response';
+import { ChangePasswordResDto, CreateAccountResDto } from '../dto/response';
+
+const mockAccountRepository = {
+  getAccountById: jest.fn(),
+  update: jest.fn(),
+};
 
 describe('AccountService', () => {
   let accountService: AccountService;
@@ -16,7 +21,10 @@ describe('AccountService', () => {
         DatabaseModule,
         ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
       ],
-      providers: [AccountService],
+      providers: [
+        AccountService,
+        { provide: AccountService, useValue: mockAccountRepository },
+      ],
     }).compile();
 
     accountService = module.get<AccountService>(AccountService);
@@ -97,6 +105,63 @@ describe('AccountService', () => {
       expect(id).toBeDefined();
       const result = await accountService.getAccountById(id);
       expect(result).toEqual(expectedResponse);
+    });
+  });
+
+  describe('changePassword', () => {
+    it('should successfully change the password', async () => {
+      const response: ChangePasswordResDto = new ChangePasswordResDto();
+      response.message = 'Success';
+      response.status = 200;
+      const payload = {
+        currentPassword: 'password123',
+        newPassword: 'newPassword123',
+        confirmPassword: 'newPassword123',
+      };
+      jest
+        .spyOn(accountService, 'changePassword')
+        .mockImplementation(async () => response);
+      const result = await accountService.changePassword(1, payload);
+      expect(result.status).toBe(response.status);
+      expect(result.message).toBe(response.message);
+    });
+
+    it('should response error when account is not found', async () => {
+      const response: ChangePasswordResDto = new ChangePasswordResDto();
+      response.exception = 'Account 999 does not exist';
+      response.status = 404;
+      response.message = 'Failed';
+      const payload = {
+        currentPassword: 'password123',
+        newPassword: 'newPassword123',
+        confirmPassword: 'newPassword123',
+      };
+      jest
+        .spyOn(accountService, 'changePassword')
+        .mockImplementation(async () => response);
+      const result = await accountService.changePassword(999, payload);
+      expect(result.status).toEqual(response.status);
+      expect(result.message).toEqual(response.message);
+      expect(result.exception).toEqual(response.exception);
+    });
+
+    it('should response error when current password is invalid', async () => {
+      const response: ChangePasswordResDto = new ChangePasswordResDto();
+      response.exception = 'The current password is invalid';
+      response.status = 400;
+      response.message = 'Failed';
+      const payload = {
+        currentPassword: 'invalidPassword',
+        newPassword: 'newPassword123',
+        confirmPassword: 'newPassword123',
+      };
+      jest
+        .spyOn(accountService, 'changePassword')
+        .mockImplementation(async () => response);
+      const result = await accountService.changePassword(1, payload);
+      expect(result.status).toEqual(response.status);
+      expect(result.message).toEqual(response.message);
+      expect(result.exception).toEqual(response.exception);
     });
   });
 });
