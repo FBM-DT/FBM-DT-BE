@@ -32,7 +32,7 @@ export class ShiftService {
   }
 
   async createWorkShift(data: AddWorkShiftReqDto): Promise<AddWorkShiftResDto> {
-    const response: AddWorkShiftResDto = new AddWorkShiftResDto();
+    let response: AddWorkShiftResDto = new AddWorkShiftResDto();
     try {
       const result = await this._workShiftRepository
         .createQueryBuilder()
@@ -40,8 +40,7 @@ export class ShiftService {
         .into(WorkShift)
         .values(data)
         .execute();
-      AppResponse.setSuccessResponse<AddWorkShiftResDto>(
-        response,
+      response = AppResponse.setSuccessResponse<AddWorkShiftResDto>(
         result.identifiers[0].id,
         {
           status: 201,
@@ -50,8 +49,7 @@ export class ShiftService {
       );
       return response;
     } catch (error) {
-      AppResponse.setAppErrorResponse<AddWorkShiftResDto>(
-        response,
+      response = AppResponse.setAppErrorResponse<AddWorkShiftResDto>(
         error.message,
       );
       return response;
@@ -59,16 +57,15 @@ export class ShiftService {
   }
 
   async getWorkShift(workShiftId: number): Promise<GetWorkShiftResDto> {
-    const response: GetWorkShiftResDto = new GetWorkShiftResDto();
+    let response: GetWorkShiftResDto = new GetWorkShiftResDto();
     try {
       const result: WorkShift = await this._workShiftRepository.findOneBy({
         id: workShiftId,
       });
-      AppResponse.setSuccessResponse<GetWorkShiftResDto>(response, result);
+      response = AppResponse.setSuccessResponse<GetWorkShiftResDto>(result);
       return response;
     } catch (error) {
-      AppResponse.setAppErrorResponse<AddWorkShiftResDto>(
-        response,
+      response = AppResponse.setAppErrorResponse<AddWorkShiftResDto>(
         error.message,
       );
       return response;
@@ -78,7 +75,7 @@ export class ShiftService {
   async getWorkShiftList(
     queries: GetWorkShiftListReqDto,
   ): Promise<GetWorkShiftListResDto> {
-    const response: GetWorkShiftListResDto = new GetWorkShiftListResDto();
+    let response: GetWorkShiftListResDto = new GetWorkShiftListResDto();
     try {
       if (Object.keys(queries).length > 0) {
         let options: FindManyOptions = new Object();
@@ -108,8 +105,7 @@ export class ShiftService {
           options,
         );
 
-        AppResponse.setSuccessResponse<GetWorkShiftListResDto>(
-          response,
+        response = AppResponse.setSuccessResponse<GetWorkShiftListResDto>(
           result,
           {
             page: queries.page,
@@ -119,11 +115,10 @@ export class ShiftService {
         return response;
       }
       const result: WorkShift[] = await this._workShiftRepository.find();
-      AppResponse.setSuccessResponse<GetWorkShiftListResDto>(response, result);
+      response = AppResponse.setSuccessResponse<GetWorkShiftListResDto>(result);
       return response;
     } catch (error) {
-      AppResponse.setAppErrorResponse<AddWorkShiftResDto>(
-        response,
+      response = AppResponse.setAppErrorResponse<AddWorkShiftResDto>(
         error.message,
       );
       return response;
@@ -131,7 +126,7 @@ export class ShiftService {
   }
 
   async deleteWorkShift(workShiftId: number): Promise<DeleteWorkShiftResDto> {
-    const response: DeleteWorkShiftResDto = new DeleteWorkShiftResDto();
+    let response: DeleteWorkShiftResDto = new DeleteWorkShiftResDto();
     try {
       const result = await this._dataSource.transaction(
         'SERIALIZABLE',
@@ -158,11 +153,10 @@ export class ShiftService {
           return returnValues;
         },
       );
-      AppResponse.setSuccessResponse<DeleteWorkShiftResDto>(response, result);
+      response = AppResponse.setSuccessResponse<DeleteWorkShiftResDto>(result);
       return response;
     } catch (error) {
-      AppResponse.setAppErrorResponse<AddWorkShiftResDto>(
-        response,
+      response = AppResponse.setAppErrorResponse<AddWorkShiftResDto>(
         error.message,
       );
       return response;
@@ -173,7 +167,7 @@ export class ShiftService {
     workShiftId: number,
     workShiftDto: UpdateWorkShiftReqDto,
   ): Promise<UpdateWorkShiftResDto> {
-    const response: UpdateWorkShiftResDto = new UpdateWorkShiftResDto();
+    let response: UpdateWorkShiftResDto = new UpdateWorkShiftResDto();
     try {
       const result = await this._workShiftRepository
         .createQueryBuilder('workshift')
@@ -181,14 +175,12 @@ export class ShiftService {
         .where('workshift.id = :workShiftId', { workShiftId: workShiftId })
         .set(workShiftDto)
         .execute();
-      AppResponse.setSuccessResponse<DeleteWorkShiftResDto>(
-        response,
+      response = AppResponse.setSuccessResponse<DeleteWorkShiftResDto>(
         result.affected,
       );
       return response;
     } catch (error) {
-      AppResponse.setAppErrorResponse<AddWorkShiftResDto>(
-        response,
+      response = AppResponse.setAppErrorResponse<AddWorkShiftResDto>(
         error.message,
       );
       return response;

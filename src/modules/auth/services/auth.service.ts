@@ -59,12 +59,12 @@ export class AuthService {
   }
 
   async handleSignin(payload: SigninReqDto): Promise<SigninResDto> {
-    const response: SigninResDto = new SigninResDto();
+    let response: SigninResDto = new SigninResDto();
     try {
       const account = await this.validateAccount(payload);
 
       if (typeof account === 'string') {
-        AppResponse.setUserErrorResponse<SigninResDto>(response, account, {
+        response = AppResponse.setUserErrorResponse<SigninResDto>(account, {
           status: 403,
         });
         return response;
@@ -74,16 +74,16 @@ export class AuthService {
 
       const tokens = await this.handleGenerateTokens(authPayload);
       await this.updateRefreshToken(account['id'], tokens.refreshToken);
-      AppResponse.setSuccessResponse<SigninResDto>(response, tokens);
+      response = AppResponse.setSuccessResponse<SigninResDto>(tokens);
       return response;
     } catch (error) {
-      AppResponse.setAppErrorResponse<SigninResDto>(response, error.message);
+      response = AppResponse.setAppErrorResponse<SigninResDto>(error.message);
       return response;
     }
   }
 
   async handleLogout(payload: IAuthAccess): Promise<LogoutResDto> {
-    const response: LogoutResDto = new LogoutResDto();
+    let response: LogoutResDto = new LogoutResDto();
     try {
       const token = payload.authorization.replace('Bearer', '').trim();
       const account = await this.verifyAccessToken(token);
@@ -96,7 +96,7 @@ export class AuthService {
       const result = {
         refreshToken: updateRefreshToken.refreshToken,
       };
-      AppResponse.setSuccessResponse<LogoutResDto>(response, result);
+      response = AppResponse.setSuccessResponse<LogoutResDto>(result);
       return response;
     } catch (error) {
       return error.message;
