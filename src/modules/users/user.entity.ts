@@ -3,7 +3,7 @@ import { Column, Entity, OneToMany } from 'typeorm';
 import { StaffShift } from '../shift/entities/staffInShift.entity';
 import { Position } from '../position/position.entity';
 import { Account } from '../auth/account.entity';
-import { DEPARTMENT, GENDER } from '../../../src/core/constants';
+import { DEPARTMENT, GENDER } from '../../core/constants';
 
 @Entity()
 export class User extends ShareEntity {

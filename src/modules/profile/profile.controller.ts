@@ -1,13 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Post, Body, UseGuards } from '@nestjs/common';
 import { ProfileService } from './profile.service';
 import { ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
 import { AddProfileReqDto } from './dto/req';

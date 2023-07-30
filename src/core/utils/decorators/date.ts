@@ -23,7 +23,7 @@ export function IsAfterStartDate(
             typeof value === 'string' &&
             typeof relatedValue === 'string' &&
             value > relatedValue
-          ); // you can return a Promise<boolean> here as well, if you want to make async validation
+          );
         },
       },
     });

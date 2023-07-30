@@ -1,4 +1,3 @@
-import { errorMessageRes } from './../../core/shared/response/errorMessage';
 import { Inject, Injectable } from '@nestjs/common';
 import { TYPEORM } from '../../core/constants';
 import { DataSource, Repository } from 'typeorm';
@@ -13,6 +12,7 @@ import {
   UpdateInventoryResDto,
 } from './dto/response';
 import { ErrorMessage } from './constants/errorMessage';
+import { ErrorHandler } from '../../core/shared/common/error';
 
 @Injectable()
 export class InventoryService {
@@ -71,7 +71,7 @@ export class InventoryService {
       if (!data) {
         AppResponse.setUserErrorResponse(
           response,
-          errorMessageRes.cannotFindById(inventoryId, 'Inventory'),
+          ErrorHandler.notFound(`Inventory with id ${inventoryId}`),
         );
         return response;
       }
@@ -81,6 +81,7 @@ export class InventoryService {
       return response;
     } catch (error) {
       AppResponse.setAppErrorResponse(response, error.message);
+      return response;
     }
   }
 
@@ -96,7 +97,7 @@ export class InventoryService {
     if (!inventory) {
       AppResponse.setUserErrorResponse(
         response,
-        errorMessageRes.cannotFindById(inventoryId, 'Inventory'),
+        ErrorHandler.notFound(`Inventory with id ${inventoryId}`),
       );
       return response;
     }
@@ -121,6 +122,7 @@ export class InventoryService {
       return response;
     } catch (error) {
       AppResponse.setAppErrorResponse(response, error.message);
+      return response;
     }
   }
 
@@ -152,7 +154,7 @@ export class InventoryService {
       if (deletedInventory.affected === 0) {
         AppResponse.setUserErrorResponse(
           response,
-          errorMessageRes.cannotFindById(inventoryId, 'Inventory'),
+          ErrorHandler.notFound(`Inventory with id ${inventoryId}`),
         );
         return response;
       }
