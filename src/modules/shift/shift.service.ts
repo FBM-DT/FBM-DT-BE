@@ -32,7 +32,6 @@ export class ShiftService {
   }
 
   async createWorkShift(data: AddWorkShiftReqDto): Promise<AddWorkShiftResDto> {
-    let response: AddWorkShiftResDto = new AddWorkShiftResDto();
     try {
       const result = await this._workShiftRepository
         .createQueryBuilder()
@@ -40,42 +39,36 @@ export class ShiftService {
         .into(WorkShift)
         .values(data)
         .execute();
-      response = AppResponse.setSuccessResponse<AddWorkShiftResDto>(
+      return AppResponse.setSuccessResponse<AddWorkShiftResDto>(
         result.identifiers[0].id,
         {
           status: 201,
           message: 'Created',
         },
       );
-      return response;
     } catch (error) {
-      response = AppResponse.setAppErrorResponse<AddWorkShiftResDto>(
+      return AppResponse.setAppErrorResponse<AddWorkShiftResDto>(
         error.message,
       );
-      return response;
     }
   }
 
   async getWorkShift(workShiftId: number): Promise<GetWorkShiftResDto> {
-    let response: GetWorkShiftResDto = new GetWorkShiftResDto();
     try {
       const result: WorkShift = await this._workShiftRepository.findOneBy({
         id: workShiftId,
       });
-      response = AppResponse.setSuccessResponse<GetWorkShiftResDto>(result);
-      return response;
+      return AppResponse.setSuccessResponse<GetWorkShiftResDto>(result);
     } catch (error) {
-      response = AppResponse.setAppErrorResponse<AddWorkShiftResDto>(
+      return AppResponse.setAppErrorResponse<AddWorkShiftResDto>(
         error.message,
       );
-      return response;
     }
   }
 
   async getWorkShiftList(
     queries: GetWorkShiftListReqDto,
   ): Promise<GetWorkShiftListResDto> {
-    let response: GetWorkShiftListResDto = new GetWorkShiftListResDto();
     try {
       if (Object.keys(queries).length > 0) {
         let options: FindManyOptions = new Object();
@@ -105,28 +98,24 @@ export class ShiftService {
           options,
         );
 
-        response = AppResponse.setSuccessResponse<GetWorkShiftListResDto>(
+        return AppResponse.setSuccessResponse<GetWorkShiftListResDto>(
           result,
           {
             page: queries.page,
             pageSize: queries.pageSize,
           },
         );
-        return response;
       }
       const result: WorkShift[] = await this._workShiftRepository.find();
-      response = AppResponse.setSuccessResponse<GetWorkShiftListResDto>(result);
-      return response;
+      return AppResponse.setSuccessResponse<GetWorkShiftListResDto>(result);
     } catch (error) {
-      response = AppResponse.setAppErrorResponse<AddWorkShiftResDto>(
+      return AppResponse.setAppErrorResponse<AddWorkShiftResDto>(
         error.message,
       );
-      return response;
     }
   }
 
   async deleteWorkShift(workShiftId: number): Promise<DeleteWorkShiftResDto> {
-    let response: DeleteWorkShiftResDto = new DeleteWorkShiftResDto();
     try {
       const result = await this._dataSource.transaction(
         'SERIALIZABLE',
@@ -153,13 +142,11 @@ export class ShiftService {
           return returnValues;
         },
       );
-      response = AppResponse.setSuccessResponse<DeleteWorkShiftResDto>(result);
-      return response;
+      return AppResponse.setSuccessResponse<DeleteWorkShiftResDto>(result);
     } catch (error) {
-      response = AppResponse.setAppErrorResponse<AddWorkShiftResDto>(
+      return AppResponse.setAppErrorResponse<AddWorkShiftResDto>(
         error.message,
       );
-      return response;
     }
   }
 
@@ -167,7 +154,6 @@ export class ShiftService {
     workShiftId: number,
     workShiftDto: UpdateWorkShiftReqDto,
   ): Promise<UpdateWorkShiftResDto> {
-    let response: UpdateWorkShiftResDto = new UpdateWorkShiftResDto();
     try {
       const result = await this._workShiftRepository
         .createQueryBuilder('workshift')
@@ -175,15 +161,13 @@ export class ShiftService {
         .where('workshift.id = :workShiftId', { workShiftId: workShiftId })
         .set(workShiftDto)
         .execute();
-      response = AppResponse.setSuccessResponse<DeleteWorkShiftResDto>(
+      return AppResponse.setSuccessResponse<DeleteWorkShiftResDto>(
         result.affected,
       );
-      return response;
     } catch (error) {
-      response = AppResponse.setAppErrorResponse<AddWorkShiftResDto>(
+      return AppResponse.setAppErrorResponse<AddWorkShiftResDto>(
         error.message,
       );
-      return response;
     }
   }
 }

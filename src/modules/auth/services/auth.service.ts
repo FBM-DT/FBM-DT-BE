@@ -59,31 +59,26 @@ export class AuthService {
   }
 
   async handleSignin(payload: SigninReqDto): Promise<SigninResDto> {
-    let response: SigninResDto = new SigninResDto();
     try {
       const account = await this.validateAccount(payload);
 
       if (typeof account === 'string') {
-        response = AppResponse.setUserErrorResponse<SigninResDto>(account, {
+        return AppResponse.setUserErrorResponse<SigninResDto>(account, {
           status: 403,
         });
-        return response;
       }
 
       const authPayload: IAuthPayload = this.createAuthPayload(account);
 
       const tokens = await this.handleGenerateTokens(authPayload);
       await this.updateRefreshToken(account['id'], tokens.refreshToken);
-      response = AppResponse.setSuccessResponse<SigninResDto>(tokens);
-      return response;
+      return AppResponse.setSuccessResponse<SigninResDto>(tokens);
     } catch (error) {
-      response = AppResponse.setAppErrorResponse<SigninResDto>(error.message);
-      return response;
+      return AppResponse.setAppErrorResponse<SigninResDto>(error.message);
     }
   }
 
   async handleLogout(payload: IAuthAccess): Promise<LogoutResDto> {
-    let response: LogoutResDto = new LogoutResDto();
     try {
       const token = payload.authorization.replace('Bearer', '').trim();
       const account = await this.verifyAccessToken(token);
@@ -96,10 +91,9 @@ export class AuthService {
       const result = {
         refreshToken: updateRefreshToken.refreshToken,
       };
-      response = AppResponse.setSuccessResponse<LogoutResDto>(result);
-      return response;
+      return AppResponse.setSuccessResponse<LogoutResDto>(result);
     } catch (error) {
-      return error.message;
+      return AppResponse.setAppErrorResponse<LogoutResDto>(error.message);
     }
   }
 
@@ -127,7 +121,6 @@ export class AuthService {
     accountId: number,
     refreshToken: string,
   ): Promise<RefreshTokenResDto | string> {
-    const response: RefreshTokenResDto = new RefreshTokenResDto();
     try {
       const account = await this._accountRepository.findOne({
         where: { id: accountId },
@@ -145,10 +138,9 @@ export class AuthService {
       const authPayload: IAuthPayload = this.createAuthPayload(account);
       const tokens = await this.handleGenerateTokens(authPayload);
       await this.updateRefreshToken(account.id, tokens.refreshToken);
-      AppResponse.setSuccessResponse<SigninResDto>(response, tokens);
-      return response;
+      return AppResponse.setSuccessResponse<SigninResDto>(tokens);
     } catch (error) {
-      return error.message;
+      return AppResponse.setAppErrorResponse<LogoutResDto>(error.message);
     }
   }
 
