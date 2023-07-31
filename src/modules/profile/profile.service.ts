@@ -21,8 +21,6 @@ export class ProfileService {
   }
 
   async createProfile(data: AddProfileReqDto): Promise<AddProfileResDto> {
-    const res: AddProfileResDto = new AddProfileResDto();
-
     const { phonenumber, password, roleId, ...rest } = data;
 
     const userData = {
@@ -61,19 +59,18 @@ export class ProfileService {
           accountId: accountRes.data,
         };
 
-        AppResponse.setSuccessResponse<AddProfileResDto>(res, createdData, {
+        return AppResponse.setSuccessResponse<AddProfileResDto>(createdData, {
           status: 201,
           message: 'Created',
         });
-        return res;
       }
     } catch (error) {
       if (error.message.includes('duplicate key')) {
-        AppResponse.setAppErrorResponse<AddProfileResDto>(res, 'Email existed');
-        return res;
+        return AppResponse.setAppErrorResponse<AddProfileResDto>(
+          'Email existed',
+        );
       }
-      AppResponse.setAppErrorResponse<AddProfileResDto>(res, error.message);
-      return res;
+      return AppResponse.setAppErrorResponse<AddProfileResDto>(error.message);
     }
   }
 }

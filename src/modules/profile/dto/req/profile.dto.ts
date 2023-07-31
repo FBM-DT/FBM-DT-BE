@@ -14,8 +14,8 @@ import {
   MinLength,
 } from 'class-validator';
 import { DEPARTMENT, GENDER } from '../../../../core/constants';
-import { IsAfterStartDate } from './IsAfterStartDate';
 import { PaginationReqDto } from '../../../../core/shared/request';
+import { IsAfterStartDate } from '../../../../core/utils/decorators/date';
 class Sort {
   sortBy: string;
   sortValue: string;

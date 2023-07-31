@@ -1,4 +1,3 @@
-import { errorMessageRes } from './../../core/shared/response/errorMessage';
 import { Inject, Injectable } from '@nestjs/common';
 import { TYPEORM } from '../../core/constants';
 import { DataSource, Repository } from 'typeorm';
@@ -12,7 +11,7 @@ import {
   GetInventoryResDto,
   UpdateInventoryResDto,
 } from './dto/response';
-import { ErrorMessage } from './constants/errorMessage';
+import { ErrorHandler } from '../../core/shared/common/error';
 
 @Injectable()
 export class InventoryService {
@@ -62,7 +61,8 @@ export class InventoryService {
       });
       if (!data) {
         return AppResponse.setUserErrorResponse(
-          ErrorMessage.INVENTORY_NOT_FOUND,
+          ErrorHandler.notFound('Inventory with id ${inventoryId}'),
+          { status: 404 },
         );
       }
 
@@ -81,7 +81,10 @@ export class InventoryService {
     });
 
     if (!inventory) {
-      return AppResponse.setUserErrorResponse(ErrorMessage.INVENTORY_NOT_FOUND);
+      return AppResponse.setUserErrorResponse(
+        ErrorHandler.notFound(`Inventory not with id ${inventoryId} found`),
+        { status: 404 },
+      );
     }
 
     try {
@@ -115,7 +118,8 @@ export class InventoryService {
 
       if (inventory.isDeleted === true) {
         return AppResponse.setUserErrorResponse(
-          ErrorMessage.INVENTORY_ALREADY_DELETED,
+          ErrorHandler.notFound(`Inventory not with id ${inventoryId}`),
+          { status: 404 },
         );
       }
 
@@ -129,7 +133,8 @@ export class InventoryService {
 
       if (deletedInventory.affected === 0) {
         return AppResponse.setUserErrorResponse(
-          ErrorMessage.INVENTORY_NOT_FOUND,
+          ErrorHandler.notFound(`Inventory not with id ${inventoryId}`),
+          { status: 404 },
         );
       }
 
