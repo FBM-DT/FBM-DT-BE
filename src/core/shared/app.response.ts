@@ -1,11 +1,8 @@
 import { ShareResDto } from './response';
 
 export const AppResponse = {
-  setSuccessResponse<T extends ShareResDto>(
-    responseObject: T,
-    data: Object,
-    otherOptions?: T,
-  ): void {
+  setSuccessResponse<T extends ShareResDto>(data: Object, otherOptions?: T): T {
+    let responseObject: T = new Object() as T;
     if (otherOptions) {
       Object.keys(otherOptions).forEach((key) => {
         responseObject[key] = otherOptions[key];
@@ -21,13 +18,14 @@ export const AppResponse = {
       responseObject.message = 'Success';
     }
     responseObject.data = data;
+    return responseObject;
   },
 
   setAppErrorResponse<T extends ShareResDto>(
-    responseObject: T,
     exceptionMessage: string,
     otherOptions?: T,
-  ): void {
+  ): T {
+    let responseObject: T = new Object() as T;
     if (otherOptions) {
       Object.keys(otherOptions).forEach((key) => {
         responseObject[key] = otherOptions[key];
@@ -43,13 +41,14 @@ export const AppResponse = {
       responseObject.message = 'Failed';
     }
     responseObject.exception = exceptionMessage;
+    return responseObject;
   },
 
   setUserErrorResponse<T extends ShareResDto>(
-    responseObject: T,
     exceptionMessage: string,
     otherOptions?: T,
-  ): void {
+  ): T {
+    let responseObject: T = new Object() as T;
     if (otherOptions) {
       Object.keys(otherOptions).forEach((key) => {
         responseObject[key] = otherOptions[key];
@@ -65,5 +64,6 @@ export const AppResponse = {
       responseObject.message = 'Failed';
     }
     responseObject.exception = exceptionMessage;
+    return responseObject;
   },
 };

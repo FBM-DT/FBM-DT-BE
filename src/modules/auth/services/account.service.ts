@@ -28,7 +28,6 @@ export class AccountService {
   }
 
   async getAccountList(): Promise<GetAllAccountsResDto> {
-    const response: GetAllAccountsResDto = new GetAllAccountsResDto();
     try {
       const account = await this._accountRepository.find({
         relations: {
@@ -40,39 +39,36 @@ export class AccountService {
         },
       });
 
-      AppResponse.setSuccessResponse<GetAllAccountsResDto>(response, account);
+      const response: GetAllAccountsResDto =
+        AppResponse.setSuccessResponse<GetAllAccountsResDto>(account);
       return response;
     } catch (error) {
-      AppResponse.setAppErrorResponse<GetAllAccountsResDto>(
-        response,
-        error.message,
-      );
+      const response: GetAllAccountsResDto =
+        AppResponse.setAppErrorResponse<GetAllAccountsResDto>(error.message);
       return response;
     }
   }
 
   async getAccountById(id: number): Promise<GetAccountResDto> {
-    const response: GetAccountResDto = new GetAccountResDto();
     try {
       const account = await this._accountRepository.findOne({
         where: { id },
         relations: ['user', 'role'],
       });
       if (!account) {
-        AppResponse.setUserErrorResponse<GetAccountResDto>(
-          response,
-          ErrorHandler.notFound(`Account ${id}`),
-        );
+        const response: GetAccountResDto =
+          AppResponse.setUserErrorResponse<GetAccountResDto>(
+            ErrorHandler.notFound(`Account ${id}`),
+          );
         return response;
       }
 
-      AppResponse.setSuccessResponse<GetAccountResDto>(response, account);
+      const response: GetAccountResDto =
+        AppResponse.setSuccessResponse<GetAccountResDto>(account);
       return response;
     } catch (error) {
-      AppResponse.setAppErrorResponse<GetAccountResDto>(
-        response,
-        error.message,
-      );
+      const response: GetAccountResDto =
+        AppResponse.setAppErrorResponse<GetAccountResDto>(error.message);
       return response;
     }
   }
@@ -94,7 +90,6 @@ export class AccountService {
   async createAccount(
     payload: CreateAccountReqDto,
   ): Promise<CreateAccountResDto> {
-    const response: CreateAccountResDto = new CreateAccountResDto();
     try {
       const { phonenumber, password } = payload;
 
@@ -103,10 +98,10 @@ export class AccountService {
       });
 
       if (phonenumber === existPhoneNumber?.phonenumber) {
-        AppResponse.setUserErrorResponse<UpdateAccountResDto>(
-          response,
-          ErrorHandler.alreadyExists('The phone number'),
-        );
+        const response: CreateAccountResDto =
+          AppResponse.setUserErrorResponse<UpdateAccountResDto>(
+            ErrorHandler.alreadyExists('The phone number'),
+          );
         return response;
       } else {
         const hashPassword = this.handleHashPassword(password);
@@ -119,21 +114,19 @@ export class AccountService {
           .values(data)
           .execute();
 
-        AppResponse.setSuccessResponse<CreateAccountResDto>(
-          response,
-          account.identifiers[0].id,
-          {
-            status: 201,
-            message: 'Created',
-          },
-        );
+        const response: CreateAccountResDto =
+          AppResponse.setSuccessResponse<CreateAccountResDto>(
+            account.identifiers[0].id,
+            {
+              status: 201,
+              message: 'Created',
+            },
+          );
         return response;
       }
     } catch (error) {
-      AppResponse.setAppErrorResponse<CreateAccountResDto>(
-        response,
-        error.message,
-      );
+      const response: CreateAccountResDto =
+        AppResponse.setAppErrorResponse<CreateAccountResDto>(error.message);
       return response;
     }
   }
@@ -142,7 +135,6 @@ export class AccountService {
     accountId: number,
     accountDto: UpdateAccountReqDto,
   ): Promise<UpdateAccountResDto> {
-    const response: UpdateAccountResDto = new UpdateAccountResDto();
     try {
       let newPassword: string;
       const { phonenumber, password } = accountDto;
@@ -151,10 +143,10 @@ export class AccountService {
       });
 
       if (phonenumber === existPhoneNumber?.phonenumber) {
-        AppResponse.setUserErrorResponse<UpdateAccountResDto>(
-          response,
-          ErrorHandler.alreadyExists('The phone number'),
-        );
+        const response: UpdateAccountResDto =
+          AppResponse.setUserErrorResponse<UpdateAccountResDto>(
+            ErrorHandler.alreadyExists('The phone number'),
+          );
         return response;
       }
 
@@ -165,10 +157,8 @@ export class AccountService {
           .where('account.id = :accountId', { accountId: accountId })
           .set(accountDto)
           .execute();
-        AppResponse.setSuccessResponse<UpdateAccountResDto>(
-          response,
-          result.affected,
-        );
+        const response: UpdateAccountResDto =
+          AppResponse.setSuccessResponse<UpdateAccountResDto>(result.affected);
         return response;
       } else {
         newPassword = this.handleHashPassword(password);
@@ -179,17 +169,13 @@ export class AccountService {
           .where('account.id = :accountId', { accountId: accountId })
           .set(account)
           .execute();
-        AppResponse.setSuccessResponse<UpdateAccountResDto>(
-          response,
-          result.affected,
-        );
+        const response: UpdateAccountResDto =
+          AppResponse.setSuccessResponse<UpdateAccountResDto>(result.affected);
         return response;
       }
     } catch (error) {
-      AppResponse.setAppErrorResponse<UpdateAccountResDto>(
-        response,
-        error.message,
-      );
+      const response: UpdateAccountResDto =
+        AppResponse.setAppErrorResponse<UpdateAccountResDto>(error.message);
       return response;
     }
   }
@@ -198,7 +184,6 @@ export class AccountService {
     accountId: number,
     payload: ChangePasswordReqDto,
   ): Promise<ChangePasswordResDto> {
-    const response: ChangePasswordResDto = new ChangePasswordResDto();
     const { currentPassword, newPassword, confirmPassword } = payload;
     try {
       const account = await this._accountRepository.findOne({
@@ -206,13 +191,13 @@ export class AccountService {
       });
 
       if (!account) {
-        AppResponse.setUserErrorResponse<ChangePasswordResDto>(
-          response,
-          ErrorHandler.notFound(`Account ${accountId}`),
-          {
-            status: 404,
-          },
-        );
+        const response: ChangePasswordResDto =
+          AppResponse.setUserErrorResponse<ChangePasswordResDto>(
+            ErrorHandler.notFound(`Account ${accountId}`),
+            {
+              status: 404,
+            },
+          );
         return response;
       }
 
@@ -222,27 +207,27 @@ export class AccountService {
       );
 
       if (!isValidPassword) {
-        AppResponse.setUserErrorResponse<ChangePasswordResDto>(
-          response,
-          ErrorHandler.invalid('The current password'),
-        );
+        const response: ChangePasswordResDto =
+          AppResponse.setUserErrorResponse<ChangePasswordResDto>(
+            ErrorHandler.invalid('The current password'),
+          );
         return response;
       }
 
       if (confirmPassword !== newPassword) {
-        AppResponse.setUserErrorResponse<ChangePasswordResDto>(
-          response,
-          ErrorHandler.invalid('The confirm password'),
-        );
+        const response: ChangePasswordResDto =
+          AppResponse.setUserErrorResponse<ChangePasswordResDto>(
+            ErrorHandler.invalid('The confirm password'),
+          );
         return response;
       }
 
       const isValidFormatPassword = await this.isPasswordValid(newPassword);
       if (isValidFormatPassword === false) {
-        AppResponse.setUserErrorResponse<ChangePasswordResDto>(
-          response,
-          'The password and confirm password are not correct format',
-        );
+        const response: ChangePasswordResDto =
+          AppResponse.setUserErrorResponse<ChangePasswordResDto>(
+            'The password and confirm password are not correct format',
+          );
         return response;
       }
 
@@ -252,16 +237,12 @@ export class AccountService {
         password: password,
       });
 
-      AppResponse.setSuccessResponse<ChangePasswordResDto>(
-        response,
-        result.affected,
-      );
+      const response: ChangePasswordResDto =
+        AppResponse.setSuccessResponse<ChangePasswordResDto>(result.affected);
       return response;
     } catch (error) {
-      AppResponse.setAppErrorResponse<ChangePasswordResDto>(
-        response,
-        error.message,
-      );
+      const response: ChangePasswordResDto =
+        AppResponse.setAppErrorResponse<ChangePasswordResDto>(error.message);
       return response;
     }
   }
