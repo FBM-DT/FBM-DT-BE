@@ -22,8 +22,6 @@ export class InventoryService {
   async createInventory(
     data: CreateInventoryReqDto,
   ): Promise<AddInventoryResDto> {
-    const response: AddInventoryResDto = new AddInventoryResDto();
-
     try {
       const result = await this._inventoryRepository
         .createQueryBuilder()
@@ -32,54 +30,44 @@ export class InventoryService {
         .values(data)
         .execute();
 
-      AppResponse.setSuccessResponse<AddInventoryResDto>(
-        response,
+      return AppResponse.setSuccessResponse<AddInventoryResDto>(
         result.identifiers[0].id,
         {
           status: 201,
           message: 'Created',
         },
       );
-
-      return response;
     } catch (error) {
-      AppResponse.setAppErrorResponse(response, error.message);
+      return AppResponse.setAppErrorResponse(error.message);
     }
   }
 
   async getAllInventories(): Promise<GetAllInventoryResDto> {
-    const response: GetAllInventoryResDto = new GetAllInventoryResDto();
     try {
       const data: Inventory[] = await this._inventoryRepository.find();
-      AppResponse.setSuccessResponse<GetAllInventoryResDto>(response, data, {
+      return AppResponse.setSuccessResponse<GetAllInventoryResDto>(data, {
         page: 1,
         pageSize: data.length,
       });
-      return response;
     } catch (error) {
-      AppResponse.setAppErrorResponse(response, error.message);
+      return AppResponse.setAppErrorResponse(error.message);
     }
   }
 
   async getInventoryById(inventoryId: number): Promise<GetInventoryResDto> {
-    const response: GetInventoryResDto = new GetInventoryResDto();
     try {
       const data: Inventory = await this._inventoryRepository.findOneBy({
         id: inventoryId,
       });
       if (!data) {
-        AppResponse.setUserErrorResponse(
-          response,
+        return AppResponse.setUserErrorResponse(
           ErrorMessage.INVENTORY_NOT_FOUND,
         );
-        return response;
       }
 
-      AppResponse.setSuccessResponse<GetInventoryResDto>(response, data);
-
-      return response;
+      return AppResponse.setSuccessResponse<GetInventoryResDto>(data);
     } catch (error) {
-      AppResponse.setAppErrorResponse(response, error.message);
+      return AppResponse.setAppErrorResponse(error.message);
     }
   }
 
@@ -90,14 +78,11 @@ export class InventoryService {
     const inventory: Inventory = await this._inventoryRepository.findOneBy({
       id: inventoryId,
     });
-    const response: UpdateInventoryResDto = new UpdateInventoryResDto();
 
     if (!inventory) {
-      AppResponse.setUserErrorResponse(
-        response,
+      return AppResponse.setUserErrorResponse(
         ErrorMessage.INVENTORY_NOT_FOUND,
       );
-      return response;
     }
 
     try {
@@ -113,31 +98,24 @@ export class InventoryService {
           id: inventoryId,
         });
 
-      AppResponse.setSuccessResponse<UpdateInventoryResDto>(
-        response,
-        updatedInventory,
-      );
-      return response;
+      return AppResponse.setSuccessResponse<UpdateInventoryResDto>(updatedInventory);
     } catch (error) {
-      AppResponse.setAppErrorResponse(response, error.message);
+      return AppResponse.setAppErrorResponse(error.message);
     }
   }
 
   async deleteInventoryById(
     inventoryId: number,
   ): Promise<DeleteInventoryResDto> {
-    const response: DeleteInventoryResDto = new DeleteInventoryResDto();
     try {
       const inventory: Inventory = await this._inventoryRepository.findOneBy({
         id: inventoryId,
       });
 
       if (inventory.isDeleted === true) {
-        AppResponse.setUserErrorResponse(
-          response,
+        return AppResponse.setUserErrorResponse(
           ErrorMessage.INVENTORY_ALREADY_DELETED,
         );
-        return response;
       }
 
       const deletedInventory = await this._inventoryRepository
@@ -149,20 +127,16 @@ export class InventoryService {
         .execute();
 
       if (deletedInventory.affected === 0) {
-        AppResponse.setUserErrorResponse(
-          response,
+        return AppResponse.setUserErrorResponse(
           ErrorMessage.INVENTORY_NOT_FOUND,
         );
-        return response;
       }
 
-      AppResponse.setSuccessResponse<DeleteInventoryResDto>(
-        response,
+      return AppResponse.setSuccessResponse<DeleteInventoryResDto>(
         deletedInventory.raw[0],
       );
-      return response;
     } catch (error) {
-      AppResponse.setAppErrorResponse(response, error.message);
+      return AppResponse.setAppErrorResponse(error.message);
     }
   }
 }
