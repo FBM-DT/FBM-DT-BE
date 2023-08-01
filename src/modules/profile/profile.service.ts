@@ -3,7 +3,7 @@ import { User } from '../users/user.entity';
 import { DataSource, Repository } from 'typeorm';
 import { TYPEORM } from '../../core/constants';
 import { AddProfileReqDto } from './dto/req';
-import { AddProfileResDto } from './dto/res';
+import { AddProfileResDto, GetProfileResDto } from './dto/res';
 import { AppResponse } from '../../core/shared/app.response';
 import { AccountService } from '../auth/services';
 
@@ -71,6 +71,29 @@ export class ProfileService {
         );
       }
       return AppResponse.setAppErrorResponse<AddProfileResDto>(error.message);
+    }
+  }
+  async getProfileById(profileId: number): Promise<GetProfileResDto> {
+    try {
+      const accountRes = await this.accountService.getAccountById(profileId);
+
+      if (accountRes.status === 400 || accountRes.status === 500)
+        return accountRes;
+
+      const rawData = {
+        ...accountRes.data['user'],
+        accountId: accountRes.data['id'],
+        userId: accountRes.data['user']['id'],
+        role: accountRes.data['role']['name'],
+      };
+
+      const { id, ...finalData } = rawData;
+
+      return AppResponse.setSuccessResponse<GetProfileResDto>(finalData, {
+        message: 'Success',
+      });
+    } catch (error) {
+      return AppResponse.setAppErrorResponse(error.message);
     }
   }
 }
