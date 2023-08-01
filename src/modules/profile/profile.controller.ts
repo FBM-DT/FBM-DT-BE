@@ -1,8 +1,16 @@
-import { Controller, Post, Body, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  UseGuards,
+  Get,
+  Param,
+  ParseIntPipe,
+} from '@nestjs/common';
 import { ProfileService } from './profile.service';
-import { ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
+import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { AddProfileReqDto } from './dto/req';
-import { AddProfileResDto } from './dto/res';
+import { AddProfileResDto, GetProfileResDto } from './dto/res';
 import { ACCOUNT_ROLE } from '../../core/constants';
 import { HasRoles } from '../auth/decorators/role.decorator';
 import { JwtAuthGuard, RolesGuard } from '../auth/guards';
@@ -30,6 +38,35 @@ export class ProfileController {
     @Body() createProfileDto: AddProfileReqDto,
   ): Promise<AddProfileResDto> {
     const res = await this.profileService.createProfile(createProfileDto);
+    return res;
+  }
+
+  @Get('findOne/:id')
+  @ApiOkResponse({
+    description: 'Get profile by id',
+    schema: {
+      example: {
+        version: '1.0.0',
+        status: 200,
+        message: 'OK',
+        data: {
+          id: 1,
+          fullname: 'Nguyen Van A',
+          email: 'example62@gmail.com',
+          dateOfBirth: '2021-01-01',
+          avatar: 'https://i.pravatar.cc/300',
+          startDate: '2021-01-01',
+          endDate: '2021-01-02',
+          department: 'Coffeeshop',
+          gender: 'female',
+        },
+      },
+    },
+  })
+  async findAProfileById(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<GetProfileResDto> {
+    const res = await this.profileService.getProfileById(id);
     return res;
   }
 }
