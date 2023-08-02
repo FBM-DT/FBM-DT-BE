@@ -39,7 +39,6 @@ export class AuthService {
         password,
         account['password'],
       );
-
       if (!account || !passwordIsValid) {
         return ErrorHandler.invalid('The phone number or password');
       }
