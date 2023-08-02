@@ -100,7 +100,7 @@ export class ChangePasswordReqDto {
   confirmPassword: string;
 }
 
-export class ForgotPasswordReqDto {
+export class SendOtpReqDto {
   @IsNotEmpty({ message: 'The phone number is required' })
   @IsString()
   @MinLength(10)

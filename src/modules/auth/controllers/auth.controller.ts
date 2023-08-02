@@ -3,7 +3,7 @@ import { Controller, Get, Req, Post, UseGuards, Body } from '@nestjs/common';
 import { Request } from 'express';
 import { AuthService } from '../services';
 import { JwtAuthGuard, RefreshTokenGuard } from '../guards';
-import { ForgotPasswordReqDto, SigninReqDto } from '../dto/request';
+import { SigninReqDto } from '../dto/request';
 import {
   LogoutResDto,
   RefreshTokenResDto,
@@ -47,7 +47,6 @@ export class AuthController {
     );
     return response;
   }
-  @ApiBody({ type: ForgotPasswordReqDto })
   @Post('/send-otp')
   async sendOtp(@Body() phoneNumber: string): Promise<{ message: string }> {
     await this.otpService.sendOtp(phoneNumber);
