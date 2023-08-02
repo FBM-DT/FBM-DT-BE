@@ -61,6 +61,13 @@ export class User extends ShareEntity {
   })
   gender: GENDER;
 
+  @Column({
+    type: 'varchar',
+    length: 500,
+    nullable: true,
+  })
+  address: string;
+
   @OneToMany(() => StaffShift, (staffShift) => staffShift.userId)
   staffShifts: StaffShift[];
 
