@@ -6,6 +6,7 @@ import {
   Get,
   Param,
   ParseIntPipe,
+  Patch,
 } from '@nestjs/common';
 import { ProfileService } from './profile.service';
 import {
@@ -74,6 +75,43 @@ export class ProfileController {
     @Param('id', ParseIntPipe) id: number,
   ): Promise<GetProfileResDto> {
     const res = await this.profileService.getProfile(id);
+    return res;
+  }
+
+  @Patch('update/:id')
+  @ApiOkResponse({
+    description: 'Update profile',
+    schema: {
+      example: {
+        version: '1.0.0',
+        status: 200,
+        message: 'OK',
+        data: {
+          fullname: 'Nguyen Van A',
+          dateOfBirth: '2021-01-01',
+          gender: 'female',
+          address: '15 Mai Thuc Lan',
+          email: 'example@gmail.com',
+          department: 'Coffeeshop',
+          startDate: '2021-01-01',
+          endDate: '2021-01-02',
+          avatar: 'https://i.pravatar.cc/300',
+          phonenumber: '0123456789',
+          roleId: 1,
+        },
+      },
+    },
+  })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @HasRoles(ACCOUNT_ROLE.SUPERVISOR)
+  async updateProfileById(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateProfileDto: UpdateProfileReqDto,
+  ): Promise<UpdateProfileResDto> {
+    const res = await this.profileService.updateProfileById(
+      id,
+      updateProfileDto,
+    );
     return res;
   }
 }

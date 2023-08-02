@@ -2,8 +2,12 @@ import { Injectable, Inject } from '@nestjs/common';
 import { User } from '../users/user.entity';
 import { DataSource, Repository } from 'typeorm';
 import { TYPEORM } from '../../core/constants';
-import { AddProfileReqDto } from './dto/req';
-import { AddProfileResDto, GetProfileResDto } from './dto/res';
+import { AddProfileReqDto, UpdateProfileReqDto } from './dto/req';
+import {
+  AddProfileResDto,
+  UpdateProfileResDto,
+  GetProfileResDto,
+} from './dto/res';
 import { AppResponse } from '../../core/shared/app.response';
 import { AccountService } from '../auth/services';
 import { Account } from '../auth/account.entity';
