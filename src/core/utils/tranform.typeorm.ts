@@ -64,6 +64,9 @@ export const ExtraQuery = {
         });
       }
     });
+    if (Object.keys(typeormWhereConditions)?.length === 0) {
+      return;
+    }
 
     if (searchType === SEARCH_TYPE.AND) {
       if (options.where?.length > 0) {
@@ -106,6 +109,11 @@ export const ExtraQuery = {
         });
       }
     });
+
+    if (Object.keys(typeormWhereConditions)?.length === 0) {
+      return;
+    }
+
     if (searchType === SEARCH_TYPE.AND) {
       if (options.where?.length > 0) {
         let newWhereOptions: FindOptionsWhere<T>[] = [];
