@@ -157,6 +157,11 @@ export class AccountService {
           .where('account.id = :accountId', { accountId: accountId })
           .set(accountDto)
           .execute();
+
+        if (result.affected === 0)
+          return AppResponse.setUserErrorResponse<UpdateAccountResDto>(
+            ErrorHandler.notFound(`Account ${accountId}`),
+          );
         const response: UpdateAccountResDto =
           AppResponse.setSuccessResponse<UpdateAccountResDto>(result.affected);
         return response;
