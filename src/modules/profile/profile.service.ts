@@ -4,6 +4,7 @@ import { DataSource, Repository } from 'typeorm';
 import { TYPEORM } from '../../core/constants';
 import { AddProfileReqDto } from './dto/req';
 import { AddProfileResDto, GetProfileResDto } from './dto/res';
+import { AddProfileResDto, GetProfileResDto } from './dto/res';
 import { AppResponse } from '../../core/shared/app.response';
 import { AccountService } from '../auth/services';
 

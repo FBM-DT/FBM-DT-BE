@@ -7,6 +7,15 @@ import {
   Param,
   ParseIntPipe,
 } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  UseGuards,
+  Get,
+  Param,
+  ParseIntPipe,
+} from '@nestjs/common';
 import { ProfileService } from './profile.service';
 import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { AddProfileReqDto } from './dto/req';
