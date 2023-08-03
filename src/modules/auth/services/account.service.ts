@@ -9,11 +9,13 @@ import {
   CreateAccountResDto,
   GetAccountResDto,
   GetAllAccountsResDto,
+  NewPasswordResDto,
   UpdateAccountResDto,
 } from '../dto/response';
 import {
   ChangePasswordReqDto,
   CreateAccountReqDto,
+  NewPasswordReqDto,
   UpdateAccountReqDto,
 } from '../dto/request';
 import { ErrorHandler } from '../../../core/shared/common/error';
@@ -243,6 +245,79 @@ export class AccountService {
     } catch (error) {
       const response: ChangePasswordResDto =
         AppResponse.setAppErrorResponse<ChangePasswordResDto>(error.message);
+      return response;
+    }
+  }
+  async handleNewPassword(
+    phonenumber: string,
+    payload: NewPasswordReqDto,
+  ): Promise<NewPasswordResDto> {
+    const { newPassword, confirmPassword } = payload;
+    try {
+      const account = await this._accountRepository.findOne({
+        where: { phonenumber: phonenumber },
+      });
+
+      if (!account) {
+        const response: NewPasswordResDto =
+          AppResponse.setUserErrorResponse<NewPasswordResDto>(
+            ErrorHandler.notFound(`The phone number ${phonenumber}`),
+            {
+              status: 404,
+            },
+          );
+        return response;
+      }
+
+      if (account.isValidOtp === false) {
+        const response: NewPasswordResDto =
+          AppResponse.setUserErrorResponse<NewPasswordResDto>(
+            ErrorHandler.invalid('The OTP'),
+            {
+              data: {
+                status: 'rejected',
+                message: 'You need to verify OTP first',
+              },
+            },
+          );
+        return response;
+      }
+
+      if (confirmPassword !== newPassword) {
+        const response: NewPasswordResDto =
+          AppResponse.setUserErrorResponse<NewPasswordResDto>(
+            ErrorHandler.invalid('The confirm password'),
+          );
+        return response;
+      }
+
+      const isValidFormatPassword = await this.isPasswordValid(newPassword);
+      if (isValidFormatPassword === false) {
+        const response: NewPasswordResDto =
+          AppResponse.setUserErrorResponse<NewPasswordResDto>(
+            'The password and confirm password are not correct format',
+          );
+        return response;
+      }
+
+      const hashPassword = await this.handleHashPassword(newPassword);
+      const password = hashPassword;
+      const result = await this._accountRepository
+        .createQueryBuilder()
+        .update(Account)
+        .set({
+          isValidOtp: false,
+          password: password,
+        })
+        .where('phonenumber = :phonenumber', { phonenumber: phonenumber })
+        .execute();
+
+      const response: NewPasswordResDto =
+        AppResponse.setSuccessResponse<NewPasswordResDto>(result.affected);
+      return response;
+    } catch (error) {
+      const response: NewPasswordResDto =
+        AppResponse.setAppErrorResponse<NewPasswordResDto>(error.message);
       return response;
     }
   }

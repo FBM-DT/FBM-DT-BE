@@ -27,6 +27,12 @@ export class Account extends ShareEntity {
   refreshToken: string;
 
   @Column({
+    type: 'boolean',
+    default: false,
+  })
+  isValidOtp: boolean;
+
+  @Column({
     type: 'int',
     nullable: false,
     unique: false,

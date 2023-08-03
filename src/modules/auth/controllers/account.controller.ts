@@ -6,6 +6,7 @@ import {
   ApiCreatedResponse,
   ApiOkResponse,
   ApiForbiddenResponse,
+  ApiNotFoundResponse,
 } from '@nestjs/swagger';
 import {
   Body,
@@ -22,15 +23,18 @@ import { ACCOUNT_ROLE } from '../../../core/constants';
 import { AccountService } from '../services';
 import { HasRoles } from '../decorators/role.decorator';
 import {
+  BadRequestResDto,
   ChangePasswordResDto,
   CreateAccountResDto,
   GetAccountResDto,
   GetAllAccountsResDto,
+  NotFoundResDto,
   UpdateAccountResDto,
 } from '../dto/response';
 import {
   ChangePasswordReqDto,
   CreateAccountReqDto,
+  NewPasswordReqDto,
   UpdateAccountReqDto,
 } from '../dto/request';
 
@@ -96,6 +100,27 @@ export class AccountController {
   ): Promise<ChangePasswordResDto> {
     const response: ChangePasswordResDto =
       await this.accountService.changePassword(accountId, payload);
+    return response;
+  }
+
+  @ApiOperation({ summary: 'New password' })
+  @ApiBody({ type: NewPasswordReqDto })
+  @ApiOkResponse({ description: 'The password was updated successfully' })
+  @ApiNotFoundResponse({
+    description: 'Resource not found',
+    type: NotFoundResDto,
+  })
+  @ApiBadRequestResponse({
+    description: 'Bad Request',
+    type: BadRequestResDto,
+  })
+  @Patch('/:phonenumber/new-password')
+  async handleNewPassword(
+    @Param('phonenumber') phonenumber: string,
+    @Body() payload: NewPasswordReqDto,
+  ): Promise<ChangePasswordResDto> {
+    const response: ChangePasswordResDto =
+      await this.accountService.handleNewPassword(phonenumber, payload);
     return response;
   }
 }

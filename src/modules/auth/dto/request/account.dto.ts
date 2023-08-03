@@ -100,12 +100,33 @@ export class ChangePasswordReqDto {
   confirmPassword: string;
 }
 
+export class NewPasswordReqDto {
+  @IsNotEmpty({ message: 'The new password is required' })
+  @IsString()
+  @MinLength(8)
+  @ApiProperty()
+  newPassword: string;
+
+  @IsNotEmpty({ message: 'The confirm password is required' })
+  @IsString()
+  @MinLength(8)
+  @ApiProperty()
+  confirmPassword: string;
+}
+
 export class SendOtpReqDto {
   @IsNotEmpty({ message: 'The phone number is required' })
   @IsString()
   @MinLength(10)
   @ApiProperty()
   phonenumber: string;
+}
+
+export class VerifyOtpReqDto {
+  @IsNotEmpty({ message: 'The otp code is required' })
+  @IsString()
+  @ApiProperty()
+  otp: string;
 }
 
 export class QueriesAccountReqDto {

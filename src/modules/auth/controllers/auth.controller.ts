@@ -1,13 +1,23 @@
 import { ApiTags, ApiOperation, ApiBody } from '@nestjs/swagger';
-import { Controller, Get, Req, Post, UseGuards, Body } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Req,
+  Post,
+  UseGuards,
+  Body,
+  Param,
+} from '@nestjs/common';
 import { Request } from 'express';
 import { AuthService, OtpService } from '../services';
 import { JwtAuthGuard, RefreshTokenGuard } from '../guards';
-import { SendOtpReqDto, SigninReqDto } from '../dto/request';
+import { SendOtpReqDto, SigninReqDto, VerifyOtpReqDto } from '../dto/request';
 import {
   LogoutResDto,
+  OTPResDto,
   RefreshTokenResDto,
   SigninResDto,
+  VerifyOTPResDto,
 } from '../dto/response';
 
 @ApiTags('Auth')
@@ -49,8 +59,18 @@ export class AuthController {
 
   @ApiBody({ type: SendOtpReqDto })
   @Post('/send-otp')
-  async sendOtp(@Body() phoneNumber: string): Promise<{ message: string }> {
-    await this.otpService.sendOtp(phoneNumber);
-    return { message: 'OTP sent successfully!' };
+  async sendOtp(@Body() phoneNumber: string): Promise<OTPResDto> {
+    const response: OTPResDto = await this.otpService.sendOtp(phoneNumber);
+    return response;
+  }
+
+  @ApiBody({ type: VerifyOtpReqDto })
+  @Post('/:phonenumber/verification-otp')
+  async verificationOtp(
+    @Param('phonenumber') phonenumber: string,
+    @Body() otp: string,
+  ): Promise<VerifyOTPResDto> {
+    const response = await this.otpService.verifyOtp(otp, phonenumber);
+    return response;
   }
 }
