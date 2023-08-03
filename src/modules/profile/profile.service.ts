@@ -10,6 +10,7 @@ import { Account } from '../auth/account.entity';
 import { ErrorHandler } from '../../core/shared/common/error';
 import { IExistDataReturnValue } from './interfaces';
 import { Bcrypt } from '../../core/utils';
+import { IAccountPayload, IUserPayload } from './interfaces';
 
 @Injectable()
 export class ProfileService {
