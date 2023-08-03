@@ -41,7 +41,6 @@ export class ProfileController {
     return res;
   }
 
-  @Patch('update/:id')
   @ApiOkResponse({
     description: 'Update profile',
     schema: {
@@ -65,16 +64,14 @@ export class ProfileController {
       },
     },
   })
+  @Patch('update/:id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @HasRoles(ACCOUNT_ROLE.SUPERVISOR)
-  async updateProfileById(
+  async updateProfile(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateProfileDto: UpdateProfileReqDto,
   ): Promise<UpdateProfileResDto> {
-    const res = await this.profileService.updateProfileById(
-      id,
-      updateProfileDto,
-    );
+    const res = await this.profileService.updateProfile(id, updateProfileDto);
     return res;
   }
 }

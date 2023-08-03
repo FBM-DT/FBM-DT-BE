@@ -7,6 +7,8 @@ import { AddProfileResDto, UpdateProfileResDto } from './dto/res';
 import { AppResponse } from '../../core/shared/app.response';
 import { AccountService } from '../auth/services';
 import { ErrorHandler } from '../../core/shared/common/error';
+import { IAccountPayload, IUserPayload } from './interfaces';
+import { Account } from '../auth/account.entity';
 
 @Injectable()
 export class ProfileService {
@@ -75,62 +77,79 @@ export class ProfileService {
     }
   }
 
-  async updateProfileById(
+  async updateProfile(
     accountID: number,
     data: UpdateProfileReqDto,
   ): Promise<UpdateProfileResDto> {
     const { roleId, phonenumber, ...rest } = data;
 
-    const userData = {
+    const userData: IUserPayload = {
       ...rest,
     };
+    console.log(
+      '🚀 ~ file: profile.service.ts:87 ~ ProfileService ~ userData:',
+      userData,
+    );
 
-    const account = {
+    const account: IAccountPayload = {
       roleId,
       phonenumber,
     };
 
     try {
-      const accountRes = await this.accountService.updateAccount(
-        accountID,
-        account,
-      );
-      if (accountRes.status === 400 || accountRes.status === 500) {
-        return accountRes;
-      }
+      const accountUpdateData = await this._dataSource
+        .getRepository(Account)
+        .createQueryBuilder()
+        .update(Account)
+        .set(account)
+        .where('id = :id', { id: accountID })
+        .execute();
 
-      const accountFindById = await this.accountService.getAccountById(
-        accountID,
-      );
+      if (accountUpdateData && accountUpdateData.affected === 0)
+        return AppResponse.setAppErrorResponse<UpdateProfileResDto>(
+          ErrorHandler.notFound(`Account ${accountID}`),
+          {
+            status: 404,
+          },
+        );
 
-      const accountUserData = accountFindById.data['user'];
+      const accountAfterUpdate = await this._dataSource
+        .getRepository(Account)
+        .findOne({ where: { id: accountID } });
+
+      const { password, refreshToken, ...updatedAccountData } =
+        accountAfterUpdate;
 
       const user = await this._userRepository
         .createQueryBuilder()
         .update(User)
         .set(userData)
-        .where('id = :id', { id: accountUserData.id })
+        .where('id = :id', { id: updatedAccountData.userId })
         .execute();
 
       if (user && user.affected === 0)
         return AppResponse.setAppErrorResponse<any>(
-          ErrorHandler.notFound(`User ${accountUserData.id}`),
+          ErrorHandler.notFound(`User ${updatedAccountData.userId}`),
         );
 
-      const updatedData = {
+      const finalResult = {
         ...rest,
         ...account,
       };
 
-      return AppResponse.setSuccessResponse<any>(updatedData, {
+      return AppResponse.setSuccessResponse<any>(finalResult, {
         status: 200,
         message: 'Updated',
       });
     } catch (error) {
       if (error.message.includes('duplicate key')) {
-        return AppResponse.setAppErrorResponse<any>('Email existed');
+        return AppResponse.setAppErrorResponse<UpdateProfileResDto>(
+          'Email existed',
+        );
       }
-      return AppResponse.setAppErrorResponse<any>(error.message);
+      return AppResponse.setAppErrorResponse<UpdateProfileResDto>(
+        error.message,
+      );
     }
   }
 }
