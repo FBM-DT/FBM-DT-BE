@@ -8,6 +8,7 @@ import { AppResponse } from '../../core/shared/app.response';
 import { AccountService } from '../auth/services';
 import { Account } from '../auth/account.entity';
 import { ErrorHandler } from '../../core/shared/common/error';
+import { IAccountPayload, IUserPayload } from './interfaces';
 
 @Injectable()
 export class ProfileService {
