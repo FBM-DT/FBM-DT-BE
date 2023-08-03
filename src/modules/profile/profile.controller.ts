@@ -15,8 +15,12 @@ import {
   ApiOkResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { AddProfileReqDto } from './dto/req';
-import { AddProfileResDto, GetProfileResDto } from './dto/res';
+import { AddProfileReqDto, UpdateProfileReqDto } from './dto/req';
+import {
+  AddProfileResDto,
+  GetProfileResDto,
+  UpdateProfileResDto,
+} from './dto/res';
 import { ACCOUNT_ROLE } from '../../core/constants';
 import { HasRoles } from '../../core/utils/decorators';
 import { JwtAuthGuard, RolesGuard } from '../auth/guards';
@@ -78,7 +82,6 @@ export class ProfileController {
     return res;
   }
 
-  @Patch('update/:id')
   @ApiOkResponse({
     description: 'Update profile',
     schema: {
@@ -102,16 +105,14 @@ export class ProfileController {
       },
     },
   })
+  @Patch('update/:id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @HasRoles(ACCOUNT_ROLE.SUPERVISOR)
-  async updateProfileById(
+  async updateProfile(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateProfileDto: UpdateProfileReqDto,
   ): Promise<UpdateProfileResDto> {
-    const res = await this.profileService.updateProfileById(
-      id,
-      updateProfileDto,
-    );
+    const res = await this.profileService.updateProfile(id, updateProfileDto);
     return res;
   }
 }
