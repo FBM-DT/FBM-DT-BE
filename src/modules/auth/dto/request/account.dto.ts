@@ -100,6 +100,14 @@ export class ChangePasswordReqDto {
   confirmPassword: string;
 }
 
+export class SendOtpReqDto {
+  @IsNotEmpty({ message: 'The phone number is required' })
+  @IsString()
+  @MinLength(10)
+  @ApiProperty()
+  phonenumber: string;
+}
+
 export class QueriesAccountReqDto {
   @IsString()
   @IsOptional()

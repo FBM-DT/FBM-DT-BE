@@ -1,9 +1,9 @@
 import { ApiTags, ApiOperation, ApiBody } from '@nestjs/swagger';
 import { Controller, Get, Req, Post, UseGuards, Body } from '@nestjs/common';
 import { Request } from 'express';
-import { AuthService } from '../services';
+import { AuthService, OtpService } from '../services';
 import { JwtAuthGuard, RefreshTokenGuard } from '../guards';
-import { SigninReqDto } from '../dto/request';
+import { SendOtpReqDto, SigninReqDto } from '../dto/request';
 import {
   LogoutResDto,
   RefreshTokenResDto,
@@ -13,7 +13,10 @@ import {
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private readonly otpService: OtpService,
+  ) {}
 
   @ApiOperation({ summary: 'Signin' })
   @ApiBody({ type: SigninReqDto })
@@ -42,5 +45,12 @@ export class AuthController {
       refreshToken,
     );
     return response;
+  }
+
+  @ApiBody({ type: SendOtpReqDto })
+  @Post('/send-otp')
+  async sendOtp(@Body() phoneNumber: string): Promise<{ message: string }> {
+    await this.otpService.sendOtp(phoneNumber);
+    return { message: 'OTP sent successfully!' };
   }
 }
