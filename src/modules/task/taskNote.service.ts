@@ -5,6 +5,7 @@ import {
   AddTaskNoteResDto,
   DeleteTaskNoteResDto,
   GetTaskNoteListResDto,
+  GetTaskNoteResDto,
   UpdateTaskNoteResDto,
 } from './dto/response';
 import {
@@ -126,6 +127,17 @@ export class TaskNoteService {
       return AppResponse.setAppErrorResponse<GetTaskNoteListResDto>(
         error.message,
       );
+    }
+  }
+
+  async getNote(noteId: number): Promise<GetTaskNoteResDto> {
+    try {
+      const result: TaskNote = await this._dataSource
+        .getRepository(TaskNote)
+        .findOneBy({ id: noteId });
+      return AppResponse.setSuccessResponse<GetTaskNoteResDto>(result);
+    } catch (error) {
+      return AppResponse.setAppErrorResponse<GetTaskNoteResDto>(error.message);
     }
   }
 }

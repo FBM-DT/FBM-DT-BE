@@ -1,13 +1,10 @@
-import { Expose, Transform, Type } from 'class-transformer';
+import { Transform } from 'class-transformer';
 import {
-  ArrayMinSize,
-  IsArray,
   IsBoolean,
   IsEmpty,
   IsNotEmpty,
   IsOptional,
   IsString,
-  ValidateNested,
 } from 'class-validator';
 import { PaginationReqDto } from '../../../../core/shared/request';
 import { ApiProperty } from '@nestjs/swagger';

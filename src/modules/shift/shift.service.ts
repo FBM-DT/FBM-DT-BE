@@ -18,6 +18,8 @@ import { AppResponse } from '../../core/shared/app.response';
 import { StaffShift } from './entities/staffInShift.entity';
 import { Task, TaskNote } from '../task/entities';
 import { ExtraQuery } from '../../core/utils';
+import { AddTaskNoteResDto } from '../task/dto/response';
+import { AddTaskNoteReqDto } from '../task/dto/request';
 
 @Injectable()
 export class ShiftService {
@@ -44,10 +46,12 @@ export class ShiftService {
         .into(WorkShift)
         .values(data.workShift)
         .execute();
-      data.task = {
-        ...data.task,
-        workShiftId: addWorkShiftResult.identifiers[0].id,
-      };
+
+      data.task.forEach((task) => {
+        task = Object.assign(task, {
+          workShiftId: addWorkShiftResult.identifiers[0].id,
+        });
+      });
       const addTaskResult = await queryRunner.manager
         .getRepository(Task)
         .createQueryBuilder()
@@ -55,21 +59,30 @@ export class ShiftService {
         .into(Task)
         .values(data.task)
         .execute();
-      data.taskNote.forEach((note) => {
-        note = Object.assign(note, { taskId: addTaskResult.identifiers[0].id });
+
+      const taskNotes: Array<AddTaskNoteReqDto> = new Array<AddTaskNoteReqDto>;
+      
+      addTaskResult.identifiers.forEach((item, index) => {
+        data.task[index].taskNote.forEach((note) => {
+          note = Object.assign(note, {
+            taskId: item['id'],
+          });
+          taskNotes.push(note);
+        });
       });
+
       const addTaskNoteResult = await queryRunner.manager
         .getRepository(TaskNote)
         .createQueryBuilder()
         .insert()
         .into(TaskNote)
-        .values(data.taskNote)
+        .values(taskNotes)
         .execute();
       await queryRunner.commitTransaction();
       return AppResponse.setSuccessResponse<AddWorkShiftResDto>(
         {
-          workShift: addWorkShiftResult.identifiers[0].id,
-          task: addTaskResult.identifiers[0].id,
+          workShift: addWorkShiftResult.identifiers,
+          task: addTaskResult.identifiers,
           taskNote: addTaskNoteResult.identifiers,
         },
         {
@@ -79,9 +92,7 @@ export class ShiftService {
       );
     } catch (error) {
       await queryRunner.rollbackTransaction();
-      return AppResponse.setAppErrorResponse<AddWorkShiftResDto>(
-        error.message,
-      );
+      return AppResponse.setAppErrorResponse<AddWorkShiftResDto>(error.message);
     } finally {
       await queryRunner.release();
     }
@@ -94,9 +105,7 @@ export class ShiftService {
       });
       return AppResponse.setSuccessResponse<GetWorkShiftResDto>(result);
     } catch (error) {
-      return AppResponse.setAppErrorResponse<AddWorkShiftResDto>(
-        error.message,
-      );
+      return AppResponse.setAppErrorResponse<AddWorkShiftResDto>(error.message);
     }
   }
 
@@ -132,20 +141,15 @@ export class ShiftService {
           options,
         );
 
-        return AppResponse.setSuccessResponse<GetWorkShiftListResDto>(
-          result,
-          {
-            page: queries.page,
-            pageSize: queries.pageSize,
-          },
-        );
+        return AppResponse.setSuccessResponse<GetWorkShiftListResDto>(result, {
+          page: queries.page,
+          pageSize: queries.pageSize,
+        });
       }
       const result: WorkShift[] = await this._workShiftRepository.find();
       return AppResponse.setSuccessResponse<GetWorkShiftListResDto>(result);
     } catch (error) {
-      return AppResponse.setAppErrorResponse<AddWorkShiftResDto>(
-        error.message,
-      );
+      return AppResponse.setAppErrorResponse<AddWorkShiftResDto>(error.message);
     }
   }
 
@@ -176,9 +180,7 @@ export class ShiftService {
       );
       return response;
     } catch (error) {
-      return AppResponse.setAppErrorResponse<AddWorkShiftResDto>(
-        error.message,
-      );
+      return AppResponse.setAppErrorResponse<AddWorkShiftResDto>(error.message);
     }
   }
 
@@ -197,9 +199,7 @@ export class ShiftService {
         result.affected,
       );
     } catch (error) {
-      return AppResponse.setAppErrorResponse<AddWorkShiftResDto>(
-        error.message,
-      );
+      return AppResponse.setAppErrorResponse<AddWorkShiftResDto>(error.message);
     }
   }
 }

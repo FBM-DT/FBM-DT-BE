@@ -17,6 +17,8 @@ import {
   DeleteTaskResDto,
   GetTaskListResDto,
   GetTaskNoteListResDto,
+  GetTaskNoteResDto,
+  GetTaskResDto,
   UpdateTaskNoteResDto,
   UpdateTaskResDto,
 } from './dto/response';
@@ -30,7 +32,7 @@ import {
   UpdateTaskReqDto,
 } from './dto/request';
 import { TaskNoteService } from './taskNote.service';
-import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Tasks')
 @Controller('task')
@@ -98,6 +100,14 @@ export class TaskController {
     return response;
   }
 
+  @Get('taskById/:taskId')
+  async getTask(
+    @Param('taskId', ParseIntPipe) taskId: number,
+  ): Promise<GetTaskResDto> {
+    const response: GetTaskResDto = await this.taskService.getTask(taskId);
+    return response;
+  }
+
   @Post(':taskId/taskNote/create')
   async addNote(
     @Body() dto: AddTaskNoteReqDto,
@@ -136,6 +146,16 @@ export class TaskController {
   ): Promise<GetTaskNoteListResDto> {
     const response: GetTaskNoteListResDto =
       await this.taskNoteService.getNoteList(taskId, queries);
+    return response;
+  }
+
+  @Get('taskNote/:noteId')
+  async getNote(
+    @Param('noteId', ParseIntPipe) noteId: number,
+  ): Promise<GetTaskNoteResDto> {
+    const response: GetTaskNoteResDto = await this.taskNoteService.getNote(
+      noteId,
+    );
     return response;
   }
 }

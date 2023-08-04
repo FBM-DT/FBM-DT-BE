@@ -1,18 +1,11 @@
-import {
-  IsArray,
-  IsEnum,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  ArrayMinSize,
-  ValidateNested,
-} from 'class-validator';
+import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { WORKTYPE } from '../../../../core/constants';
 import { PaginationReqDto } from '../../../../core/shared/request';
 import {
   AddTaskNoteReqDto,
   AddTaskReqDto,
 } from '../../../../modules/task/dto/request';
+import { ApiProperty } from '@nestjs/swagger';
 
 class AddWorkShift {
   @IsNotEmpty({ message: 'The work shift name is required' })
@@ -37,10 +30,16 @@ class AddWorkShift {
   @IsString({ message: 'The work shift description must be string type' })
   readonly description: string;
 }
-export class AddWorkShiftReqDto {
-  workShift?: AddWorkShift;
-  task?: AddTaskReqDto;
+class AddTaskInfor extends AddTaskReqDto {
+  @ApiProperty({ required: false, type: () => AddTaskNoteReqDto })
   taskNote?: Array<AddTaskNoteReqDto>;
+}
+export class AddWorkShiftReqDto {
+  @ApiProperty({ required: false, type: AddWorkShift })
+  workShift?: AddWorkShift;
+
+  @ApiProperty({ required: false, type: () => AddTaskInfor })
+  task?: Array<AddTaskInfor>;
 }
 
 export class GetWorkShiftListReqDto extends PaginationReqDto {

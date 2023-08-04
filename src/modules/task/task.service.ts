@@ -5,6 +5,7 @@ import {
   AddTaskResDto,
   DeleteTaskResDto,
   GetTaskListResDto,
+  GetTaskResDto,
   UpdateTaskResDto,
 } from './dto/response';
 import { AppResponse } from '../../core/shared/app.response';
@@ -128,6 +129,17 @@ export class TaskService {
       });
     } catch (error) {
       return AppResponse.setAppErrorResponse<GetTaskListResDto>(error.message);
+    }
+  }
+
+  async getTask(taskId: number): Promise<GetTaskResDto> {
+    try {
+      const result: Task = await this._dataSource
+        .getRepository(Task)
+        .findOneBy({ id: taskId });
+      return AppResponse.setSuccessResponse<GetTaskResDto>(result);
+    } catch (error) {
+      return AppResponse.setAppErrorResponse<GetTaskResDto>(error.message);
     }
   }
 }
