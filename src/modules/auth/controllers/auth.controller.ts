@@ -76,14 +76,4 @@ export class AuthController {
     const response = await this.otpService.verifyOtp(otp, phonenumber);
     return response;
   }
-
-  // @ApiBody({ type: VerifyOtpReqDto })
-  // @Post('/:phonenumber/verification-otp-code')
-  // async verificationOtpCode(
-  //   @Param('phonenumber') phonenumber: string,
-  //   @Body() otp: string,
-  // ): Promise<VerifyOTPResDto> {
-  //   const response = await this.otpService.OtpVerification(phonenumber, otp);
-  //   return response;
-  // }
 }
