@@ -123,6 +123,12 @@ export class SendOtpReqDto {
 }
 
 export class VerifyOtpReqDto {
+  // @IsNotEmpty({ message: 'The phone number is required' })
+  // @IsString()
+  // @MinLength(10)
+  // @ApiProperty()
+  // phonenumber: string;
+
   @IsNotEmpty({ message: 'The otp code is required' })
   @IsString()
   @ApiProperty()

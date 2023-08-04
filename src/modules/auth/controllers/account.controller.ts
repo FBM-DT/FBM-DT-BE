@@ -7,17 +7,20 @@ import {
   ApiOkResponse,
   ApiForbiddenResponse,
   ApiNotFoundResponse,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import {
   Body,
   Controller,
   Get,
+  Req,
   Param,
   Post,
   UseGuards,
   Patch,
   ParseIntPipe,
 } from '@nestjs/common';
+import { Request } from 'express';
 import { JwtAuthGuard, RolesGuard } from '../guards';
 import { ACCOUNT_ROLE } from '../../../core/constants';
 import { AccountService } from '../services';
@@ -49,9 +52,22 @@ export class AccountController {
   @ApiOkResponse({ description: 'The list account were returned successfully' })
   @ApiForbiddenResponse({ description: 'Unauthorized Request' })
   @Get('list')
+  @ApiBearerAuth('token')
   async getAccountList(): Promise<GetAllAccountsResDto> {
     const response: GetAllAccountsResDto =
       await this.accountService.getAccountList();
+    return response;
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('detail')
+  @ApiOperation({ summary: 'Get my account detail' })
+  @ApiBearerAuth('token')
+  async getDetailAccount(@Req() req: Request): Promise<GetAccountResDto> {
+    const account = req.user['payload'];
+    const response: GetAccountResDto = await this.accountService.getAccountById(
+      account.accountId,
+    );
     return response;
   }
 
@@ -64,11 +80,14 @@ export class AccountController {
     return response;
   }
 
+  @HasRoles(ACCOUNT_ROLE.ADM)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiOperation({ summary: 'Create a new account' })
   @ApiBody({ type: CreateAccountReqDto })
   @ApiCreatedResponse({ description: 'Created Successfully' })
   @ApiBadRequestResponse({ description: 'Bad Request' })
   @Post()
+  @ApiBearerAuth('token')
   async createAccount(
     @Body() accountDto: CreateAccountReqDto,
   ): Promise<CreateAccountResDto> {

@@ -1,4 +1,4 @@
-import { ApiTags, ApiOperation, ApiBody } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import {
   Controller,
   Get,
@@ -38,6 +38,7 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Get('/logout')
+  @ApiBearerAuth('token')
   async logout(@Req() req: Request): Promise<LogoutResDto> {
     const response = await this.authService.handleLogout(req.headers);
     return response;
@@ -45,10 +46,12 @@ export class AuthController {
 
   @UseGuards(RefreshTokenGuard)
   @Get('refresh')
+  @ApiBearerAuth('token')
   async refreshTokens(
     @Req() req: Request,
   ): Promise<string | RefreshTokenResDto> {
     const account = req.user['payload'];
+    console.log(account);
     const refreshToken = req.user['refreshToken'];
     const response = await this.authService.handleRefreshTokens(
       account.accountId,
@@ -73,4 +76,14 @@ export class AuthController {
     const response = await this.otpService.verifyOtp(otp, phonenumber);
     return response;
   }
+
+  // @ApiBody({ type: VerifyOtpReqDto })
+  // @Post('/:phonenumber/verification-otp-code')
+  // async verificationOtpCode(
+  //   @Param('phonenumber') phonenumber: string,
+  //   @Body() otp: string,
+  // ): Promise<VerifyOTPResDto> {
+  //   const response = await this.otpService.OtpVerification(phonenumber, otp);
+  //   return response;
+  // }
 }

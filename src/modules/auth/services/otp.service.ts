@@ -30,6 +30,7 @@ export class OtpService {
   }
 
   async generateOtp() {
+    const timeLine = 60;
     const otp = await speakeasy.totp({
       secret: this.otpSecret,
       encoding: 'base32',
@@ -44,15 +45,16 @@ export class OtpService {
       const phoneNumber = jsonData.phonenumber;
       const formatPhoneNumber = `+84${phoneNumber}`;
 
-      // const digits = '0123456789';
-      // let OTP = '';
-      // for (let i = 0; i < 6; i++) {
-      //   OTP += digits[Math.floor(Math.random() * 10)];
-      // }
+      const digits = '0123456789';
+      let OTP = '';
+      for (let i = 0; i < 6; i++) {
+        OTP += digits[Math.floor(Math.random() * 10)];
+      }
 
-      const getOtp = await this.generateOtp();
-      console.log(getOtp);
-      const message = `Your OTP is: ${getOtp}`;
+      // const getOtp = await this.generateOtp();
+      // console.log(getOtp);
+      const message = `Your OTP is: ${OTP}`;
+      console.log(message);
       await this.twilioService.client.messages.create({
         to: formatPhoneNumber,
         from: '+12187488035',
@@ -72,7 +74,10 @@ export class OtpService {
     }
   }
 
-  // async OtpVerification(phonenumber: string, verificationCode: string) {
+  // async OtpVerification(
+  //   phonenumber: string,
+  //   otp: string,
+  // ): Promise<VerifyOTPResDto> {
   //   try {
   //     const serviceSid = this.configService.get(
   //       'TWILIO_VERIFICATION_SERVICE_SID',
@@ -84,20 +89,33 @@ export class OtpService {
   //     const formatPhoneNumber = `+84${phoneNumber}`;
   //     console.log(formatPhoneNumber);
 
+  //     const paramOtp = JSON.stringify(otp);
+  //     const jsonDataOtp = JSON.parse(paramOtp);
+  //     const otpCode = jsonDataOtp.verificationCode;
+  //     console.log(otpCode);
+
   //     const result = await this.twilioClient.verify.v2
   //       .services(serviceSid)
   //       .verificationChecks.create({
   //         to: formatPhoneNumber,
-  //         code: verificationCode,
+  //         code: otpCode,
   //       })
   //       .then((verification) => console.log(verification.status));
   //     console.log('result', result);
+
+  //     const response: VerifyOTPResDto =
+  //       AppResponse.setSuccessResponse<VerifyOTPResDto>({
+  //         result,
+  //       });
+  //     return response;
 
   //     // if (!result.valid || result.status !== 'approved') {
   //     //   console.log('Code not');
   //     // }
   //   } catch (error) {
-  //     console.log(error);
+  //     const response: VerifyOTPResDto =
+  //       AppResponse.setAppErrorResponse<VerifyOTPResDto>(error.message);
+  //     return response;
   //   }
   // }
 

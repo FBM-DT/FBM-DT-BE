@@ -19,6 +19,7 @@ import {
   UpdateAccountReqDto,
 } from '../dto/request';
 import { ErrorHandler } from '../../../core/shared/common/error';
+import { Bcrypt } from '../../../core/utils';
 
 @Injectable()
 export class AccountService {
@@ -106,7 +107,7 @@ export class AccountService {
           );
         return response;
       } else {
-        const hashPassword = this.handleHashPassword(password);
+        const hashPassword = Bcrypt.handleHashPassword(password);
         const data = { ...payload, password: hashPassword };
 
         const account = await this._accountRepository
@@ -163,7 +164,7 @@ export class AccountService {
           AppResponse.setSuccessResponse<UpdateAccountResDto>(result.affected);
         return response;
       } else {
-        newPassword = this.handleHashPassword(password);
+        newPassword = Bcrypt.handleHashPassword(password);
         const account = { ...accountDto, password: newPassword };
         const result = await this._accountRepository
           .createQueryBuilder('account')
@@ -224,7 +225,7 @@ export class AccountService {
         return response;
       }
 
-      const isValidFormatPassword = await this.isPasswordValid(newPassword);
+      const isValidFormatPassword = await Bcrypt.isPasswordValid(newPassword);
       if (isValidFormatPassword === false) {
         const response: ChangePasswordResDto =
           AppResponse.setUserErrorResponse<ChangePasswordResDto>(
@@ -233,7 +234,7 @@ export class AccountService {
         return response;
       }
 
-      const hashPassword = await this.handleHashPassword(newPassword);
+      const hashPassword = await Bcrypt.handleHashPassword(newPassword);
       const password = hashPassword;
       const result = await this._accountRepository.update(accountId, {
         password: password,
@@ -291,7 +292,7 @@ export class AccountService {
         return response;
       }
 
-      const isValidFormatPassword = await this.isPasswordValid(newPassword);
+      const isValidFormatPassword = await Bcrypt.isPasswordValid(newPassword);
       if (isValidFormatPassword === false) {
         const response: NewPasswordResDto =
           AppResponse.setUserErrorResponse<NewPasswordResDto>(
@@ -300,7 +301,7 @@ export class AccountService {
         return response;
       }
 
-      const hashPassword = await this.handleHashPassword(newPassword);
+      const hashPassword = await Bcrypt.handleHashPassword(newPassword);
       const password = hashPassword;
       const result = await this._accountRepository
         .createQueryBuilder()
@@ -333,29 +334,5 @@ export class AccountService {
     } catch (error) {
       return error.message;
     }
-  }
-
-  private async isPasswordValid(password: string): Promise<boolean> {
-    const uppercaseRegex = /[A-Z]/;
-    const lowercaseRegex = /[a-z]/;
-    const numberRegex = /[0-9]/;
-    const specialRegex = /[!@#$%^&*()_+\-=[\]{}|;:,.<>?]/;
-
-    const hasUppercase = uppercaseRegex.test(password);
-    const hasLowercase = lowercaseRegex.test(password);
-    const hasNumber = numberRegex.test(password);
-    const hasSpecialChar = specialRegex.test(password);
-
-    if (!hasUppercase || !hasLowercase || !hasNumber || !hasSpecialChar) {
-      return false;
-    } else if (hasUppercase && hasLowercase && hasNumber && hasSpecialChar) {
-      return true;
-    }
-  }
-
-  private handleHashPassword(password: string) {
-    const saltOrRounds = 10;
-    const hashPassword = bcrypt.hashSync(password, saltOrRounds);
-    return hashPassword;
   }
 }
