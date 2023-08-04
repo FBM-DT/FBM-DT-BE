@@ -12,7 +12,7 @@ import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { AddProfileReqDto } from './dto/req';
 import { AddProfileResDto, GetProfileResDto } from './dto/res';
 import { ACCOUNT_ROLE } from '../../core/constants';
-import { HasRoles } from '../auth/decorators/role.decorator';
+import { HasRoles } from '../../core/utils/decorators';
 import { JwtAuthGuard, RolesGuard } from '../auth/guards';
 
 @ApiTags('Profile')
