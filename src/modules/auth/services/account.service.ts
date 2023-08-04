@@ -197,9 +197,6 @@ export class AccountService {
         const response: ChangePasswordResDto =
           AppResponse.setUserErrorResponse<ChangePasswordResDto>(
             ErrorHandler.notFound(`Account ${accountId}`),
-            {
-              status: 404,
-            },
           );
         return response;
       }
@@ -234,10 +231,9 @@ export class AccountService {
         return response;
       }
 
-      const hashPassword = await Bcrypt.handleHashPassword(newPassword);
-      const password = hashPassword;
+      const hashPassword = Bcrypt.handleHashPassword(newPassword);
       const result = await this._accountRepository.update(accountId, {
-        password: password,
+        password: hashPassword,
       });
 
       const response: ChangePasswordResDto =
@@ -263,14 +259,11 @@ export class AccountService {
         const response: NewPasswordResDto =
           AppResponse.setUserErrorResponse<NewPasswordResDto>(
             ErrorHandler.notFound(`The phone number ${phonenumber}`),
-            {
-              status: 404,
-            },
           );
         return response;
       }
 
-      if (account.isValidOtp === false) {
+      if (!account.isValidOtp) {
         const response: NewPasswordResDto =
           AppResponse.setUserErrorResponse<NewPasswordResDto>(
             ErrorHandler.invalid('The OTP'),
@@ -293,7 +286,7 @@ export class AccountService {
       }
 
       const isValidFormatPassword = await Bcrypt.isPasswordValid(newPassword);
-      if (isValidFormatPassword === false) {
+      if (!isValidFormatPassword) {
         const response: NewPasswordResDto =
           AppResponse.setUserErrorResponse<NewPasswordResDto>(
             'The password and confirm password are not correct format',
@@ -301,14 +294,13 @@ export class AccountService {
         return response;
       }
 
-      const hashPassword = await Bcrypt.handleHashPassword(newPassword);
-      const password = hashPassword;
+      const hashPassword = Bcrypt.handleHashPassword(newPassword);
       const result = await this._accountRepository
         .createQueryBuilder()
         .update(Account)
         .set({
           isValidOtp: false,
-          password: password,
+          password: hashPassword,
         })
         .where('phonenumber = :phonenumber', { phonenumber: phonenumber })
         .execute();

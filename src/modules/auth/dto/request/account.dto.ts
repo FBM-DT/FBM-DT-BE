@@ -22,6 +22,7 @@ export class CreateAccountReqDto {
   @IsNotEmpty({ message: 'The password is required' })
   @IsString()
   @MinLength(8)
+  @MaxLength(12)
   @ApiProperty()
   readonly password: string;
 
@@ -45,11 +46,15 @@ export class UpdateAccountReqDto extends PartialType(CreateAccountReqDto) {}
 export class UpdateAccountByIdRequestDto {
   @IsOptional()
   @IsString({ message: 'The phone number must be string type' })
+  @MinLength(10)
+  @MaxLength(10)
   @ApiProperty()
   readonly phonenumber?: string;
 
   @IsOptional()
   @IsString({ message: 'The password must be string type' })
+  @MinLength(8)
+  @MaxLength(12)
   @ApiProperty()
   readonly password?: string;
 
@@ -71,11 +76,15 @@ export class UpdateAccountByIdRequestDto {
 export class SigninReqDto {
   @IsNotEmpty({ message: 'The phone number is required' })
   @IsString()
+  @MinLength(10)
+  @MaxLength(10)
   @ApiProperty()
   readonly phonenumber: string;
 
   @IsNotEmpty({ message: 'The password is required' })
   @IsString()
+  @MinLength(8)
+  @MaxLength(12)
   @ApiProperty()
   readonly password: string;
 }
@@ -84,18 +93,21 @@ export class ChangePasswordReqDto {
   @IsNotEmpty({ message: 'The current password is required' })
   @IsString()
   @MinLength(8)
+  @MaxLength(12)
   @ApiProperty()
   currentPassword: string;
 
   @IsNotEmpty({ message: 'The new password is required' })
   @IsString()
   @MinLength(8)
+  @MaxLength(12)
   @ApiProperty()
   newPassword: string;
 
   @IsNotEmpty({ message: 'The confirm password is required' })
   @IsString()
   @MinLength(8)
+  @MaxLength(12)
   @ApiProperty()
   confirmPassword: string;
 }
@@ -104,12 +116,14 @@ export class NewPasswordReqDto {
   @IsNotEmpty({ message: 'The new password is required' })
   @IsString()
   @MinLength(8)
+  @MaxLength(12)
   @ApiProperty()
   newPassword: string;
 
   @IsNotEmpty({ message: 'The confirm password is required' })
   @IsString()
   @MinLength(8)
+  @MaxLength(12)
   @ApiProperty()
   confirmPassword: string;
 }
@@ -118,17 +132,12 @@ export class SendOtpReqDto {
   @IsNotEmpty({ message: 'The phone number is required' })
   @IsString()
   @MinLength(10)
+  @MaxLength(10)
   @ApiProperty()
   phonenumber: string;
 }
 
 export class VerifyOtpReqDto {
-  // @IsNotEmpty({ message: 'The phone number is required' })
-  // @IsString()
-  // @MinLength(10)
-  // @ApiProperty()
-  // phonenumber: string;
-
   @IsNotEmpty({ message: 'The otp code is required' })
   @IsString()
   @ApiProperty()

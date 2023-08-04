@@ -8,20 +8,8 @@ export const Bcrypt = {
   },
 
   isPasswordValid(password: string): boolean {
-    const uppercaseRegex = /[A-Z]/;
-    const lowercaseRegex = /[a-z]/;
-    const numberRegex = /[0-9]/;
-    const specialRegex = /[!@#$%^&*()_+\-=[\]{}|;:,.<>?]/;
-
-    const hasUppercase = uppercaseRegex.test(password);
-    const hasLowercase = lowercaseRegex.test(password);
-    const hasNumber = numberRegex.test(password);
-    const hasSpecialChar = specialRegex.test(password);
-
-    if (!hasUppercase || !hasLowercase || !hasNumber || !hasSpecialChar) {
-      return false;
-    } else if (hasUppercase && hasLowercase && hasNumber && hasSpecialChar) {
-      return true;
-    }
+    const passwordRegex =
+      /^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[!@#$%^&*()_+\-=[\]{}|;:,.<>?]).{8,}$/;
+    return passwordRegex.test(password);
   },
 };

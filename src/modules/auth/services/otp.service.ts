@@ -46,9 +46,6 @@ export class OtpService {
       if (!account) {
         const response: OTPResDto = AppResponse.setUserErrorResponse<OTPResDto>(
           ErrorHandler.notFound(`The phone number ${phoneNumber}`),
-          {
-            status: 404,
-          },
         );
         return response;
       }
@@ -85,9 +82,6 @@ export class OtpService {
       if (!account) {
         const response: OTPResDto = AppResponse.setUserErrorResponse<OTPResDto>(
           ErrorHandler.notFound(`The phone number ${phonenumber}`),
-          {
-            status: 404,
-          },
         );
         return response;
       }
@@ -95,43 +89,42 @@ export class OtpService {
       const otpBody = JSON.stringify(otp);
       const jsonData = JSON.parse(otpBody);
       const otpValue = jsonData.otp;
-      const otpIsValid = await speakeasy.totp.verify({
+      const isValidOtp = await speakeasy.totp.verify({
         secret: this.otpSecret,
         encoding: 'base32',
         token: otpValue,
         window: 1,
       });
 
-      if (!otpIsValid) {
+      if (!isValidOtp) {
         const response: VerifyOTPResDto =
           AppResponse.setUserErrorResponse<VerifyOTPResDto>(
             ErrorHandler.invalid('The OTP'),
             {
               data: {
-                valid: otpIsValid,
+                valid: isValidOtp,
                 status: 'rejected',
               },
             },
           );
         return response;
-      } else {
-        const confirmOtp = await this._accountRepository
-          .createQueryBuilder()
-          .update(Account)
-          .set({
-            isValidOtp: true,
-          })
-          .where('phonenumber = :phonenumber', { phonenumber: phonenumber })
-          .execute();
-
-        const response: VerifyOTPResDto =
-          AppResponse.setSuccessResponse<VerifyOTPResDto>({
-            valid: otpIsValid,
-            status: 'approved',
-            accountId: confirmOtp.affected,
-          });
-        return response;
       }
+      const confirmOtp = await this._accountRepository
+        .createQueryBuilder()
+        .update(Account)
+        .set({
+          isValidOtp: true,
+        })
+        .where('phonenumber = :phonenumber', { phonenumber: phonenumber })
+        .execute();
+
+      const response: VerifyOTPResDto =
+        AppResponse.setSuccessResponse<VerifyOTPResDto>({
+          valid: isValidOtp,
+          status: 'approved',
+          accountId: confirmOtp.affected,
+        });
+      return response;
     } catch (error) {
       const response: VerifyOTPResDto =
         AppResponse.setAppErrorResponse<VerifyOTPResDto>(error.message);

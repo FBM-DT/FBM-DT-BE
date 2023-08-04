@@ -1,14 +1,5 @@
 import { ApiTags, ApiOperation, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
-import {
-  Controller,
-  Get,
-  Req,
-  Post,
-  UseGuards,
-  Body,
-  Param,
-} from '@nestjs/common';
-import { Request } from 'express';
+import { Controller, Get, Post, UseGuards, Body, Param } from '@nestjs/common';
 import { AuthService, OtpService } from '../services';
 import { JwtAuthGuard, RefreshTokenGuard } from '../guards';
 import { SendOtpReqDto, SigninReqDto, VerifyOtpReqDto } from '../dto/request';
@@ -19,6 +10,7 @@ import {
   SigninResDto,
   VerifyOTPResDto,
 } from '../dto/response';
+import { GetAccount } from '../decorators';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -39,8 +31,8 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Get('/logout')
   @ApiBearerAuth('token')
-  async logout(@Req() req: Request): Promise<LogoutResDto> {
-    const response = await this.authService.handleLogout(req.headers);
+  async logout(@GetAccount() account): Promise<LogoutResDto> {
+    const response = await this.authService.handleLogout(account.accessToken);
     return response;
   }
 
@@ -48,14 +40,11 @@ export class AuthController {
   @Get('refresh')
   @ApiBearerAuth('token')
   async refreshTokens(
-    @Req() req: Request,
+    @GetAccount() account,
   ): Promise<string | RefreshTokenResDto> {
-    const account = req.user['payload'];
-    console.log(account);
-    const refreshToken = req.user['refreshToken'];
     const response = await this.authService.handleRefreshTokens(
-      account.accountId,
-      refreshToken,
+      account.payload.accountId,
+      account.refreshToken,
     );
     return response;
   }
@@ -68,8 +57,8 @@ export class AuthController {
   }
 
   @ApiBody({ type: VerifyOtpReqDto })
-  @Post('/:phonenumber/verification-otp')
-  async verificationOtp(
+  @Post('/:phonenumber/verify-otp')
+  async verifyOtp(
     @Param('phonenumber') phonenumber: string,
     @Body() otp: string,
   ): Promise<VerifyOTPResDto> {

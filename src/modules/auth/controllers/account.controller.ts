@@ -13,18 +13,15 @@ import {
   Body,
   Controller,
   Get,
-  Req,
   Param,
   Post,
   UseGuards,
   Patch,
   ParseIntPipe,
 } from '@nestjs/common';
-import { Request } from 'express';
 import { JwtAuthGuard, RolesGuard } from '../guards';
 import { ACCOUNT_ROLE } from '../../../core/constants';
 import { AccountService } from '../services';
-import { HasRoles } from '../decorators/role.decorator';
 import {
   BadRequestResDto,
   ChangePasswordResDto,
@@ -40,6 +37,7 @@ import {
   NewPasswordReqDto,
   UpdateAccountReqDto,
 } from '../dto/request';
+import { GetAccount, HasRoles } from '../decorators';
 
 @ApiTags('Account')
 @Controller('account')
@@ -63,8 +61,7 @@ export class AccountController {
   @Get('detail')
   @ApiOperation({ summary: 'Get my account detail' })
   @ApiBearerAuth('token')
-  async getDetailAccount(@Req() req: Request): Promise<GetAccountResDto> {
-    const account = req.user['payload'];
+  async getAccountDetail(@GetAccount() account): Promise<GetAccountResDto> {
     const response: GetAccountResDto = await this.accountService.getAccountById(
       account.accountId,
     );
