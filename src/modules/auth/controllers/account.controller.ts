@@ -37,7 +37,7 @@ import {
   NewPasswordReqDto,
   UpdateAccountReqDto,
 } from '../dto/request';
-import { GetAccount, HasRoles } from '../decorators';
+import { GetAccount, HasRoles } from '../../../core/utils/decorators';
 
 @ApiTags('Account')
 @Controller('account')
