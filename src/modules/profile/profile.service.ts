@@ -3,9 +3,11 @@ import { User } from '../users/user.entity';
 import { DataSource, Repository } from 'typeorm';
 import { TYPEORM } from '../../core/constants';
 import { AddProfileReqDto } from './dto/req';
-import { AddProfileResDto } from './dto/res';
+import { AddProfileResDto, GetProfileResDto } from './dto/res';
 import { AppResponse } from '../../core/shared/app.response';
 import { AccountService } from '../auth/services';
+import { Account } from '../auth/account.entity';
+import { ErrorHandler } from '../../core/shared/common/error';
 
 @Injectable()
 export class ProfileService {
@@ -71,6 +73,38 @@ export class ProfileService {
         );
       }
       return AppResponse.setAppErrorResponse<AddProfileResDto>(error.message);
+    }
+  }
+  async getProfile(accountId: number): Promise<GetProfileResDto> {
+    try {
+      const test = await this._dataSource.getRepository(Account).findOne({
+        where: { id: accountId },
+        relations: ['user', 'role'],
+      });
+      if (!test)
+        return AppResponse.setAppErrorResponse<GetProfileResDto>(
+          ErrorHandler.notFound(`Account ${accountId}`),
+          {
+            status: 404,
+          },
+        );
+      console.log(
+        '🚀 ~ file: profile.service.ts:89 ~ ProfileService ~ test ~ test:',
+        test,
+      );
+
+      const { id, ...profileData } = {
+        ...test.user,
+        accountId: test.id,
+        userId: test.user.id,
+        role: test.role.name,
+      };
+
+      return AppResponse.setSuccessResponse<GetProfileResDto>(profileData, {
+        message: 'Success',
+      });
+    } catch (error) {
+      return AppResponse.setAppErrorResponse(error.message);
     }
   }
 }
