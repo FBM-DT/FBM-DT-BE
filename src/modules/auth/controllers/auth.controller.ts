@@ -1,19 +1,24 @@
-import { ApiTags, ApiOperation, ApiBody } from '@nestjs/swagger';
-import { Controller, Get, Req, Post, UseGuards, Body } from '@nestjs/common';
-import { Request } from 'express';
-import { AuthService } from '../services';
+import { ApiTags, ApiOperation, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
+import { Controller, Get, Post, UseGuards, Body, Param } from '@nestjs/common';
+import { AuthService, OtpService } from '../services';
 import { JwtAuthGuard, RefreshTokenGuard } from '../guards';
-import { SigninReqDto } from '../dto/request';
+import { SendOtpReqDto, SigninReqDto, VerifyOtpReqDto } from '../dto/request';
 import {
   LogoutResDto,
+  OTPResDto,
   RefreshTokenResDto,
   SigninResDto,
+  VerifyOTPResDto,
 } from '../dto/response';
+import { GetAccount } from '../../../core/utils/decorators';
 
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private readonly otpService: OtpService,
+  ) {}
 
   @ApiOperation({ summary: 'Signin' })
   @ApiBody({ type: SigninReqDto })
@@ -25,22 +30,39 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Get('/logout')
-  async logout(@Req() req: Request): Promise<LogoutResDto> {
-    const response = await this.authService.handleLogout(req.headers);
+  @ApiBearerAuth('token')
+  async logout(@GetAccount() account): Promise<LogoutResDto> {
+    const response = await this.authService.handleLogout(account.accessToken);
     return response;
   }
 
   @UseGuards(RefreshTokenGuard)
   @Get('refresh')
+  @ApiBearerAuth('token')
   async refreshTokens(
-    @Req() req: Request,
+    @GetAccount() account,
   ): Promise<string | RefreshTokenResDto> {
-    const account = req.user['payload'];
-    const refreshToken = req.user['refreshToken'];
     const response = await this.authService.handleRefreshTokens(
-      account.accountId,
-      refreshToken,
+      account.payload.accountId,
+      account.refreshToken,
     );
+    return response;
+  }
+
+  @ApiBody({ type: SendOtpReqDto })
+  @Post('/send-otp')
+  async sendOtp(@Body() phoneNumber: string): Promise<OTPResDto> {
+    const response: OTPResDto = await this.otpService.sendOtp(phoneNumber);
+    return response;
+  }
+
+  @ApiBody({ type: VerifyOtpReqDto })
+  @Post('/:phonenumber/verify-otp')
+  async verifyOtp(
+    @Param('phonenumber') phonenumber: string,
+    @Body() otp: string,
+  ): Promise<VerifyOTPResDto> {
+    const response = await this.otpService.verifyOtp(otp, phonenumber);
     return response;
   }
 }

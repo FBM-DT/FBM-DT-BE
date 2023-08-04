@@ -12,6 +12,10 @@ async function bootstrap() {
     .setTitle('API documentation')
     .setDescription('The FBM API description aaabbbcccddd')
     .setVersion('1.0')
+    .addBearerAuth(
+      { type: 'http', scheme: 'bearer', bearerFormat: 'Token' },
+      'token',
+    )
     .addTag('api')
     .build();
   app.setGlobalPrefix('api/v1');
