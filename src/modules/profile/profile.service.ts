@@ -2,8 +2,12 @@ import { Injectable, Inject } from '@nestjs/common';
 import { User } from '../users/user.entity';
 import { DataSource, Repository } from 'typeorm';
 import { TYPEORM } from '../../core/constants';
-import { AddProfileReqDto } from './dto/req';
-import { AddProfileResDto, GetProfileResDto } from './dto/res';
+import { AddProfileReqDto, UpdateProfileReqDto } from './dto/req';
+import {
+  AddProfileResDto,
+  GetProfileResDto,
+  UpdateProfileResDto,
+} from './dto/res';
 import { AppResponse } from '../../core/shared/app.response';
 import { AccountService } from '../auth/services';
 import { Account } from '../auth/account.entity';
@@ -106,6 +110,81 @@ export class ProfileService {
       });
     } catch (error) {
       return AppResponse.setAppErrorResponse(error.message);
+    }
+  }
+
+  async updateProfile(
+    accountID: number,
+    data: UpdateProfileReqDto,
+  ): Promise<UpdateProfileResDto> {
+    const { roleId, phonenumber, ...rest } = data;
+
+    const userData: IUserPayload = {
+      ...rest,
+    };
+
+    const account: IAccountPayload = {
+      roleId,
+      phonenumber,
+    };
+
+    try {
+      const accountUpdateData = await this._dataSource
+        .getRepository(Account)
+        .createQueryBuilder()
+        .update(Account)
+        .set(account)
+        .where('id = :id', { id: accountID })
+        .execute();
+
+      if (accountUpdateData && accountUpdateData.affected === 0)
+        return AppResponse.setAppErrorResponse<UpdateProfileResDto>(
+          ErrorHandler.notFound(`Account ${accountID}`),
+          {
+            status: 404,
+          },
+        );
+
+      const accountAfterUpdate = await this._dataSource
+        .getRepository(Account)
+        .findOne({ where: { id: accountID } });
+
+      const { password, refreshToken, ...updatedAccountData } =
+        accountAfterUpdate;
+
+      const user = await this._userRepository
+        .createQueryBuilder()
+        .update(User)
+        .set(userData)
+        .where('id = :id', { id: updatedAccountData.userId })
+        .execute();
+
+      if (user && user.affected === 0)
+        return AppResponse.setAppErrorResponse<UpdateProfileResDto>(
+          ErrorHandler.notFound(`User ${updatedAccountData.userId}`),
+        );
+
+      const finalResult = {
+        ...rest,
+        ...account,
+      };
+
+      return AppResponse.setSuccessResponse<UpdateProfileResDto>(finalResult, {
+        status: 200,
+        message: 'Updated',
+      });
+    } catch (error) {
+      if (error.message.includes('duplicate key')) {
+        return AppResponse.setAppErrorResponse<UpdateProfileResDto>(
+          'Email existed',
+          {
+            status: 400,
+          },
+        );
+      }
+      return AppResponse.setAppErrorResponse<UpdateProfileResDto>(
+        error.message,
+      );
     }
   }
 }
