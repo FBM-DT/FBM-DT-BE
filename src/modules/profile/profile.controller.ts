@@ -2,29 +2,21 @@ import {
   Controller,
   Post,
   Body,
-  UseGuards,
-  Get,
-  Param,
   ParseIntPipe,
   Patch,
+  Param,
+  Get,
 } from '@nestjs/common';
 import { ProfileService } from './profile.service';
-import {
-  ApiBearerAuth,
-  ApiCreatedResponse,
-  ApiOkResponse,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { AddProfileReqDto, UpdateProfileReqDto } from './dto/req';
 import {
   AddProfileResDto,
-  GetProfileResDto,
   UpdateProfileResDto,
+  GetProfileResDto,
 } from './dto/res';
 import { ACCOUNT_ROLE } from '../../core/constants';
-import { HasRoles } from '../../core/utils/decorators';
-import { JwtAuthGuard, RolesGuard } from '../auth/guards';
-import { Auth } from '../../core/utils/decorators/Auth';
+import { Auth } from '../../core/utils/decorators';
 
 @ApiTags('Profile')
 @Controller('profile')
@@ -43,9 +35,7 @@ export class ProfileController {
       },
     },
   })
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @HasRoles(ACCOUNT_ROLE.SUPERVISOR)
-  @ApiBearerAuth('token')
+  @Auth(ACCOUNT_ROLE.SUPERVISOR)
   async createProfile(
     @Body() createProfileDto: AddProfileReqDto,
   ): Promise<AddProfileResDto> {
@@ -106,8 +96,7 @@ export class ProfileController {
     },
   })
   @Patch('update/:id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @HasRoles(ACCOUNT_ROLE.SUPERVISOR)
+  @Auth(ACCOUNT_ROLE.SUPERVISOR)
   async updateProfile(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateProfileDto: UpdateProfileReqDto,
