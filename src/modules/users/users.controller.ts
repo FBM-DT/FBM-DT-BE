@@ -1,13 +1,27 @@
 import { ApiTags } from '@nestjs/swagger';
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, Patch } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { UserDto } from './dto/user.dto';
+import { AddUserProfileReqDto } from './dto/request';
+import { AddUserProfileResDto } from './dto/response';
+import { HasRoles } from '../auth/decorators/role.decorator';
+import { ACCOUNT_ROLE } from 'src/core/constants';
 
 @ApiTags('User')
 @Controller('users')
 export class UsersController {
   constructor(private userService: UsersService) {}
 
-  @Post('add')
-  async addUser(@Body() dto: UserDto) {}
+  @Post('addProfile')
+  async addProfileUser(
+    @Body() dto: AddUserProfileReqDto,
+  ): Promise<AddUserProfileResDto> {
+    const response: AddUserProfileResDto =
+      await this.userService.addProfileUser(dto);
+    return response;
+  }
+
+  @Patch('staffUpdateProfile')
+  async updateProfile() {
+    
+  }
 }
