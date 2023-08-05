@@ -63,7 +63,7 @@ export class AccountController {
   @ApiBearerAuth('token')
   async getAccountDetail(@GetAccount() account): Promise<GetAccountResDto> {
     const response: GetAccountResDto = await this.accountService.getAccountById(
-      account.accountId,
+      account.payload.accountId,
     );
     return response;
   }
