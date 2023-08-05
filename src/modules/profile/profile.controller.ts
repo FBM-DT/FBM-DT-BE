@@ -14,6 +14,7 @@ import { AddProfileResDto, UpdateProfileResDto } from './dto/res';
 import { ACCOUNT_ROLE } from '../../core/constants';
 import { HasRoles } from '../auth/decorators/role.decorator';
 import { JwtAuthGuard, RolesGuard } from '../auth/guards';
+import { Auth } from '../../core/utils/decorators/Auth';
 
 @ApiTags('Profile')
 @Controller('profile')
@@ -65,8 +66,7 @@ export class ProfileController {
     },
   })
   @Patch('update/:id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @HasRoles(ACCOUNT_ROLE.SUPERVISOR)
+  @Auth(ACCOUNT_ROLE.SUPERVISOR)
   async updateProfile(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateProfileDto: UpdateProfileReqDto,

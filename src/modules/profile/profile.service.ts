@@ -86,10 +86,6 @@ export class ProfileService {
     const userData: IUserPayload = {
       ...rest,
     };
-    console.log(
-      '🚀 ~ file: profile.service.ts:87 ~ ProfileService ~ userData:',
-      userData,
-    );
 
     const account: IAccountPayload = {
       roleId,
@@ -128,7 +124,7 @@ export class ProfileService {
         .execute();
 
       if (user && user.affected === 0)
-        return AppResponse.setAppErrorResponse<any>(
+        return AppResponse.setAppErrorResponse<UpdateProfileResDto>(
           ErrorHandler.notFound(`User ${updatedAccountData.userId}`),
         );
 
@@ -137,7 +133,7 @@ export class ProfileService {
         ...account,
       };
 
-      return AppResponse.setSuccessResponse<any>(finalResult, {
+      return AppResponse.setSuccessResponse<UpdateProfileResDto>(finalResult, {
         status: 200,
         message: 'Updated',
       });
@@ -145,6 +141,9 @@ export class ProfileService {
       if (error.message.includes('duplicate key')) {
         return AppResponse.setAppErrorResponse<UpdateProfileResDto>(
           'Email existed',
+          {
+            status: 400,
+          },
         );
       }
       return AppResponse.setAppErrorResponse<UpdateProfileResDto>(
