@@ -14,6 +14,7 @@ import { AddProfileResDto, GetProfileResDto } from './dto/res';
 import { ACCOUNT_ROLE } from '../../core/constants';
 import { HasRoles } from '../../core/utils/decorators';
 import { JwtAuthGuard, RolesGuard } from '../auth/guards';
+import { Auth } from '../../core/utils/decorators/Auth';
 
 @ApiTags('Profile')
 @Controller('profile')
