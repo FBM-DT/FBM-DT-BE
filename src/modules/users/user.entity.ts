@@ -71,7 +71,7 @@ export class User extends ShareEntity {
   @OneToMany(() => StaffShift, (staffShift) => staffShift.userId)
   staffShifts: StaffShift[];
 
-  @OneToMany(() => Position, (position) => position.id)
+  @OneToMany(() => Position, (position) => position.userId)
   positions: Position[];
 
   @OneToMany(() => Account, (account) => account.userId)

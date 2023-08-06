@@ -9,12 +9,12 @@ import {
 } from 'class-validator';
 import { WORKTYPE } from '../../../../core/constants';
 import { PaginationReqDto } from '../../../../core/shared/request';
+import {
+  AddTaskNoteReqDto,
+  AddTaskReqDto,
+} from '../../../../modules/task/dto/request';
 
-class Sort {
-  sortBy: string;
-  sortValue: string;
-}
-export class AddWorkShiftReqDto {
+class AddWorkShift {
   @IsNotEmpty({ message: 'The work shift name is required' })
   @IsString({ message: 'The workshift name must be string type' })
   readonly name: string;
@@ -37,13 +37,16 @@ export class AddWorkShiftReqDto {
   @IsString({ message: 'The work shift description must be string type' })
   readonly description: string;
 }
+export class AddWorkShiftReqDto {
+  workShift?: AddWorkShift;
+  task?: AddTaskReqDto;
+  taskNote?: Array<AddTaskNoteReqDto>;
+}
 
 export class GetWorkShiftListReqDto extends PaginationReqDto {
   @IsOptional()
-  @IsArray({ message: 'The sort must be an array' })
-  @ArrayMinSize(1)
-  @ValidateNested({ each: true, context: Sort })
-  readonly sort?: Sort[];
+  @IsString({ message: 'The sort must be a string' })
+  readonly sort?: string;
 
   @IsOptional()
   @IsString({ message: 'The type must be a string' })

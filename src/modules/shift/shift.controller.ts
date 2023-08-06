@@ -52,6 +52,7 @@ export class ShiftController {
   async getWorkShiftList(
     @Query() queries: GetWorkShiftListReqDto,
   ): Promise<GetWorkShiftListResDto> {
+    console.log("🚀 ~ file: shift.controller.ts:55 ~ ShiftController ~ queries:", queries)
     const response: GetWorkShiftListResDto =
       await this.shiftService.getWorkShiftList(queries);
     return response;

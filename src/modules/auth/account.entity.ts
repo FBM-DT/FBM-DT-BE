@@ -1,7 +1,8 @@
 import { ShareEntity } from '../../core/shared';
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { Role } from '../role/role.entity';
 import { User } from '../users/user.entity';
+import { TaskNote } from '../task/entities/tasknote.entity';
 
 @Entity()
 export class Account extends ShareEntity {
@@ -53,4 +54,7 @@ export class Account extends ShareEntity {
   })
   @JoinColumn({ name: 'userId' })
   user: User;
+
+  @OneToMany(() => TaskNote, (taskNote) => taskNote.accountId)
+  taskNotes: TaskNote[];
 }

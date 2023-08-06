@@ -25,21 +25,23 @@ export const ExtraQuery = {
     }
   },
   sortBy<T extends ShareEntity>(
-    sortOptions: Array<ISort>,
+    sortString: string,
     options: FindManyOptions,
   ): void {
-    if (sortOptions !== undefined) {
+    if (sortString !== undefined && sortString.length > 0) {
+      const sortOptions: Array<string> = sortString.split(',');
       let ordersOption: FindOptionsOrder<T> = {};
       sortOptions.forEach((option) => {
+        const sortPair: Array<string> = option.split(':');
         if (
-          option.sortBy !== null &&
-          option.sortBy !== undefined &&
-          option.sortValue !== null &&
-          option.sortValue !== undefined
+          sortPair[0] !== undefined &&
+          sortPair[0] !== null &&
+          sortPair[1] !== undefined &&
+          sortPair[1] !== null
         ) {
           ordersOption = {
             ...ordersOption,
-            [option.sortBy.toString()]: option.sortValue,
+            [sortPair[0]]: sortPair[1],
           };
         }
       });
@@ -64,6 +66,10 @@ export const ExtraQuery = {
         });
       }
     });
+    if (Object.keys(typeormWhereConditions)?.length === 0) {
+      return;
+    }
+
     if (Object.keys(typeormWhereConditions)?.length === 0) {
       return;
     }
@@ -93,7 +99,7 @@ export const ExtraQuery = {
       }
     }
   },
-  searchByEnum<T extends ShareEntity>(
+  searchByConstant<T extends ShareEntity>(
     searchObject: Object,
     options: FindManyOptions,
     searchType: SEARCH_TYPE = SEARCH_TYPE.AND,

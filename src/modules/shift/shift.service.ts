@@ -16,7 +16,7 @@ import { DataSource, FindManyOptions, Repository } from 'typeorm';
 import { WorkShift } from './entities/workShift.entity';
 import { AppResponse } from '../../core/shared/app.response';
 import { StaffShift } from './entities/staffInShift.entity';
-import { Task } from '../task/entities/task.entity';
+import { Task, TaskNote } from '../task/entities';
 import { ExtraQuery } from '../../core/utils';
 
 @Injectable()
@@ -32,24 +32,58 @@ export class ShiftService {
   }
 
   async createWorkShift(data: AddWorkShiftReqDto): Promise<AddWorkShiftResDto> {
+    const queryRunner = this._dataSource.createQueryRunner();
+
     try {
-      const result = await this._workShiftRepository
+      await queryRunner.connect();
+      await queryRunner.startTransaction('SERIALIZABLE');
+      const addWorkShiftResult = await queryRunner.manager
+        .getRepository(WorkShift)
         .createQueryBuilder()
         .insert()
         .into(WorkShift)
-        .values(data)
+        .values(data.workShift)
         .execute();
+      data.task = {
+        ...data.task,
+        workShiftId: addWorkShiftResult.identifiers[0].id,
+      };
+      const addTaskResult = await queryRunner.manager
+        .getRepository(Task)
+        .createQueryBuilder()
+        .insert()
+        .into(Task)
+        .values(data.task)
+        .execute();
+      data.taskNote.forEach((note) => {
+        note = Object.assign(note, { taskId: addTaskResult.identifiers[0].id });
+      });
+      const addTaskNoteResult = await queryRunner.manager
+        .getRepository(TaskNote)
+        .createQueryBuilder()
+        .insert()
+        .into(TaskNote)
+        .values(data.taskNote)
+        .execute();
+      await queryRunner.commitTransaction();
       return AppResponse.setSuccessResponse<AddWorkShiftResDto>(
-        result.identifiers[0].id,
+        {
+          workShift: addWorkShiftResult.identifiers[0].id,
+          task: addTaskResult.identifiers[0].id,
+          taskNote: addTaskNoteResult.identifiers,
+        },
         {
           status: 201,
           message: 'Created',
         },
       );
     } catch (error) {
+      await queryRunner.rollbackTransaction();
       return AppResponse.setAppErrorResponse<AddWorkShiftResDto>(
         error.message,
       );
+    } finally {
+      await queryRunner.release();
     }
   }
 
@@ -89,7 +123,7 @@ export class ShiftService {
           options,
           SEARCH_TYPE.AND,
         );
-        ExtraQuery.searchByEnum<WorkShift>(
+        ExtraQuery.searchByConstant<WorkShift>(
           { type: WORKTYPE[queries.type?.toUpperCase()] },
           options,
           SEARCH_TYPE.AND,
@@ -116,33 +150,31 @@ export class ShiftService {
   }
 
   async deleteWorkShift(workShiftId: number): Promise<DeleteWorkShiftResDto> {
+    const response: DeleteWorkShiftResDto = new DeleteWorkShiftResDto();
+    const queryRunner = this._dataSource.createQueryRunner();
     try {
-      const result = await this._dataSource.transaction(
-        'SERIALIZABLE',
-        async (transaction) => {
-          let returnValues: Object = new Object();
-          const deleteWorkShiftReturn = await transaction
-            .getRepository(WorkShift)
-            .delete({ id: workShiftId });
-          const deleteStaffShiftReturn = await transaction
-            .getRepository(StaffShift)
-            .delete({
-              workShiftId: workShiftId,
-            });
-          const deleteRelatedTasksReturn = await transaction
-            .getRepository(Task)
-            .delete({
-              workShiftId: workShiftId,
-            });
-          returnValues = {
-            workShift: deleteWorkShiftReturn.affected,
-            staffShift: deleteStaffShiftReturn.affected,
-            tasks: deleteRelatedTasksReturn.affected,
-          };
-          return returnValues;
-        },
+      await queryRunner.connect();
+      await queryRunner.startTransaction('SERIALIZABLE');
+
+      let returnValues: Object = new Object();
+      const deleteWorkShiftReturn = await queryRunner.manager
+        .getRepository(WorkShift)
+        .delete({ id: workShiftId });
+      const deleteStaffShiftReturn = await queryRunner.manager
+        .getRepository(StaffShift)
+        .delete({
+          workShiftId: workShiftId,
+        });
+      returnValues = {
+        workShift: deleteWorkShiftReturn.affected,
+        staffShift: deleteStaffShiftReturn.affected,
+      };
+      await queryRunner.commitTransaction();
+      AppResponse.setSuccessResponse<DeleteWorkShiftResDto>(
+        response,
+        returnValues,
       );
-      return AppResponse.setSuccessResponse<DeleteWorkShiftResDto>(result);
+      return response;
     } catch (error) {
       return AppResponse.setAppErrorResponse<AddWorkShiftResDto>(
         error.message,
