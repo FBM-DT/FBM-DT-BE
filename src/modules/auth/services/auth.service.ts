@@ -6,7 +6,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { AccountService } from './account.service';
 import { Account } from '../account.entity';
-import { IAuthAccess, IAuthPayload } from '../interfaces';
+import { IAuthPayload } from '../interfaces';
 import { AppResponse } from '../../../core/shared/app.response';
 import { SigninReqDto } from '../dto/request';
 import {
@@ -78,10 +78,9 @@ export class AuthService {
     }
   }
 
-  async handleLogout(payload: IAuthAccess): Promise<LogoutResDto> {
+  async handleLogout(accessToken: string): Promise<LogoutResDto> {
     try {
-      const token = payload.authorization.replace('Bearer', '').trim();
-      const account = await this.verifyAccessToken(token);
+      const account = await this.verifyAccessToken(accessToken);
       const updateRefreshToken = await this.accountService.updateRefreshToken(
         account['id'],
         {

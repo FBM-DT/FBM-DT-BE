@@ -6,6 +6,8 @@ import {
   ApiCreatedResponse,
   ApiOkResponse,
   ApiForbiddenResponse,
+  ApiNotFoundResponse,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import {
   Body,
@@ -20,19 +22,22 @@ import {
 import { JwtAuthGuard, RolesGuard } from '../guards';
 import { ACCOUNT_ROLE } from '../../../core/constants';
 import { AccountService } from '../services';
-import { HasRoles } from '../decorators/role.decorator';
 import {
+  BadRequestResDto,
   ChangePasswordResDto,
   CreateAccountResDto,
   GetAccountResDto,
   GetAllAccountsResDto,
+  NotFoundResDto,
   UpdateAccountResDto,
 } from '../dto/response';
 import {
   ChangePasswordReqDto,
   CreateAccountReqDto,
+  NewPasswordReqDto,
   UpdateAccountReqDto,
 } from '../dto/request';
+import { GetAccount, HasRoles } from '../../../core/utils/decorators';
 
 @ApiTags('Account')
 @Controller('account')
@@ -45,9 +50,21 @@ export class AccountController {
   @ApiOkResponse({ description: 'The list account were returned successfully' })
   @ApiForbiddenResponse({ description: 'Unauthorized Request' })
   @Get('list')
+  @ApiBearerAuth('token')
   async getAccountList(): Promise<GetAllAccountsResDto> {
     const response: GetAllAccountsResDto =
       await this.accountService.getAccountList();
+    return response;
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('detail')
+  @ApiOperation({ summary: 'Get my account detail' })
+  @ApiBearerAuth('token')
+  async getAccountDetail(@GetAccount() account): Promise<GetAccountResDto> {
+    const response: GetAccountResDto = await this.accountService.getAccountById(
+      account.payload.accountId,
+    );
     return response;
   }
 
@@ -60,11 +77,14 @@ export class AccountController {
     return response;
   }
 
+  @HasRoles(ACCOUNT_ROLE.ADM)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiOperation({ summary: 'Create a new account' })
   @ApiBody({ type: CreateAccountReqDto })
   @ApiCreatedResponse({ description: 'Created Successfully' })
   @ApiBadRequestResponse({ description: 'Bad Request' })
   @Post()
+  @ApiBearerAuth('token')
   async createAccount(
     @Body() accountDto: CreateAccountReqDto,
   ): Promise<CreateAccountResDto> {
@@ -96,6 +116,27 @@ export class AccountController {
   ): Promise<ChangePasswordResDto> {
     const response: ChangePasswordResDto =
       await this.accountService.changePassword(accountId, payload);
+    return response;
+  }
+
+  @ApiOperation({ summary: 'New password' })
+  @ApiBody({ type: NewPasswordReqDto })
+  @ApiOkResponse({ description: 'The password was updated successfully' })
+  @ApiNotFoundResponse({
+    description: 'Resource not found',
+    type: NotFoundResDto,
+  })
+  @ApiBadRequestResponse({
+    description: 'Bad Request',
+    type: BadRequestResDto,
+  })
+  @Patch('/:phonenumber/new-password')
+  async handleNewPassword(
+    @Param('phonenumber') phonenumber: string,
+    @Body() payload: NewPasswordReqDto,
+  ): Promise<ChangePasswordResDto> {
+    const response: ChangePasswordResDto =
+      await this.accountService.handleNewPassword(phonenumber, payload);
     return response;
   }
 }
