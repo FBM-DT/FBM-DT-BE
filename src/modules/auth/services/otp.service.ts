@@ -53,8 +53,8 @@ export class OtpService {
       const getOTP = await this.generateOtp();
       const message = `Your OTP is: ${getOTP}`;
       await this.twilioService.client.messages.create({
-        to: formatPhoneNumber,
-        from: this.configService.get<string>('TWILIO_SENDER_PHONE_NUMBER'),
+        to: `whatsapp:${formatPhoneNumber}`,
+        from: this.configService.get<string>('TWILIO_SENDER_SANDBOX'),
         messagingServiceSid: this.configService.get<string>(
           'TWILIO_VERIFICATION_SERVICE_SID',
         ),
