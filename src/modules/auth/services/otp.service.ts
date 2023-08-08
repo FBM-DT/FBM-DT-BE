@@ -44,10 +44,9 @@ export class OtpService {
       });
 
       if (!account) {
-        const response: OTPResDto = AppResponse.setUserErrorResponse<OTPResDto>(
+        return AppResponse.setUserErrorResponse<OTPResDto>(
           ErrorHandler.notFound(`The phone number ${phoneNumber}`),
         );
-        return response;
       }
 
       const getOTP = await this.generateOtp();
@@ -61,15 +60,11 @@ export class OtpService {
         body: message,
       });
 
-      const response: OTPResDto = AppResponse.setSuccessResponse({
+      return AppResponse.setSuccessResponse({
         message: 'OTP sent successfully!',
       });
-      return response;
     } catch (error) {
-      const response: OTPResDto = AppResponse.setAppErrorResponse(
-        error.message,
-      );
-      return response;
+      return AppResponse.setAppErrorResponse(error.message);
     }
   }
 
@@ -80,10 +75,9 @@ export class OtpService {
       });
 
       if (!account) {
-        const response: OTPResDto = AppResponse.setUserErrorResponse<OTPResDto>(
+        return AppResponse.setUserErrorResponse<OTPResDto>(
           ErrorHandler.notFound(`The phone number ${phonenumber}`),
         );
-        return response;
       }
 
       const otpBody = JSON.stringify(otp);
@@ -97,17 +91,15 @@ export class OtpService {
       });
 
       if (!isValidOtp) {
-        const response: VerifyOTPResDto =
-          AppResponse.setUserErrorResponse<VerifyOTPResDto>(
-            ErrorHandler.invalid('The OTP'),
-            {
-              data: {
-                valid: isValidOtp,
-                status: 'rejected',
-              },
+        return AppResponse.setUserErrorResponse<VerifyOTPResDto>(
+          ErrorHandler.invalid('The OTP'),
+          {
+            data: {
+              valid: isValidOtp,
+              status: 'rejected',
             },
-          );
-        return response;
+          },
+        );
       }
       const confirmOtp = await this._accountRepository
         .createQueryBuilder()
@@ -118,17 +110,13 @@ export class OtpService {
         .where('phonenumber = :phonenumber', { phonenumber: phonenumber })
         .execute();
 
-      const response: VerifyOTPResDto =
-        AppResponse.setSuccessResponse<VerifyOTPResDto>({
-          valid: isValidOtp,
-          status: 'approved',
-          accountId: confirmOtp.affected,
-        });
-      return response;
+      return AppResponse.setSuccessResponse<VerifyOTPResDto>({
+        valid: isValidOtp,
+        status: 'approved',
+        accountId: confirmOtp.affected,
+      });
     } catch (error) {
-      const response: VerifyOTPResDto =
-        AppResponse.setAppErrorResponse<VerifyOTPResDto>(error.message);
-      return response;
+      return AppResponse.setAppErrorResponse<VerifyOTPResDto>(error.message);
     }
   }
 }
