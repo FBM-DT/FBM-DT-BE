@@ -6,10 +6,21 @@ import {
   IsString,
   MaxLength,
   MinLength,
+  IsArray,
+  ArrayMinSize,
+  ValidateNested,
+  Min,
 } from 'class-validator';
 import { PartialType } from '@nestjs/mapped-types';
 import { ApiProperty } from '@nestjs/swagger';
 import { ACCOUNT_ROLE } from '../../../../core/constants';
+import { PaginationReqDto } from '../../../../core/shared/request';
+import { Transform } from 'class-transformer';
+
+class Sort {
+  sortBy: string;
+  sortValue: string;
+}
 
 export class CreateAccountReqDto {
   @IsNotEmpty({ message: 'The phone number is required' })
@@ -144,17 +155,33 @@ export class VerifyOtpReqDto {
   otp: string;
 }
 
-export class QueriesAccountReqDto {
-  @IsString()
-  @IsOptional()
-  @ApiProperty({ required: false })
-  phonenumber: string;
-
+export class QueriesGetAccountsReqDto extends PaginationReqDto {
   @IsEnum(ACCOUNT_ROLE)
   @IsOptional()
   @ApiProperty({
     required: false,
     enum: ACCOUNT_ROLE,
   })
-  role: string;
+  readonly role?: string;
+
+  @IsOptional()
+  @IsArray({ message: 'The sort must be an array' })
+  @ArrayMinSize(1)
+  @ValidateNested({ each: true, context: Sort })
+  @ApiProperty({ required: false })
+  readonly sort?: Sort[];
+
+  @IsOptional()
+  @Transform(({ value }) => parseInt(value))
+  @IsInt({ message: 'The page must be a number' })
+  @Min(0)
+  @ApiProperty({ required: false })
+  readonly page?: number;
+
+  @IsOptional()
+  @Transform(({ value }) => parseInt(value))
+  @IsInt({ message: 'The page must be a number' })
+  @Min(0)
+  @ApiProperty({ required: false })
+  readonly pageSize?: number;
 }

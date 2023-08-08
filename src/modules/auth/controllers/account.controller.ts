@@ -15,6 +15,7 @@ import {
   Get,
   Param,
   Post,
+  Query,
   UseGuards,
   Patch,
   ParseIntPipe,
@@ -36,6 +37,7 @@ import {
   CreateAccountReqDto,
   NewPasswordReqDto,
   UpdateAccountReqDto,
+  QueriesGetAccountsReqDto,
 } from '../dto/request';
 import { GetAccount, HasRoles } from '../../../core/utils/decorators';
 
@@ -44,16 +46,18 @@ import { GetAccount, HasRoles } from '../../../core/utils/decorators';
 export class AccountController {
   constructor(private accountService: AccountService) {}
 
-  @HasRoles(ACCOUNT_ROLE.ADM)
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  // @HasRoles(ACCOUNT_ROLE.ADM)
+  // @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiOperation({ summary: 'Get all account' })
   @ApiOkResponse({ description: 'The list account were returned successfully' })
   @ApiForbiddenResponse({ description: 'Unauthorized Request' })
   @Get('list')
   @ApiBearerAuth('token')
-  async getAccountList(): Promise<GetAllAccountsResDto> {
+  async getAccountList(
+    @Query() queries: QueriesGetAccountsReqDto,
+  ): Promise<GetAllAccountsResDto> {
     const response: GetAllAccountsResDto =
-      await this.accountService.getAccountList();
+      await this.accountService.getAccountList(queries);
     return response;
   }
 

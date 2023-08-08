@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { TYPEORM } from '../../../core/constants';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, Repository, FindManyOptions } from 'typeorm';
 import { AppResponse } from '../../../core/shared/app.response';
 import { Account } from '../account.entity';
 import {
@@ -17,9 +17,11 @@ import {
   CreateAccountReqDto,
   NewPasswordReqDto,
   UpdateAccountReqDto,
+  QueriesGetAccountsReqDto,
 } from '../dto/request';
 import { ErrorHandler } from '../../../core/shared/common/error';
 import { Bcrypt } from '../../../core/utils';
+import { ExtraQuery } from '../../../core/utils';
 
 @Injectable()
 export class AccountService {
@@ -30,25 +32,42 @@ export class AccountService {
     this._accountRepository = dataSource.getRepository(Account);
   }
 
-  async getAccountList(): Promise<GetAllAccountsResDto> {
+  async getAccountList(
+    queries: QueriesGetAccountsReqDto,
+  ): Promise<GetAllAccountsResDto> {
     try {
-      const account = await this._accountRepository.find({
-        relations: {
-          role: true,
-          user: true,
-        },
-        order: {
-          id: 'ASC',
-        },
-      });
+      if (Object.keys(queries).length > 0) {
+        const options: FindManyOptions = new Object();
+        ExtraQuery.paginateBy(
+          {
+            page: queries.page,
+            pageSize: queries.pageSize,
+          },
+          options,
+        );
+        ExtraQuery.sortBy<Account>(queries.sort, options);
 
-      const response: GetAllAccountsResDto =
-        AppResponse.setSuccessResponse<GetAllAccountsResDto>(account);
-      return response;
+        const account: Account[] = await this._accountRepository.find(options);
+        return AppResponse.setSuccessResponse<GetAllAccountsResDto>(account, {
+          page: queries.page,
+          pageSize: queries.pageSize,
+        });
+      }
+
+      const [account, countTotalAccount] =
+        await this._accountRepository.findAndCount({
+          relations: ['role', 'user'],
+          order: {
+            id: 'ASC',
+          },
+        });
+
+      console.log(countTotalAccount);
+      return AppResponse.setSuccessResponse<GetAllAccountsResDto>(account);
     } catch (error) {
-      const response: GetAllAccountsResDto =
-        AppResponse.setAppErrorResponse<GetAllAccountsResDto>(error.message);
-      return response;
+      return AppResponse.setAppErrorResponse<GetAllAccountsResDto>(
+        error.message,
+      );
     }
   }
 
@@ -58,21 +77,16 @@ export class AccountService {
         where: { id },
         relations: ['user', 'role'],
       });
+
       if (!account) {
-        const response: GetAccountResDto =
-          AppResponse.setUserErrorResponse<GetAccountResDto>(
-            ErrorHandler.notFound(`Account ${id}`),
-          );
-        return response;
+        return AppResponse.setUserErrorResponse<GetAccountResDto>(
+          ErrorHandler.notFound(`Account ${id}`),
+        );
       }
 
-      const response: GetAccountResDto =
-        AppResponse.setSuccessResponse<GetAccountResDto>(account);
-      return response;
+      return AppResponse.setSuccessResponse<GetAccountResDto>(account);
     } catch (error) {
-      const response: GetAccountResDto =
-        AppResponse.setAppErrorResponse<GetAccountResDto>(error.message);
-      return response;
+      return AppResponse.setAppErrorResponse<GetAccountResDto>(error.message);
     }
   }
 
@@ -101,11 +115,9 @@ export class AccountService {
       });
 
       if (phonenumber === existPhoneNumber?.phonenumber) {
-        const response: CreateAccountResDto =
-          AppResponse.setUserErrorResponse<UpdateAccountResDto>(
-            ErrorHandler.alreadyExists('The phone number'),
-          );
-        return response;
+        return AppResponse.setUserErrorResponse<UpdateAccountResDto>(
+          ErrorHandler.alreadyExists('The phone number'),
+        );
       } else {
         const hashPassword = Bcrypt.handleHashPassword(password);
         const data = { ...payload, password: hashPassword };
@@ -116,21 +128,18 @@ export class AccountService {
           .into(Account)
           .values(data)
           .execute();
-
-        const response: CreateAccountResDto =
-          AppResponse.setSuccessResponse<CreateAccountResDto>(
-            account.identifiers[0].id,
-            {
-              status: 201,
-              message: 'Created',
-            },
-          );
-        return response;
+        return AppResponse.setSuccessResponse<CreateAccountResDto>(
+          account.identifiers[0].id,
+          {
+            status: 201,
+            message: 'Created',
+          },
+        );
       }
     } catch (error) {
-      const response: CreateAccountResDto =
-        AppResponse.setAppErrorResponse<CreateAccountResDto>(error.message);
-      return response;
+      return AppResponse.setAppErrorResponse<CreateAccountResDto>(
+        error.message,
+      );
     }
   }
 
@@ -146,11 +155,9 @@ export class AccountService {
       });
 
       if (phonenumber === existPhoneNumber?.phonenumber) {
-        const response: UpdateAccountResDto =
-          AppResponse.setUserErrorResponse<UpdateAccountResDto>(
-            ErrorHandler.alreadyExists('The phone number'),
-          );
-        return response;
+        return AppResponse.setUserErrorResponse<UpdateAccountResDto>(
+          ErrorHandler.alreadyExists('The phone number'),
+        );
       }
 
       if (!password) {
@@ -160,9 +167,10 @@ export class AccountService {
           .where('account.id = :accountId', { accountId: accountId })
           .set(accountDto)
           .execute();
-        const response: UpdateAccountResDto =
-          AppResponse.setSuccessResponse<UpdateAccountResDto>(result.affected);
-        return response;
+
+        return AppResponse.setSuccessResponse<UpdateAccountResDto>(
+          result.affected,
+        );
       } else {
         newPassword = Bcrypt.handleHashPassword(password);
         const account = { ...accountDto, password: newPassword };
@@ -172,14 +180,14 @@ export class AccountService {
           .where('account.id = :accountId', { accountId: accountId })
           .set(account)
           .execute();
-        const response: UpdateAccountResDto =
-          AppResponse.setSuccessResponse<UpdateAccountResDto>(result.affected);
-        return response;
+        return AppResponse.setSuccessResponse<UpdateAccountResDto>(
+          result.affected,
+        );
       }
     } catch (error) {
-      const response: UpdateAccountResDto =
-        AppResponse.setAppErrorResponse<UpdateAccountResDto>(error.message);
-      return response;
+      return AppResponse.setAppErrorResponse<UpdateAccountResDto>(
+        error.message,
+      );
     }
   }
 
@@ -194,11 +202,9 @@ export class AccountService {
       });
 
       if (!account) {
-        const response: ChangePasswordResDto =
-          AppResponse.setUserErrorResponse<ChangePasswordResDto>(
-            ErrorHandler.notFound(`Account ${accountId}`),
-          );
-        return response;
+        return AppResponse.setUserErrorResponse<ChangePasswordResDto>(
+          ErrorHandler.notFound(`Account ${accountId}`),
+        );
       }
 
       const isValidPassword = await bcrypt.compare(
@@ -207,28 +213,22 @@ export class AccountService {
       );
 
       if (!isValidPassword) {
-        const response: ChangePasswordResDto =
-          AppResponse.setUserErrorResponse<ChangePasswordResDto>(
-            ErrorHandler.invalid('The current password'),
-          );
-        return response;
+        return AppResponse.setUserErrorResponse<ChangePasswordResDto>(
+          ErrorHandler.invalid('The current password'),
+        );
       }
 
       if (confirmPassword !== newPassword) {
-        const response: ChangePasswordResDto =
-          AppResponse.setUserErrorResponse<ChangePasswordResDto>(
-            ErrorHandler.invalid('The confirm password'),
-          );
-        return response;
+        return AppResponse.setUserErrorResponse<ChangePasswordResDto>(
+          ErrorHandler.invalid('The confirm password'),
+        );
       }
 
       const isValidFormatPassword = await Bcrypt.isPasswordValid(newPassword);
       if (isValidFormatPassword === false) {
-        const response: ChangePasswordResDto =
-          AppResponse.setUserErrorResponse<ChangePasswordResDto>(
-            'The password and confirm password are not correct format',
-          );
-        return response;
+        return AppResponse.setUserErrorResponse<ChangePasswordResDto>(
+          'The password and confirm password are not correct format',
+        );
       }
 
       const hashPassword = Bcrypt.handleHashPassword(newPassword);
@@ -236,13 +236,13 @@ export class AccountService {
         password: hashPassword,
       });
 
-      const response: ChangePasswordResDto =
-        AppResponse.setSuccessResponse<ChangePasswordResDto>(result.affected);
-      return response;
+      return AppResponse.setSuccessResponse<ChangePasswordResDto>(
+        result.affected,
+      );
     } catch (error) {
-      const response: ChangePasswordResDto =
-        AppResponse.setAppErrorResponse<ChangePasswordResDto>(error.message);
-      return response;
+      return AppResponse.setAppErrorResponse<ChangePasswordResDto>(
+        error.message,
+      );
     }
   }
   async handleNewPassword(
@@ -256,42 +256,34 @@ export class AccountService {
       });
 
       if (!account) {
-        const response: NewPasswordResDto =
-          AppResponse.setUserErrorResponse<NewPasswordResDto>(
-            ErrorHandler.notFound(`The phone number ${phonenumber}`),
-          );
-        return response;
+        return AppResponse.setUserErrorResponse<NewPasswordResDto>(
+          ErrorHandler.notFound(`The phone number ${phonenumber}`),
+        );
       }
 
       if (!account.isValidOtp) {
-        const response: NewPasswordResDto =
-          AppResponse.setUserErrorResponse<NewPasswordResDto>(
-            ErrorHandler.invalid('The OTP'),
-            {
-              data: {
-                status: 'rejected',
-                message: 'You need to verify OTP first',
-              },
+        return AppResponse.setUserErrorResponse<NewPasswordResDto>(
+          ErrorHandler.invalid('The OTP'),
+          {
+            data: {
+              status: 'rejected',
+              message: 'You need to verify OTP first',
             },
-          );
-        return response;
+          },
+        );
       }
 
       if (confirmPassword !== newPassword) {
-        const response: NewPasswordResDto =
-          AppResponse.setUserErrorResponse<NewPasswordResDto>(
-            ErrorHandler.invalid('The confirm password'),
-          );
-        return response;
+        return AppResponse.setUserErrorResponse<NewPasswordResDto>(
+          ErrorHandler.invalid('The confirm password'),
+        );
       }
 
       const isValidFormatPassword = await Bcrypt.isPasswordValid(newPassword);
       if (!isValidFormatPassword) {
-        const response: NewPasswordResDto =
-          AppResponse.setUserErrorResponse<NewPasswordResDto>(
-            'The password and confirm password are not correct format',
-          );
-        return response;
+        return AppResponse.setUserErrorResponse<NewPasswordResDto>(
+          'The password and confirm password are not correct format',
+        );
       }
 
       const hashPassword = Bcrypt.handleHashPassword(newPassword);
@@ -305,13 +297,9 @@ export class AccountService {
         .where('phonenumber = :phonenumber', { phonenumber: phonenumber })
         .execute();
 
-      const response: NewPasswordResDto =
-        AppResponse.setSuccessResponse<NewPasswordResDto>(result.affected);
-      return response;
+      return AppResponse.setSuccessResponse<NewPasswordResDto>(result.affected);
     } catch (error) {
-      const response: NewPasswordResDto =
-        AppResponse.setAppErrorResponse<NewPasswordResDto>(error.message);
-      return response;
+      return AppResponse.setAppErrorResponse<NewPasswordResDto>(error.message);
     }
   }
 
