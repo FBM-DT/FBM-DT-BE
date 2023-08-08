@@ -164,6 +164,11 @@ export class QueriesGetAccountsReqDto extends PaginationReqDto {
   })
   readonly role?: string;
 
+  @IsOptional({ message: 'The phone number must be an string' })
+  @IsString()
+  @ApiProperty({ required: false })
+  readonly phonenumber?: string;
+
   @IsOptional()
   @IsArray({ message: 'The sort must be an array' })
   @ArrayMinSize(1)

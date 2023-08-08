@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import { TYPEORM } from '../../../core/constants';
+import { ACCOUNT_ROLE, SEARCH_TYPE, TYPEORM } from '../../../core/constants';
 import { DataSource, Repository, FindManyOptions } from 'typeorm';
 import { AppResponse } from '../../../core/shared/app.response';
 import { Account } from '../account.entity';
@@ -46,6 +46,15 @@ export class AccountService {
           options,
         );
         ExtraQuery.sortBy<Account>(queries.sort, options);
+        ExtraQuery.searchBy<Account>(
+          {
+            role: queries.role,
+            phonenumber: queries.phonenumber,
+          },
+          options,
+          SEARCH_TYPE.AND,
+        );
+        ExtraQuery.selectWithRelations<Account>(['role', 'user'], options);
 
         const account: Account[] = await this._accountRepository.find(options);
         return AppResponse.setSuccessResponse<GetAllAccountsResDto>(account, {
@@ -54,15 +63,12 @@ export class AccountService {
         });
       }
 
-      const [account, countTotalAccount] =
-        await this._accountRepository.findAndCount({
-          relations: ['role', 'user'],
-          order: {
-            id: 'ASC',
-          },
-        });
-
-      console.log(countTotalAccount);
+      const account = await this._accountRepository.find({
+        relations: ['role', 'user'],
+        order: {
+          id: 'ASC',
+        },
+      });
       return AppResponse.setSuccessResponse<GetAllAccountsResDto>(account);
     } catch (error) {
       return AppResponse.setAppErrorResponse<GetAllAccountsResDto>(

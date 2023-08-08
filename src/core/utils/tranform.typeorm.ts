@@ -4,11 +4,18 @@ import {
   FindOptionsOrder,
   Like,
   FindOptionsSelect,
+  FindOptionsRelations,
 } from 'typeorm';
 import { PaginationReqDto } from '../shared/request';
 import { ShareEntity } from '../shared';
 import { ISort } from '../abstract/interface';
-import { SEARCH_TYPE } from '../constants';
+import { ACCOUNT_ROLE, SEARCH_TYPE } from '../constants';
+
+const ROLE_MAPPING = {
+  [ACCOUNT_ROLE.ADM]: 1,
+  [ACCOUNT_ROLE.SUPERVISOR]: 2,
+  [ACCOUNT_ROLE.USER]: 3,
+};
 
 export const ExtraQuery = {
   paginateBy(paginationOptions: PaginationReqDto, options: FindManyOptions) {
@@ -59,9 +66,21 @@ export const ExtraQuery = {
     let typeormWhereConditions: FindOptionsWhere<T> = {};
     Object.keys(searchObject).forEach((key: string) => {
       if (searchObject[key] !== undefined && searchObject[key] !== null) {
-        Object.assign(typeormWhereConditions, {
-          [key]: Like(`%${searchObject[key]}%`),
-        });
+        if (key === 'role' && typeof searchObject[key] === 'string') {
+          const roleId = ROLE_MAPPING[searchObject[key] as ACCOUNT_ROLE];
+          if (roleId !== undefined) {
+            Object.assign(typeormWhereConditions, {
+              roleId: roleId,
+            });
+          }
+        } else {
+          Object.assign(typeormWhereConditions, {
+            [key]: Like(`%${searchObject[key]}%`),
+          });
+        }
+        // Object.assign(typeormWhereConditions, {
+        //   [key]: Like(`%${searchObject[key]}%`),
+        // });
       }
     });
     if (Object.keys(typeormWhereConditions)?.length === 0) {
@@ -152,6 +171,21 @@ export const ExtraQuery = {
         };
       });
       Object.assign(options, { select: selectedColumns });
+    }
+  },
+  selectWithRelations<T extends ShareEntity>(
+    field: Array<string>,
+    options: FindManyOptions,
+  ): void {
+    if (field.length > 0) {
+      let selectedRelations: FindOptionsRelations<T> = {};
+      field.forEach((relation: string) => {
+        selectedRelations = {
+          ...selectedRelations,
+          [relation]: true,
+        };
+      });
+      Object.assign(options, { relations: selectedRelations });
     }
   },
 };
