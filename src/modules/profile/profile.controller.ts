@@ -8,7 +8,12 @@ import {
   ParseIntPipe,
 } from '@nestjs/common';
 import { ProfileService } from './profile.service';
-import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { AddProfileReqDto } from './dto/req';
 import { AddProfileResDto, GetProfileResDto } from './dto/res';
 import { ACCOUNT_ROLE } from '../../core/constants';
@@ -34,6 +39,7 @@ export class ProfileController {
   })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @HasRoles(ACCOUNT_ROLE.SUPERVISOR)
+  @ApiBearerAuth('token')
   async createProfile(
     @Body() createProfileDto: AddProfileReqDto,
   ): Promise<AddProfileResDto> {
