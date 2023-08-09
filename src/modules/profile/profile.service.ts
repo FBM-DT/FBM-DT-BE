@@ -2,14 +2,19 @@ import { Injectable, Inject } from '@nestjs/common';
 import { User } from '../users/user.entity';
 import { DataSource, Repository } from 'typeorm';
 import { TYPEORM } from '../../core/constants';
-import { AddProfileReqDto } from './dto/req';
-import { AddProfileResDto, GetProfileResDto } from './dto/res';
+import { AddProfileReqDto, UpdateProfileReqDto } from './dto/req';
+import {
+  AddProfileResDto,
+  GetProfileResDto,
+  UpdateProfileResDto,
+} from './dto/res';
 import { AppResponse } from '../../core/shared/app.response';
 import { AccountService } from '../auth/services';
 import { Account } from '../auth/account.entity';
 import { ErrorHandler } from '../../core/shared/common/error';
 import { IExistDataReturnValue } from './interfaces';
 import { Bcrypt } from '../../core/utils';
+import { IAccountPayload, IUserPayload } from './interfaces';
 
 @Injectable()
 export class ProfileService {
@@ -27,11 +32,11 @@ export class ProfileService {
   async createProfile(data: AddProfileReqDto): Promise<AddProfileResDto> {
     const { phonenumber, password, roleId, ...rest } = data;
 
-    const userData = {
+    const userData: IUserPayload = {
       ...rest,
     };
 
-    const account = {
+    const account: IAccountPayload = {
       phonenumber,
       password,
       roleId,
@@ -162,27 +167,23 @@ export class ProfileService {
 
   async getProfile(accountId: number): Promise<GetProfileResDto> {
     try {
-      const test = await this._dataSource.getRepository(Account).findOne({
+      const account = await this._dataSource.getRepository(Account).findOne({
         where: { id: accountId },
         relations: ['user', 'role'],
       });
-      if (!test)
+      if (!account)
         return AppResponse.setAppErrorResponse<GetProfileResDto>(
           ErrorHandler.notFound(`Account ${accountId}`),
           {
             status: 404,
           },
         );
-      console.log(
-        '🚀 ~ file: profile.service.ts:89 ~ ProfileService ~ test ~ test:',
-        test,
-      );
 
       const { id, ...profileData } = {
-        ...test.user,
-        accountId: test.id,
-        userId: test.user.id,
-        role: test.role.name,
+        ...account.user,
+        accountId: account.id,
+        userId: account.user.id,
+        role: account.role.name,
       };
 
       return AppResponse.setSuccessResponse<GetProfileResDto>(profileData, {
@@ -190,6 +191,113 @@ export class ProfileService {
       });
     } catch (error) {
       return AppResponse.setAppErrorResponse(error.message);
+    }
+  }
+
+  async updateProfile(
+    accountID: number,
+    data: UpdateProfileReqDto,
+  ): Promise<UpdateProfileResDto> {
+    const { roleId, phonenumber, ...rest } = data;
+
+    const userData: IUserPayload = {
+      ...rest,
+    };
+
+    const account = {
+      roleId,
+      phonenumber,
+    };
+
+    const querryRunner = this._dataSource.createQueryRunner();
+
+    try {
+      await querryRunner.connect();
+      await querryRunner.startTransaction('SERIALIZABLE');
+
+      const isHaveAccount = await this._dataSource
+        .getRepository(Account)
+        .findOneBy({
+          id: accountID,
+        });
+
+      if (!isHaveAccount) {
+        await querryRunner.rollbackTransaction();
+
+        return AppResponse.setAppErrorResponse<UpdateProfileResDto>(
+          ErrorHandler.notFound(`Account with id ${accountID}`),
+          {
+            status: 404,
+          },
+        );
+      }
+
+      const isExistPhoneNumber: IExistDataReturnValue =
+        await this.isExistUserProfileData({
+          phonenumber: data.phonenumber,
+        });
+
+      if (isExistPhoneNumber.isExist) {
+        await querryRunner.rollbackTransaction();
+
+        return AppResponse.setUserErrorResponse<AddProfileResDto>(
+          isExistPhoneNumber.message,
+        );
+      }
+      const isExistEmail: IExistDataReturnValue =
+        await this.isExistUserProfileData({
+          email: data.email,
+        });
+
+      if (isExistEmail.isExist) {
+        await querryRunner.rollbackTransaction();
+
+        return AppResponse.setUserErrorResponse<AddProfileResDto>(
+          isExistEmail.message,
+        );
+      }
+
+      const accountUpdateData = await this._dataSource
+        .getRepository(Account)
+        .createQueryBuilder()
+        .update(Account)
+        .set(account)
+        .where('id = :id', { id: accountID })
+        .execute();
+
+      const accountAfterUpdate = await this._dataSource
+        .getRepository(Account)
+        .findOne({ where: { id: accountID } });
+
+      const { ...updatedAccountData } = accountAfterUpdate;
+
+      const user = await this._userRepository
+        .createQueryBuilder()
+        .update(User)
+        .set(userData)
+        .where('id = :id', { id: updatedAccountData.userId })
+        .execute();
+
+      await querryRunner.commitTransaction();
+
+      const finalResult = {
+        ...rest,
+        ...account,
+        accountId: updatedAccountData.id,
+        userId: updatedAccountData.userId,
+      };
+
+      return AppResponse.setSuccessResponse<UpdateProfileResDto>(finalResult, {
+        status: 200,
+        message: 'Updated',
+      });
+    } catch (error) {
+      await querryRunner.rollbackTransaction();
+      return AppResponse.setAppErrorResponse<UpdateProfileResDto>(
+        error.message,
+      );
+    } finally {
+      await querryRunner.release();
     }
   }
 }
