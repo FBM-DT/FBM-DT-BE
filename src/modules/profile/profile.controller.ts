@@ -2,23 +2,21 @@ import {
   Controller,
   Post,
   Body,
-  UseGuards,
-  Get,
-  Param,
   ParseIntPipe,
+  Patch,
+  Param,
+  Get,
 } from '@nestjs/common';
 import { ProfileService } from './profile.service';
+import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { AddProfileReqDto, UpdateProfileReqDto } from './dto/req';
 import {
-  ApiBearerAuth,
-  ApiCreatedResponse,
-  ApiOkResponse,
-  ApiTags,
-} from '@nestjs/swagger';
-import { AddProfileReqDto } from './dto/req';
-import { AddProfileResDto, GetProfileResDto } from './dto/res';
+  AddProfileResDto,
+  UpdateProfileResDto,
+  GetProfileResDto,
+} from './dto/res';
 import { ACCOUNT_ROLE } from '../../core/constants';
-import { HasRoles } from '../../core/utils/decorators';
-import { JwtAuthGuard, RolesGuard } from '../auth/guards';
+import { Auth } from '../../core/utils/decorators';
 
 @ApiTags('Profile')
 @Controller('profile')
@@ -37,9 +35,7 @@ export class ProfileController {
       },
     },
   })
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @HasRoles(ACCOUNT_ROLE.SUPERVISOR)
-  @ApiBearerAuth('token')
+  @Auth(ACCOUNT_ROLE.SUPERVISOR)
   async createProfile(
     @Body() createProfileDto: AddProfileReqDto,
   ): Promise<AddProfileResDto> {
@@ -73,6 +69,39 @@ export class ProfileController {
     @Param('id', ParseIntPipe) id: number,
   ): Promise<GetProfileResDto> {
     const res = await this.profileService.getProfile(id);
+    return res;
+  }
+
+  @ApiOkResponse({
+    description: 'Update profile',
+    schema: {
+      example: {
+        version: '1.0.0',
+        status: 200,
+        message: 'OK',
+        data: {
+          fullname: 'Nguyen Van A',
+          dateOfBirth: '2021-01-01',
+          gender: 'female',
+          address: '15 Mai Thuc Lan',
+          email: 'example@gmail.com',
+          department: 'Coffeeshop',
+          startDate: '2021-01-01',
+          endDate: '2021-01-02',
+          avatar: 'https://i.pravatar.cc/300',
+          phonenumber: '0123456789',
+          roleId: 1,
+        },
+      },
+    },
+  })
+  @Patch('update/:id')
+  @Auth(ACCOUNT_ROLE.SUPERVISOR)
+  async updateProfile(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateProfileDto: UpdateProfileReqDto,
+  ): Promise<UpdateProfileResDto> {
+    const res = await this.profileService.updateProfile(id, updateProfileDto);
     return res;
   }
 }
