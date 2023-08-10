@@ -16,7 +16,6 @@ import { ApiProperty } from '@nestjs/swagger';
 import { ACCOUNT_ROLE } from '../../../../core/constants';
 import { PaginationReqDto } from '../../../../core/shared/request';
 import { Transform } from 'class-transformer';
-
 class Sort {
   sortBy: string;
   sortValue: string;
@@ -156,13 +155,13 @@ export class VerifyOtpReqDto {
 }
 
 export class QueriesGetAccountsReqDto extends PaginationReqDto {
-  @IsEnum(ACCOUNT_ROLE)
   @IsOptional()
+  @Transform(({ value }) => parseInt(value))
+  @IsInt()
   @ApiProperty({
     required: false,
-    enum: ACCOUNT_ROLE,
   })
-  readonly role?: string;
+  readonly roleId?: number;
 
   @IsOptional({ message: 'The phone number must be an string' })
   @IsString()

@@ -66,21 +66,9 @@ export const ExtraQuery = {
     let typeormWhereConditions: FindOptionsWhere<T> = {};
     Object.keys(searchObject).forEach((key: string) => {
       if (searchObject[key] !== undefined && searchObject[key] !== null) {
-        if (key === 'role' && typeof searchObject[key] === 'string') {
-          const roleId = ROLE_MAPPING[searchObject[key] as ACCOUNT_ROLE];
-          if (roleId !== undefined) {
-            Object.assign(typeormWhereConditions, {
-              roleId: roleId,
-            });
-          }
-        } else {
-          Object.assign(typeormWhereConditions, {
-            [key]: Like(`%${searchObject[key]}%`),
-          });
-        }
-        // Object.assign(typeormWhereConditions, {
-        //   [key]: Like(`%${searchObject[key]}%`),
-        // });
+        Object.assign(typeormWhereConditions, {
+          [key]: Like(`%${searchObject[key]}%`),
+        });
       }
     });
     if (Object.keys(typeormWhereConditions)?.length === 0) {

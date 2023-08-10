@@ -48,7 +48,7 @@ export class AccountService {
         ExtraQuery.sortBy<Account>(queries.sort, options);
         ExtraQuery.searchBy<Account>(
           {
-            role: queries.role,
+            roleId: queries.roleId,
             phonenumber: queries.phonenumber,
           },
           options,
