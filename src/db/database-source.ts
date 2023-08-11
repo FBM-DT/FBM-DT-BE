@@ -14,5 +14,5 @@ export default new DataSource({
   host: configService.get<string>('DB_HOST'),
   port: parseInt(configService.get<string>('DB_PORT')),
   entities: ['dist/**/*.entity{.ts,.js}'],
-  migrations: ['dist/db/{migrations,seeder}/*.js'],
+  migrations: ['dist/db/migrations/*.js'],
 });
