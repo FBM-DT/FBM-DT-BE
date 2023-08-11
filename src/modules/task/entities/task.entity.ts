@@ -1,30 +1,35 @@
 import { ShareEntity } from '../../../core/shared';
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
-import { WorkShift } from '../../shift/entities/workShift.entity';
+import { Shift } from '../../shift/entities/shift.entity';
+import { TASKSTATUS } from '../../../core/constants';
 
-@Entity()
+@Entity({
+  name: 'task',
+})
 export class Task extends ShareEntity {
   @Column({
     type: 'varchar',
-    length: 1000,
+    length: 255,
     nullable: false,
   })
   name: string;
 
   @Column({
-    type: 'boolean',
-    default: true,
+    type: 'enum',
+    enum: TASKSTATUS,
+    default: TASKSTATUS.TODO,
     nullable: false,
   })
-  status: boolean;
+  status: TASKSTATUS;
 
   @Column({
     type: 'int',
     nullable: false,
   })
-  workShiftId: number;
-
-  @ManyToOne(() => WorkShift, (ws) => ws.tasks, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'workShiftId' })
-  workShift: WorkShift;
+  shiftId: number;
+  @ManyToOne(() => Shift, (shift) => shift.tasks, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'shiftId', referencedColumnName: 'id' })
+  shift: Shift;
 }

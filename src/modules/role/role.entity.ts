@@ -1,8 +1,7 @@
 import { ShareEntity } from '../../core/shared';
-import { Column, Entity, OneToMany } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { Account } from '../auth/account.entity';
 import { ACCOUNT_ROLE } from '../../core/constants';
-import { User } from '../users/user.entity';
 
 @Entity()
 export class Role extends ShareEntity {
@@ -14,6 +13,13 @@ export class Role extends ShareEntity {
   })
   name: ACCOUNT_ROLE;
 
-  @OneToMany(() => Account, (account) => account.id)
-  account: Account;
+  @Column({
+    type: 'int',
+    nullable: false,
+    unique: true,
+  })
+  roleId: number;
+
+  @OneToMany(() => Account, (account) => account.role)
+  accounts: Account[];
 }
