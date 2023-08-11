@@ -1,49 +1,66 @@
 import {
+  ArrayMaxSize,
+  ArrayMinSize,
   IsArray,
   IsEnum,
+  IsInt,
   IsNotEmpty,
   IsOptional,
   IsString,
-  ArrayMinSize,
   ValidateNested,
 } from 'class-validator';
-import { WORKTYPE } from '../../../../core/constants';
+import { WEEKDAYS, WORKTYPE } from '../../../../core/constants';
 import { PaginationReqDto } from '../../../../core/shared/request';
+import {
+  AddTaskNoteReqDto,
+  AddTaskReqDto,
+} from '../../../task/dto/request';
+import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 
-class Sort {
-  sortBy: string;
-  sortValue: string;
-}
-export class AddWorkShiftReqDto {
+class AddWorkShift {
   @IsNotEmpty({ message: 'The work shift name is required' })
   @IsString({ message: 'The workshift name must be string type' })
   readonly name: string;
 
   @IsNotEmpty({ message: 'The work shift type is required' })
-  @IsEnum(WORKTYPE, {
-    message: 'The type of work shift must be belonged to the enum',
+  @IsArray({ message: 'The work shift type is an array' })
+  @ValidateNested({ each: true })
+  @ArrayMinSize(1)
+  @ArrayMaxSize(7)
+  readonly repeatDays: Array<WEEKDAYS>;
+
+  @IsNotEmpty({ message: 'The start time must be required' })
+  @IsString({ message: 'The start time must be a string' })
+  startTime: string;
+
+  @IsNotEmpty({ message: 'The end time must be required' })
+  @IsString({ message: 'The end time must be a string' })
+  endTime: string;
+
+  @IsNotEmpty({
+    message: 'The department must be required',
   })
-  readonly type: WORKTYPE;
+  @IsInt({ message: 'The department id must be a number' })
+  @Type(() => Number)
+  departmentId: number;
+}
+class AddTaskInfor extends AddTaskReqDto {
+  @ApiProperty({ required: false, type: () => AddTaskNoteReqDto })
+  taskNote?: Array<AddTaskNoteReqDto>;
+}
+export class AddWorkShiftReqDto {
+  @ApiProperty({ required: false, type: AddWorkShift })
+  workShift?: AddWorkShift;
 
-  @IsNotEmpty({ message: 'The work shift address is required' })
-  @IsString({ message: 'The work shift address must be string type' })
-  readonly address: string;
-
-  @IsNotEmpty({ message: 'The work shift duration is required' })
-  @IsString({ message: 'The work shift duration must be string type' })
-  readonly duration: string;
-
-  @IsOptional()
-  @IsString({ message: 'The work shift description must be string type' })
-  readonly description: string;
+  @ApiProperty({ required: false, type: () => AddTaskInfor })
+  task?: Array<AddTaskInfor>;
 }
 
 export class GetWorkShiftListReqDto extends PaginationReqDto {
   @IsOptional()
-  @IsArray({ message: 'The sort must be an array' })
-  @ArrayMinSize(1)
-  @ValidateNested({ each: true, context: Sort })
-  readonly sort?: Sort[];
+  @IsString({ message: 'The sort must be a string' })
+  readonly sort?: string;
 
   @IsOptional()
   @IsString({ message: 'The type must be a string' })

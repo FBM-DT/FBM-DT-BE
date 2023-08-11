@@ -3,6 +3,22 @@ export enum WORKTYPE {
   EVENT = 'event',
 }
 
+export enum WEEKDAYS {
+  Monday,
+  Tuesday,
+  Wednesday,
+  Thursday,
+  Friday,
+  Saturday,
+  Sunday,
+}
+
+export enum TASKSTATUS {
+  TODO = 'todo',
+  INPROGRESS = 'inprogress',
+  DONE = 'done',
+}
+
 export enum ACCOUNT_ROLE {
   ADM = 'admin',
   SUPERVISOR = 'supervisor',

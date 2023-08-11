@@ -1,1 +1,1 @@
-export * from './workshift.dto'
+export * from './shift.dto'

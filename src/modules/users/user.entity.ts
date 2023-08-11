@@ -1,11 +1,14 @@
 import { ShareEntity } from '../../core/shared';
-import { Column, Entity, OneToMany } from 'typeorm';
-import { StaffShift } from '../shift/entities/staffInShift.entity';
-import { Position } from '../position/position.entity';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
+import { Schedule } from '../shift/entities/schedule.entity';
+import { Position } from '../organisation/entities/position.entity';
 import { Account } from '../auth/account.entity';
-import { DEPARTMENT, GENDER } from '../../core/constants';
+import { GENDER } from '../../core/constants';
+import { Department } from '../organisation/entities/department.entity';
 
-@Entity()
+@Entity({
+  name: 'user',
+})
 export class User extends ShareEntity {
   @Column({
     type: 'varchar',
@@ -23,10 +26,18 @@ export class User extends ShareEntity {
   email: string;
 
   @Column({
-    type: 'date',
-    nullable: true,
+    type: 'varchar',
+    length: 500,
+    nullable: false,
   })
-  dateOfBirth: Date;
+  address: string;
+
+  @Column({
+    type: 'enum',
+    enum: GENDER,
+    default: GENDER.MALE,
+  })
+  gender: GENDER;
 
   @Column({
     type: 'varchar',
@@ -34,6 +45,12 @@ export class User extends ShareEntity {
     length: 500,
   })
   avatar: string;
+
+  @Column({
+    type: 'date',
+    nullable: true,
+  })
+  dateOfBirth: Date;
 
   @Column({
     type: 'date',
@@ -48,32 +65,48 @@ export class User extends ShareEntity {
   endDate: Date;
 
   @Column({
-    type: 'enum',
-    enum: DEPARTMENT,
-    default: DEPARTMENT.COFFEESHOP,
+    type: 'boolean',
+    nullable: false,
+    default: true,
   })
-  department: DEPARTMENT;
-
-  @Column({
-    type: 'enum',
-    enum: GENDER,
-    default: GENDER.MALE,
-  })
-  gender: GENDER;
+  isActive: boolean;
 
   @Column({
     type: 'varchar',
-    length: 500,
+    length: 12,
+    nullable: false,
+  })
+  citizenId: string;
+
+  @Column({
+    type: 'varchar',
+    length: 15,
     nullable: true,
   })
-  address: string;
+  socialInsurance: string;
 
-  @OneToMany(() => StaffShift, (staffShift) => staffShift.userId)
-  staffShifts: StaffShift[];
+  @Column({
+    type: 'int',
+    nullable: false,
+  })
+  positionId: number;
+  @ManyToOne(() => Position, (position) => position.users, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'positionId', referencedColumnName: 'id' })
+  position: Position;
 
-  @OneToMany(() => Position, (position) => position.id)
-  positions: Position[];
+  @Column({
+    type: 'int',
+    nullable: false,
+  })
+  departmentId: number;
+  @ManyToOne(() => Department, (department) => department.users, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'departmentId', referencedColumnName: 'id' })
+  department: Department;
 
-  @OneToMany(() => Account, (account) => account.userId)
+  @OneToMany(() => Account, (account) => account.user)
   accounts: Account[];
 }

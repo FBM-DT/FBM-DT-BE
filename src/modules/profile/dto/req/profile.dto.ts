@@ -12,10 +12,12 @@ import {
   IsInt,
   MaxLength,
   MinLength,
+  IsNumber,
 } from 'class-validator';
 import { DEPARTMENT, GENDER } from '../../../../core/constants';
 import { PaginationReqDto } from '../../../../core/shared/request';
 import { IsAfterStartDate } from '../../../../core/utils/decorators/date';
+import { Transform } from 'class-transformer';
 class Sort {
   sortBy: string;
   sortValue: string;
@@ -54,12 +56,10 @@ export class AddProfileReqDto {
   @ApiProperty({ example: 'example@gmail.com' })
   email: string;
 
-  @IsOptional()
-  @IsEnum(DEPARTMENT, {
-    message: 'The type of department must be belonged to the enum',
-  })
+  @IsNotEmpty({ message: 'The department id is required' })
+  @IsNumber({ allowNaN: false, allowInfinity: false })
   @ApiProperty({ enum: [...Object.values(DEPARTMENT)] })
-  department?: DEPARTMENT;
+  departmentId?: number;
 
   @IsOptional()
   @IsDateString({}, { message: 'The start date must be date type' })
@@ -103,7 +103,11 @@ export class AddProfileReqDto {
 }
 
 export class UpdateProfileReqDto extends PartialType(
-  OmitType(AddProfileReqDto, ['password'] as const),
+  OmitType(AddProfileReqDto, [
+    'departmentId',
+    'startDate',
+    'endDate',
+  ] as const),
 ) {}
 
 export default class GetProfilesReqDto extends PaginationReqDto {
