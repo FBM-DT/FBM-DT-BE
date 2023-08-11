@@ -8,9 +8,10 @@ import { RoleModule } from './modules/role/role.module';
 import { DatabaseModule } from './db/database.module';
 import { ShiftModule } from './modules/shift/shift.module';
 import { TaskModule } from './modules/task/task.module';
-import { PositionModule } from './modules/position/position.module';
 import { InventoryModule } from './modules/inventory/inventory.module';
 import { ProfileModule } from './modules/profile/profile.module';
+import { OrganisationModule } from './modules/organisation/organisation.module';
+import { NoteModule } from './modules/note/note.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -23,9 +24,10 @@ import { ProfileModule } from './modules/profile/profile.module';
     RoleModule,
     ShiftModule,
     TaskModule,
-    PositionModule,
     InventoryModule,
     ProfileModule,
+    OrganisationModule,
+    NoteModule,
   ],
   controllers: [AppController],
   providers: [AppService],

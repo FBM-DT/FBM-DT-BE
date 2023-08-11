@@ -34,7 +34,7 @@ export class TaskService {
     try {
       data = {
         ...data,
-        workShiftId: workShiftId,
+        shiftId: workShiftId,
       };
       const result = await this._dataSource
         .getRepository(Task)

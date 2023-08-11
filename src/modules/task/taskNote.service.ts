@@ -14,7 +14,7 @@ import {
   UpdateTaskNoteReqDto,
 } from './dto/request';
 import { AppResponse } from '../../core/shared/app.response';
-import { TaskNote } from './entities';
+import { Note } from '../note/note.entity';
 import { ExtraQuery } from '../../core/utils';
 
 @Injectable()
@@ -37,10 +37,10 @@ export class TaskNoteService {
         taskId: taskId,
       };
       const result = await this._dataSource
-        .getRepository(TaskNote)
+        .getRepository(Note)
         .createQueryBuilder()
         .insert()
-        .into(TaskNote)
+        .into(Note)
         .values(data)
         .execute();
       return AppResponse.setSuccessResponse<AddTaskNoteResDto>(
@@ -57,9 +57,9 @@ export class TaskNoteService {
   ): Promise<UpdateTaskNoteResDto> {
     try {
       const result = await this._dataSource
-        .getRepository(TaskNote)
+        .getRepository(Note)
         .createQueryBuilder('note')
-        .update(TaskNote)
+        .update(Note)
         .where('note.id = :noteId', { noteId: noteId })
         .set(data)
         .execute();
@@ -76,7 +76,7 @@ export class TaskNoteService {
   async deleteNote(noteId: number): Promise<DeleteTaskNoteResDto> {
     try {
       const result = await this._dataSource
-        .getRepository(TaskNote)
+        .getRepository(Note)
         .delete({ id: noteId });
       return AppResponse.setSuccessResponse<DeleteTaskNoteResDto>(
         result.affected,
@@ -94,7 +94,7 @@ export class TaskNoteService {
   ): Promise<GetTaskNoteListResDto> {
     try {
       let options: FindManyOptions = new Object();
-      ExtraQuery.searchByConstant<TaskNote>(
+      ExtraQuery.searchByConstant<Note>(
         { taskId: taskId },
         options,
         SEARCH_TYPE.AND,
@@ -107,8 +107,8 @@ export class TaskNoteService {
           },
           options,
         );
-        ExtraQuery.sortBy<TaskNote>(queries.sort, options);
-        ExtraQuery.searchBy<TaskNote>(
+        ExtraQuery.sortBy<Note>(queries.sort, options);
+        ExtraQuery.searchBy<Note>(
           {
             context: queries.context,
           },
@@ -116,8 +116,8 @@ export class TaskNoteService {
           SEARCH_TYPE.AND,
         );
       }
-      const result: TaskNote[] = await this._dataSource
-        .getRepository(TaskNote)
+      const result: Note[] = await this._dataSource
+        .getRepository(Note)
         .find(options);
       return AppResponse.setSuccessResponse<GetTaskNoteListResDto>(result, {
         page: queries.page,
@@ -132,8 +132,8 @@ export class TaskNoteService {
 
   async getNote(noteId: number): Promise<GetTaskNoteResDto> {
     try {
-      const result: TaskNote = await this._dataSource
-        .getRepository(TaskNote)
+      const result: Note = await this._dataSource
+        .getRepository(Note)
         .findOneBy({ id: noteId });
       return AppResponse.setSuccessResponse<GetTaskNoteResDto>(result);
     } catch (error) {

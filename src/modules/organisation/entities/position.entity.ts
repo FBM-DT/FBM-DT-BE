@@ -1,6 +1,6 @@
-import { ShareEntity } from '../../core/shared';
+import { ShareEntity } from '../../../core/shared';
 import { Column, Entity, OneToMany } from 'typeorm';
-import { User } from '../users/user.entity';
+import { User } from '../../users/user.entity';
 
 @Entity({
   name: 'position',
@@ -13,6 +13,6 @@ export class Position extends ShareEntity {
   })
   name: string;
 
-  @OneToMany(() => User, (user) => user.positionId)
+  @OneToMany(() => User, (user) => user.position)
   users: User[];
 }

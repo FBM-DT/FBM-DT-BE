@@ -6,7 +6,7 @@ export interface IUserPayload {
   gender?: GENDER;
   address?: string;
   email?: string;
-  department?: DEPARTMENT;
+  departmentId?: number;
   startDate?: Date;
   endDate?: Date;
   avatar?: string;

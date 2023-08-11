@@ -13,24 +13,25 @@ import {
 } from './dto/response';
 import { SEARCH_TYPE, TYPEORM, WORKTYPE } from '../../core/constants';
 import { DataSource, FindManyOptions, Repository } from 'typeorm';
-import { WorkShift } from './entities/workShift.entity';
+import { Shift } from './entities/shift.entity';
 import { AppResponse } from '../../core/shared/app.response';
-import { StaffShift } from './entities/staffInShift.entity';
-import { Task, TaskNote } from '../task/entities';
+import { Schedule } from './entities/schedule.entity';
+import { Task } from '../task/entities';
 import { ExtraQuery } from '../../core/utils';
 import { AddTaskNoteResDto } from '../task/dto/response';
 import { AddTaskNoteReqDto } from '../task/dto/request';
+import { Note } from '../note/note.entity';
 
 @Injectable()
 export class ShiftService {
-  private _workShiftRepository: Repository<WorkShift>;
+  private _workShiftRepository: Repository<Shift>;
   private _dataSource: DataSource;
   constructor(
     @Inject(TYPEORM)
     dataSource: DataSource,
   ) {
     this._dataSource = dataSource;
-    this._workShiftRepository = dataSource.getRepository(WorkShift);
+    this._workShiftRepository = dataSource.getRepository(Shift);
   }
 
   async createWorkShift(data: AddWorkShiftReqDto): Promise<AddWorkShiftResDto> {
@@ -40,10 +41,10 @@ export class ShiftService {
       await queryRunner.connect();
       await queryRunner.startTransaction('SERIALIZABLE');
       const addWorkShiftResult = await queryRunner.manager
-        .getRepository(WorkShift)
+        .getRepository(Shift)
         .createQueryBuilder()
         .insert()
-        .into(WorkShift)
+        .into(Shift)
         .values(data.workShift)
         .execute();
 
@@ -72,10 +73,10 @@ export class ShiftService {
       });
 
       const addTaskNoteResult = await queryRunner.manager
-        .getRepository(TaskNote)
+        .getRepository(Note)
         .createQueryBuilder()
         .insert()
-        .into(TaskNote)
+        .into(Note)
         .values(taskNotes)
         .execute();
       await queryRunner.commitTransaction();
@@ -100,7 +101,7 @@ export class ShiftService {
 
   async getWorkShift(workShiftId: number): Promise<GetWorkShiftResDto> {
     try {
-      const result: WorkShift = await this._workShiftRepository.findOneBy({
+      const result: Shift = await this._workShiftRepository.findOneBy({
         id: workShiftId,
       });
       return AppResponse.setSuccessResponse<GetWorkShiftResDto>(result);
@@ -122,8 +123,8 @@ export class ShiftService {
           },
           options,
         );
-        ExtraQuery.sortBy<WorkShift>(queries.sort, options);
-        ExtraQuery.searchBy<WorkShift>(
+        ExtraQuery.sortBy<Shift>(queries.sort, options);
+        ExtraQuery.searchBy<Shift>(
           {
             address: queries.address,
             name: queries.name?.toLowerCase(),
@@ -132,12 +133,12 @@ export class ShiftService {
           options,
           SEARCH_TYPE.AND,
         );
-        ExtraQuery.searchByConstant<WorkShift>(
+        ExtraQuery.searchByConstant<Shift>(
           { type: WORKTYPE[queries.type?.toUpperCase()] },
           options,
           SEARCH_TYPE.AND,
         );
-        const result: WorkShift[] = await this._workShiftRepository.find(
+        const result: Shift[] = await this._workShiftRepository.find(
           options,
         );
 
@@ -146,14 +147,14 @@ export class ShiftService {
           pageSize: queries.pageSize,
         });
       }
-      const result: WorkShift[] = await this._workShiftRepository.find();
+      const result: Shift[] = await this._workShiftRepository.find();
       return AppResponse.setSuccessResponse<GetWorkShiftListResDto>(result);
     } catch (error) {
       return AppResponse.setAppErrorResponse<AddWorkShiftResDto>(error.message);
     }
   }
 
-  async deleteWorkShift(workShiftId: number): Promise<DeleteWorkShiftResDto> {
+  async deleteWorkShift(shiftId: number): Promise<DeleteWorkShiftResDto> {
     const response: DeleteWorkShiftResDto = new DeleteWorkShiftResDto();
     const queryRunner = this._dataSource.createQueryRunner();
     try {
@@ -162,12 +163,12 @@ export class ShiftService {
 
       let returnValues: Object = new Object();
       const deleteWorkShiftReturn = await queryRunner.manager
-        .getRepository(WorkShift)
-        .delete({ id: workShiftId });
+        .getRepository(Shift)
+        .delete({ id: shiftId });
       const deleteStaffShiftReturn = await queryRunner.manager
-        .getRepository(StaffShift)
+        .getRepository(Schedule)
         .delete({
-          workShiftId: workShiftId,
+          shiftId: shiftId,
         });
       returnValues = {
         workShift: deleteWorkShiftReturn.affected,
@@ -191,7 +192,7 @@ export class ShiftService {
     try {
       const result = await this._workShiftRepository
         .createQueryBuilder('workshift')
-        .update(WorkShift)
+        .update(Shift)
         .where('workshift.id = :workShiftId', { workShiftId: workShiftId })
         .set(workShiftDto)
         .execute();

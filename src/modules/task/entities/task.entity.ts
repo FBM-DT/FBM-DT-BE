@@ -1,38 +1,35 @@
 import { ShareEntity } from '../../../core/shared';
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
-import { WorkShift } from '../../shift/entities/workShift.entity';
-import { TaskNote } from './tasknote.entity';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { Shift } from '../../shift/entities/shift.entity';
+import { TASKSTATUS } from '../../../core/constants';
 
-@Entity()
+@Entity({
+  name: 'task',
+})
 export class Task extends ShareEntity {
   @Column({
     type: 'varchar',
-    length: 1000,
+    length: 255,
     nullable: false,
   })
   name: string;
 
   @Column({
-    type: 'boolean',
-    default: true,
+    type: 'enum',
+    enum: TASKSTATUS,
+    default: TASKSTATUS.TODO,
     nullable: false,
   })
-  status: boolean;
+  status: TASKSTATUS;
 
   @Column({
     type: 'int',
     nullable: false,
   })
-  workShiftId: number;
-
-  @ManyToOne(() => WorkShift, (ws) => ws.tasks, {
+  shiftId: number;
+  @ManyToOne(() => Shift, (shift) => shift.tasks, {
     onDelete: 'CASCADE',
-    onUpdate: 'NO ACTION',
   })
-  @JoinColumn({ name: 'workShiftId' , referencedColumnName: 'id' })
-  workShift: WorkShift;
-
-  @OneToMany(() => TaskNote, (taskNote) => taskNote.taskId)
-  @JoinColumn() 
-  taskNotes: TaskNote[];
+  @JoinColumn({ name: 'shiftId', referencedColumnName: 'id' })
+  shift: Shift;
 }

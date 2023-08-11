@@ -2,12 +2,14 @@ import { Transform } from 'class-transformer';
 import {
   IsBoolean,
   IsEmpty,
+  IsEnum,
   IsNotEmpty,
   IsOptional,
   IsString,
 } from 'class-validator';
 import { PaginationReqDto } from '../../../../core/shared/request';
 import { ApiProperty } from '@nestjs/swagger';
+import { TASKSTATUS } from '../../../../core/constants';
 
 export class AddTaskReqDto {
   @ApiProperty()
@@ -17,25 +19,16 @@ export class AddTaskReqDto {
 
   @ApiProperty()
   @IsNotEmpty({ message: 'The task status cannot be empty' })
-  @Transform(({ value }) => {
-    if (typeof value === 'string') {
-      if (value.toLowerCase() === 'true') {
-        return true;
-      }
-      if (value.toLowerCase() === 'false') {
-        return false;
-      }
-    }
-    return value;
+  @IsEnum(TASKSTATUS, {
+    message: 'The type of work shift must be belonged to the enum',
   })
-  @IsBoolean({ message: 'The task status must be in boolean type' })
-  status: boolean;
+  status: TASKSTATUS;
 
   @IsEmpty({
     message: 'The workshift id cannot be passed into the request body',
   })
   @Transform(({ value }) => parseInt(value))
-  workShiftId: number;
+  shiftId: number;
 }
 
 export class UpdateTaskReqDto {
@@ -46,19 +39,10 @@ export class UpdateTaskReqDto {
 
   @ApiProperty()
   @IsOptional()
-  @Transform(({ value }) => {
-    if (typeof value === 'string') {
-      if (value.toLowerCase() === 'true') {
-        return true;
-      }
-      if (value.toLowerCase() === 'false') {
-        return false;
-      }
-    }
-    return value;
+  @IsEnum(TASKSTATUS, {
+    message: 'The type of work shift must be belonged to the enum',
   })
-  @IsBoolean({ message: 'The task status must be in boolean type' })
-  status?: boolean;
+  status: TASKSTATUS;
 }
 
 export class GetTaskListReqDto extends PaginationReqDto {

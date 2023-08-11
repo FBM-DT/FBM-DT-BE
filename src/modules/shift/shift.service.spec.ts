@@ -34,8 +34,8 @@ describe('ShiftService', () => {
         workShift:{
           name: 'test',
           address: '55 Harvard',
+          repeatDays: [0, 1, 2, 3, 4, 5, 6],
           duration: '1y',
-          type: WORKTYPE.DAILY,
           description: 'test',
         }
         

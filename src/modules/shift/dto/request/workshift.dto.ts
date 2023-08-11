@@ -1,5 +1,5 @@
-import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
-import { WORKTYPE } from '../../../../core/constants';
+import { ArrayMaxSize, ArrayMinSize, IsArray, IsEnum, IsNotEmpty, IsOptional, IsString, ValidateNested } from 'class-validator';
+import { WEEKDAYS, WORKTYPE } from '../../../../core/constants';
 import { PaginationReqDto } from '../../../../core/shared/request';
 import {
   AddTaskNoteReqDto,
@@ -13,10 +13,11 @@ class AddWorkShift {
   readonly name: string;
 
   @IsNotEmpty({ message: 'The work shift type is required' })
-  @IsEnum(WORKTYPE, {
-    message: 'The type of work shift must be belonged to the enum',
-  })
-  readonly type: WORKTYPE;
+  @IsArray({message: 'The work shift type is an array'})
+  @ValidateNested({each: true })
+  @ArrayMinSize(1)
+  @ArrayMaxSize(7)
+  readonly repeatDays: Array<WEEKDAYS>;
 
   @IsNotEmpty({ message: 'The work shift address is required' })
   @IsString({ message: 'The work shift address must be string type' })
