@@ -31,14 +31,13 @@ describe('ShiftService', () => {
       result.version = 'v1';
       result.status = 201;
       const dto: AddWorkShiftReqDto = {
-        workShift:{
+        workShift: {
           name: 'test',
-          address: '55 Harvard',
           repeatDays: [0, 1, 2, 3, 4, 5, 6],
-          duration: '1y',
-          description: 'test',
-        }
-        
+          startTime: '06:00',
+          endTime: '12:00',
+          departmentId: 1,
+        },
       };
       jest
         .spyOn(service, 'createWorkShift')

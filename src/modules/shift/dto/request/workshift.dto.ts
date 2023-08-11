@@ -1,4 +1,14 @@
-import { ArrayMaxSize, ArrayMinSize, IsArray, IsEnum, IsNotEmpty, IsOptional, IsString, ValidateNested } from 'class-validator';
+import {
+  ArrayMaxSize,
+  ArrayMinSize,
+  IsArray,
+  IsEnum,
+  IsInt,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
 import { WEEKDAYS, WORKTYPE } from '../../../../core/constants';
 import { PaginationReqDto } from '../../../../core/shared/request';
 import {
@@ -6,6 +16,7 @@ import {
   AddTaskReqDto,
 } from '../../../../modules/task/dto/request';
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 
 class AddWorkShift {
   @IsNotEmpty({ message: 'The work shift name is required' })
@@ -13,23 +24,26 @@ class AddWorkShift {
   readonly name: string;
 
   @IsNotEmpty({ message: 'The work shift type is required' })
-  @IsArray({message: 'The work shift type is an array'})
-  @ValidateNested({each: true })
+  @IsArray({ message: 'The work shift type is an array' })
+  @ValidateNested({ each: true })
   @ArrayMinSize(1)
   @ArrayMaxSize(7)
   readonly repeatDays: Array<WEEKDAYS>;
 
-  @IsNotEmpty({ message: 'The work shift address is required' })
-  @IsString({ message: 'The work shift address must be string type' })
-  readonly address: string;
+  @IsNotEmpty({ message: 'The start time must be required' })
+  @IsString({ message: 'The start time must be a string' })
+  startTime: string;
 
-  @IsNotEmpty({ message: 'The work shift duration is required' })
-  @IsString({ message: 'The work shift duration must be string type' })
-  readonly duration: string;
+  @IsNotEmpty({ message: 'The end time must be required' })
+  @IsString({ message: 'The end time must be a string' })
+  endTime: string;
 
-  @IsOptional()
-  @IsString({ message: 'The work shift description must be string type' })
-  readonly description: string;
+  @IsNotEmpty({
+    message: 'The department must be required',
+  })
+  @IsInt({ message: 'The department id must be a number' })
+  @Type(() => Number)
+  departmentId: number;
 }
 class AddTaskInfor extends AddTaskReqDto {
   @ApiProperty({ required: false, type: () => AddTaskNoteReqDto })

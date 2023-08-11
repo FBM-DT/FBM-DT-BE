@@ -54,6 +54,7 @@ export class Shift extends ShareEntity {
 
   @OneToMany(() => Schedule, (schedule) => schedule.shift)
   schedules: Schedule[];
+  
   @OneToMany(() => Task, (task) => task.shift)
   tasks: Task[];
 
