@@ -1,24 +1,18 @@
 import { ShareEntity } from '../../core/shared';
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { Column, Entity, OneToMany } from 'typeorm';
 import { User } from '../users/user.entity';
 
-@Entity()
+@Entity({
+  name: 'position',
+})
 export class Position extends ShareEntity {
   @Column({
     type: 'varchar',
     nullable: false,
-    unique: true,
-    length: 5000,
+    length: 255,
   })
   name: string;
 
-  @Column({
-    type: 'int',
-    nullable: false,
-  })
-  userId: number;
-
-  @ManyToOne(() => User, (user) => user.positions, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'userId' })
-  users: User;
+  @OneToMany(() => User, (user) => user.positionId)
+  users: User[];
 }

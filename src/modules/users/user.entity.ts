@@ -1,5 +1,5 @@
 import { ShareEntity } from '../../core/shared';
-import { Column, Entity, OneToMany } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { StaffShift } from '../shift/entities/staffInShift.entity';
 import { Position } from '../position/position.entity';
 import { Account } from '../auth/account.entity';
@@ -62,16 +62,19 @@ export class User extends ShareEntity {
   gender: GENDER;
 
   @Column({
-    type: 'varchar',
-    length: 500,
-    nullable: true,
+    type: 'int',
+    nullable: false,
   })
-  address: string;
+  positionId: number;
+
+  @ManyToOne(() => Position, (position) => position.id, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'positionId' })
+  position: Position;
 
   @OneToMany(() => StaffShift, (staffShift) => staffShift.userId)
   staffShifts: StaffShift[];
 
-  @OneToMany(() => Position, (position) => position.userId)
+  @OneToMany(() => Position, (position) => position.users)
   positions: Position[];
 
   @OneToMany(() => Account, (account) => account.userId)
