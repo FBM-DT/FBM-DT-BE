@@ -14,7 +14,7 @@ import { PaginationReqDto } from '../../../../core/shared/request';
 import {
   AddTaskNoteReqDto,
   AddTaskReqDto,
-} from '../../../../modules/task/dto/request';
+} from '../../../task/dto/request';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
