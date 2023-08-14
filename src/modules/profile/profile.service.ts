@@ -300,4 +300,130 @@ export class ProfileService {
       await querryRunner.release();
     }
   }
+
+  async deActiveProfile(userId: number): Promise<UpdateProfileResDto> {
+    try {
+      const user = await this._userRepository.findOne({
+        where: { id: userId },
+      });
+
+      if (!user)
+        return AppResponse.setAppErrorResponse<UpdateProfileResDto>(
+          ErrorHandler.notFound(`User with id ${userId}`),
+          {
+            status: 400,
+          },
+        );
+
+      const account = await this._dataSource
+        .getRepository(Account)
+        .findOne({ where: { userId: user.id } });
+
+      if (!account)
+        return AppResponse.setAppErrorResponse<UpdateProfileResDto>(
+          ErrorHandler.notFound(`Account with user id ${userId}`),
+          {
+            status: 400,
+          },
+        );
+
+      const updatePromises = [];
+      updatePromises.push(
+        this._dataSource
+          .getRepository(User)
+          .createQueryBuilder()
+          .update(User)
+          .set({ isActive: false })
+          .where('id = :id', { id: user.id })
+          .execute(),
+      );
+
+      updatePromises.push(
+        this._dataSource
+          .getRepository(Account)
+          .createQueryBuilder()
+          .update(Account)
+          .set({ isActive: false })
+          .where('id = :id', { id: account.id })
+          .execute(),
+      );
+
+      const [userDeActive, accountDeActive] = await Promise.all(updatePromises);
+
+      return AppResponse.setSuccessResponse<UpdateProfileResDto>(
+        { user: userDeActive.affected, account: accountDeActive.affected },
+        {
+          status: 200,
+          message: 'User have been Deactivated',
+        },
+      );
+    } catch (error) {
+      return AppResponse.setAppErrorResponse<UpdateProfileResDto>(
+        error.message,
+      );
+    }
+  }
+
+  async activeProfile(userId: number): Promise<UpdateProfileResDto> {
+    try {
+      const user = await this._userRepository.findOne({
+        where: { id: userId },
+      });
+
+      if (!user)
+        return AppResponse.setAppErrorResponse<UpdateProfileResDto>(
+          ErrorHandler.notFound(`User with id ${userId}`),
+          {
+            status: 400,
+          },
+        );
+
+      const account = await this._dataSource
+        .getRepository(Account)
+        .findOne({ where: { userId: user.id } });
+
+      if (!account)
+        return AppResponse.setAppErrorResponse<UpdateProfileResDto>(
+          ErrorHandler.notFound(`Account with user id ${userId}`),
+          {
+            status: 400,
+          },
+        );
+
+      const updatePromises = [];
+      updatePromises.push(
+        this._dataSource
+          .getRepository(User)
+          .createQueryBuilder()
+          .update(User)
+          .set({ isActive: true })
+          .where('id = :id', { id: user.id })
+          .execute(),
+      );
+
+      updatePromises.push(
+        this._dataSource
+          .getRepository(Account)
+          .createQueryBuilder()
+          .update(Account)
+          .set({ isActive: true })
+          .where('id = :id', { id: account.id })
+          .execute(),
+      );
+
+      const [userDeActive, accountDeActive] = await Promise.all(updatePromises);
+
+      return AppResponse.setSuccessResponse<UpdateProfileResDto>(
+        { user: userDeActive.affected, account: accountDeActive.affected },
+        {
+          status: 200,
+          message: 'User have been Activated',
+        },
+      );
+    } catch (error) {
+      return AppResponse.setAppErrorResponse<UpdateProfileResDto>(
+        error.message,
+      );
+    }
+  }
 }
