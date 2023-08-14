@@ -1,8 +1,3 @@
-export enum WORKTYPE {
-  DAILY = 'daily',
-  EVENT = 'event',
-}
-
 export enum WEEKDAYS {
   Monday,
   Tuesday,

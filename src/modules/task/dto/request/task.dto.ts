@@ -25,7 +25,7 @@ export class AddTaskReqDto {
   status: TASKSTATUS;
 
   @IsEmpty({
-    message: 'The workshift id cannot be passed into the request body',
+    message: 'The shift id cannot be passed into the request body',
   })
   @Transform(({ value }) => parseInt(value))
   shiftId: number;
