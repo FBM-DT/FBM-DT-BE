@@ -3,11 +3,11 @@ import { ConfigService } from '@nestjs/config';
 import { DataSource, Repository } from 'typeorm';
 import { TwilioService } from 'nestjs-twilio';
 import { OTPResDto, VerifyOTPResDto } from '../dto/response';
-import { AppResponse } from '../../../core/shared/app.response';
+import { AppResponse } from '@/core/shared/app.response';
 import * as speakeasy from 'speakeasy';
-import { ErrorHandler } from '../../../core/shared/common/error';
+import { ErrorHandler } from '@/core/shared/common/error';
 import { Account } from '../account.entity';
-import { TYPEORM } from '../../../core/constants';
+import { TYPEORM } from '@/core/constants';
 
 @Injectable()
 export class OtpService {

@@ -20,7 +20,7 @@ import {
   ParseIntPipe,
 } from '@nestjs/common';
 import { JwtAuthGuard, RolesGuard } from '../guards';
-import { ACCOUNT_ROLE } from '../../../core/constants';
+import { ACCOUNT_ROLE } from '@/core/constants';
 import { AccountService } from '../services';
 import {
   BadRequestResDto,
@@ -37,7 +37,7 @@ import {
   NewPasswordReqDto,
   UpdateAccountReqDto,
 } from '../dto/request';
-import { GetAccount, HasRoles } from '../../../core/utils/decorators';
+import { GetAccount, HasRoles } from '@/core/utils/decorators';
 
 @ApiTags('Account')
 @Controller('account')

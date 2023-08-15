@@ -1,8 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import { TYPEORM } from '../../../core/constants';
+import { TYPEORM } from '@/core/constants';
 import { DataSource, Repository } from 'typeorm';
-import { AppResponse } from '../../../core/shared/app.response';
+import { AppResponse } from '@/core/shared/app.response';
 import { Account } from '../account.entity';
 import {
   ChangePasswordResDto,
@@ -18,8 +18,8 @@ import {
   NewPasswordReqDto,
   UpdateAccountReqDto,
 } from '../dto/request';
-import { ErrorHandler } from '../../../core/shared/common/error';
-import { Bcrypt } from '../../../core/utils';
+import { ErrorHandler } from '@/core/shared/common/error';
+import { Bcrypt } from '@/core/utils';
 
 @Injectable()
 export class AccountService {
