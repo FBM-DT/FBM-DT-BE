@@ -1,4 +1,4 @@
-import { DEPARTMENT, GENDER } from '../../../core/constants';
+import { GENDER } from '../../../core/constants';
 
 export interface IUserPayload {
   fullname?: string;

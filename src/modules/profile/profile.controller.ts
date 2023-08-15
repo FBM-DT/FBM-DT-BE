@@ -8,8 +8,17 @@ import {
   Get,
 } from '@nestjs/common';
 import { ProfileService } from './profile.service';
-import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import { AddProfileReqDto, UpdateProfileReqDto } from './dto/req';
+import {
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiTags,
+  getSchemaPath,
+} from '@nestjs/swagger';
+import {
+  AddProfileReqDto,
+  GetProfileReqDto,
+  UpdateProfileReqDto,
+} from './dto/req';
 import {
   AddProfileResDto,
   UpdateProfileResDto,
@@ -25,15 +34,7 @@ export class ProfileController {
 
   @Post('create')
   @ApiCreatedResponse({
-    description: 'Create profile',
-    schema: {
-      example: {
-        version: '1.0.0',
-        status: 201,
-        message: 'Created',
-        data: 1,
-      },
-    },
+    type: AddProfileReqDto,
   })
   @Auth(ACCOUNT_ROLE.SUPERVISOR)
   async createProfile(
@@ -43,27 +44,7 @@ export class ProfileController {
     return res;
   }
 
-  @ApiOkResponse({
-    description: 'Get profile by id',
-    schema: {
-      example: {
-        version: '1.0.0',
-        status: 200,
-        message: 'OK',
-        data: {
-          id: 1,
-          fullname: 'Nguyen Van A',
-          email: 'example62@gmail.com',
-          dateOfBirth: '2021-01-01',
-          avatar: 'https://i.pravatar.cc/300',
-          startDate: '2021-01-01',
-          endDate: '2021-01-02',
-          department: 'Coffeeshop',
-          gender: 'female',
-        },
-      },
-    },
-  })
+  @ApiOkResponse({ type: GetProfileReqDto })
   @Get('findOne/:id')
   async findProfile(
     @Param('id', ParseIntPipe) id: number,
@@ -75,24 +56,21 @@ export class ProfileController {
   @ApiOkResponse({
     description: 'Update profile',
     schema: {
-      example: {
-        version: '1.0.0',
-        status: 200,
-        message: 'OK',
-        data: {
-          fullname: 'Nguyen Van A',
-          dateOfBirth: '2021-01-01',
-          gender: 'female',
-          address: '15 Mai Thuc Lan',
-          email: 'example@gmail.com',
-          department: 'Coffeeshop',
-          startDate: '2021-01-01',
-          endDate: '2021-01-02',
-          avatar: 'https://i.pravatar.cc/300',
-          phonenumber: '0123456789',
-          roleId: 1,
+      allOf: [
+        { $ref: getSchemaPath(UpdateProfileReqDto) },
+        {
+          properties: {
+            userId: {
+              type: 'number',
+              example: '1',
+            },
+            accountId: {
+              type: 'number',
+              example: '1',
+            },
+          },
         },
-      },
+      ],
     },
   })
   @Patch('update/:id')
