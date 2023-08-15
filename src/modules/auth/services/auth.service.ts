@@ -14,7 +14,7 @@ import {
   RefreshTokenResDto,
   SigninResDto,
 } from '../dto/response';
-import { ErrorMessage } from '../constrants/errorMessages';
+import { ErrorMessage } from '../constants/errorMessages';
 import { ErrorHandler } from '../../../core/shared/common/error';
 
 @Injectable()
