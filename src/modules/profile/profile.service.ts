@@ -300,4 +300,137 @@ export class ProfileService {
       await querryRunner.release();
     }
   }
+
+  async deActiveProfile(userId: number): Promise<UpdateProfileResDto> {
+    const querryRunner = this._dataSource.createQueryRunner();
+    try {
+      await querryRunner.connect();
+      await querryRunner.startTransaction('SERIALIZABLE');
+
+      const user = await this._userRepository.findOne({
+        where: { id: userId },
+      });
+
+      if (!user)
+        return AppResponse.setAppErrorResponse<UpdateProfileResDto>(
+          ErrorHandler.notFound(`User with id ${userId}`),
+          {
+            status: 400,
+          },
+        );
+
+      const account = await this._dataSource
+        .getRepository(Account)
+        .findOne({ where: { userId: user.id } });
+
+      if (!account)
+        return AppResponse.setAppErrorResponse<UpdateProfileResDto>(
+          ErrorHandler.notFound(`Account with user id ${userId}`),
+          {
+            status: 400,
+          },
+        );
+
+      const userUpdate = await this._dataSource
+        .getRepository(User)
+        .createQueryBuilder()
+        .update(User)
+        .set({ isActive: false })
+        .where('id = :id', { id: user.id })
+        .execute();
+
+      const accountUpdate = await this._dataSource
+        .getRepository(Account)
+        .createQueryBuilder()
+        .update(Account)
+        .set({ isActive: false })
+        .where('id = :id', { id: account.id })
+        .execute();
+
+      await querryRunner.commitTransaction();
+
+      const result = {
+        user: userUpdate.affected,
+        account: accountUpdate.affected,
+      };
+
+      return AppResponse.setSuccessResponse<UpdateProfileResDto>(result, {
+        status: 200,
+        message: 'User have been Deactivated',
+      });
+    } catch (error) {
+      await querryRunner.rollbackTransaction();
+      return AppResponse.setAppErrorResponse<UpdateProfileResDto>(
+        error.message,
+      );
+    } finally {
+      await querryRunner.release();
+    }
+  }
+
+  async activeProfile(userId: number): Promise<UpdateProfileResDto> {
+    const querryRunner = this._dataSource.createQueryRunner();
+    try {
+      await querryRunner.connect();
+      await querryRunner.startTransaction('SERIALIZABLE');
+      const user = await this._userRepository.findOne({
+        where: { id: userId },
+      });
+
+      if (!user)
+        return AppResponse.setAppErrorResponse<UpdateProfileResDto>(
+          ErrorHandler.notFound(`User with id ${userId}`),
+          {
+            status: 400,
+          },
+        );
+
+      const account = await this._dataSource
+        .getRepository(Account)
+        .findOne({ where: { userId: user.id } });
+
+      if (!account)
+        return AppResponse.setAppErrorResponse<UpdateProfileResDto>(
+          ErrorHandler.notFound(`Account with user id ${userId}`),
+          {
+            status: 400,
+          },
+        );
+
+      const userUpdate = await this._dataSource
+        .getRepository(User)
+        .createQueryBuilder()
+        .update(User)
+        .set({ isActive: true })
+        .where('id = :id', { id: user.id })
+        .execute();
+
+      const accountUpdate = await this._dataSource
+        .getRepository(Account)
+        .createQueryBuilder()
+        .update(Account)
+        .set({ isActive: true })
+        .where('id = :id', { id: account.id })
+        .execute();
+
+      await querryRunner.commitTransaction();
+
+      const result = {
+        user: userUpdate.affected,
+        account: accountUpdate.affected,
+      };
+
+      return AppResponse.setSuccessResponse<UpdateProfileResDto>(result, {
+        status: 200,
+        message: 'User have been Activated',
+      });
+    } catch (error) {
+      await querryRunner.rollbackTransaction();
+      return AppResponse.setAppErrorResponse<UpdateProfileResDto>(
+        error.message,
+      );
+    } finally {
+      await querryRunner.release();
+    }
+  }
 }
