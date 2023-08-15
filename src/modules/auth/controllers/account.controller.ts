@@ -44,7 +44,7 @@ import { GetAccount, HasRoles } from '@/core/utils/decorators';
 export class AccountController {
   constructor(private accountService: AccountService) {}
 
-  @HasRoles(ACCOUNT_ROLE.ADM)
+  @HasRoles(ACCOUNT_ROLE.ADM, ACCOUNT_ROLE.SUPERVISOR)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiOperation({ summary: 'Get all account' })
   @ApiOkResponse({ description: 'The list account were returned successfully' })
