@@ -4,12 +4,12 @@ import { ACCOUNT_ROLE } from '../../constants';
 import { JwtAuthGuard, RolesGuard } from '../../../modules/auth/guards';
 import { HasRoles } from './role.decorator';
 
-export function Auth(role: ACCOUNT_ROLE) {
-  return !role
+export function Auth(...roles: ACCOUNT_ROLE[]) {
+  return !roles
     ? applyDecorators(UseGuards(JwtAuthGuard), ApiBearerAuth('token'))
     : applyDecorators(
         UseGuards(JwtAuthGuard, RolesGuard),
-        HasRoles(role),
+        HasRoles(...roles),
         ApiBearerAuth('token'),
       );
 }
