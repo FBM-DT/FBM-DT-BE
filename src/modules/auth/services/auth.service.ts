@@ -67,8 +67,17 @@ export class AuthService {
 
       if (typeof account === 'string') {
         return AppResponse.setUserErrorResponse<SigninResDto>(account, {
-          status: 403,
+          status: 401,
         });
+      }
+
+      if (!account.isActive) {
+        return AppResponse.setUserErrorResponse<SigninResDto>(
+          ErrorMessage.ACCESS_DENIED,
+          {
+            status: 403,
+          },
+        );
       }
 
       const authPayload: IAuthPayload = this.createAuthPayload(account);

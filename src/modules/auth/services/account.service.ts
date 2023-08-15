@@ -19,15 +19,19 @@ import {
   UpdateAccountReqDto,
 } from '../dto/request';
 import { ErrorHandler } from '@/core/shared/common/error';
+import { ErrorMessage } from '../constants/errorMessages';
 import { Bcrypt } from '@/core/utils';
+import { User } from '@/modules/users/user.entity';
 
 @Injectable()
 export class AccountService {
   private _accountRepository: Repository<Account>;
+  private _userRepository: Repository<User>;
   private _dataSource: DataSource;
   constructor(@Inject(TYPEORM) dataSource: DataSource) {
     this._dataSource = dataSource;
     this._accountRepository = dataSource.getRepository(Account);
+    this._userRepository = dataSource.getRepository(User);
   }
 
   async getAccountList(): Promise<GetAllAccountsResDto> {
@@ -94,7 +98,19 @@ export class AccountService {
     payload: CreateAccountReqDto,
   ): Promise<CreateAccountResDto> {
     try {
-      const { phonenumber, password } = payload;
+      const { phonenumber, password, userId } = payload;
+
+      const userData = await this._userRepository.findOne({
+        where: { id: userId },
+      });
+
+      if (!userData.isActive) {
+        const response: CreateAccountResDto =
+          AppResponse.setUserErrorResponse<CreateAccountResDto>(
+            ErrorMessage.USER_HAS_BEEN_DEACTIVATED,
+          );
+        return response;
+      }
 
       const existPhoneNumber = await this._accountRepository.findOne({
         where: { phonenumber },
@@ -102,7 +118,7 @@ export class AccountService {
 
       if (phonenumber === existPhoneNumber?.phonenumber) {
         const response: CreateAccountResDto =
-          AppResponse.setUserErrorResponse<UpdateAccountResDto>(
+          AppResponse.setUserErrorResponse<CreateAccountResDto>(
             ErrorHandler.alreadyExists('The phone number'),
           );
         return response;
