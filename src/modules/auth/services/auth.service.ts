@@ -54,7 +54,10 @@ export class AuthService {
       accountId: account['id'],
       fullname: account['user']['fullname'],
       phonenumber: account['phonenumber'],
+      roleId: account['roleId'],
       role: account['role']['name'],
+      isActive: account['isActive'],
+      firstLogin: account['firstLogin'],
     };
   }
 

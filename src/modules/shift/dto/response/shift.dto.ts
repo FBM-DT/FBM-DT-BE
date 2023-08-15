@@ -1,7 +1,7 @@
 import { ShareResDto } from '../../../../core/shared/response';
 
-export class AddWorkShiftResDto extends ShareResDto {}
-export class GetWorkShiftListResDto extends ShareResDto {}
-export class GetWorkShiftResDto extends ShareResDto {}
-export class DeleteWorkShiftResDto extends ShareResDto {}
-export class UpdateWorkShiftResDto extends ShareResDto {}
+export class AddShiftResDto extends ShareResDto {}
+export class GetShiftListResDto extends ShareResDto {}
+export class GetShiftResDto extends ShareResDto {}
+export class DeleteShiftResDto extends ShareResDto {}
+export class UpdateShiftResDto extends ShareResDto {}

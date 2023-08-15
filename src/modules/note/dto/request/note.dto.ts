@@ -1,17 +1,8 @@
-import { Transform } from 'class-transformer';
-import {
-  ArrayMinSize,
-  IsArray,
-  IsEmpty,
-  IsNotEmpty,
-  IsNumber,
-  IsOptional,
-  IsString,
-  ValidateNested,
-} from 'class-validator';
+import { Transform, Type } from 'class-transformer';
+import { IsEmpty, IsInt, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { PaginationReqDto } from '../../../../core/shared/request';
 
-export class AddTaskNoteReqDto {
+export class AddNoteReqDto {
   @IsNotEmpty({ message: 'The task note context cannot be empty' })
   @IsString({ message: 'The task note context must be a string' })
   context: string;
@@ -23,23 +14,25 @@ export class AddTaskNoteReqDto {
     }
     return value;
   })
-  @IsNumber()
-  accountId: number;
-
-  @IsEmpty({ message: 'The task id cannot be passed into the request body' })
-  @Transform(({ value }) => {
-    parseInt(value.toLowerCase());
+  @IsInt({
+    message: 'The note must contain the id of the owner',
   })
-  taskId: number;
+  createdBy: number;
+
+  @IsEmpty({
+    message: 'The shift id cannot be passed into the request body',
+  })
+  @Transform(({ value }) => parseInt(value))
+  shiftId: number;
 }
 
-export class UpdateTaskNoteReqDto {
+export class UpdateNoteReqDto {
   @IsOptional()
   @IsString({ message: 'The task note context must be a string' })
   context?: string;
 }
 
-export class GetTaskNoteListReqDto extends PaginationReqDto {
+export class GetNoteListReqDto extends PaginationReqDto {
   @IsOptional()
   @IsString({ message: 'The sort must be a string' })
   readonly sort?: string;

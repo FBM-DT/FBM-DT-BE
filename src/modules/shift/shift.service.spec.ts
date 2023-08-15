@@ -1,9 +1,8 @@
 import { Test } from '@nestjs/testing';
 import { ShiftService } from './shift.service';
 import { ShiftModule } from './shift.module';
-import { AddWorkShiftReqDto } from './dto/request';
-import { AddWorkShiftResDto } from './dto/response';
-import { WORKTYPE } from '../../../src/core/constants';
+import { AddShiftReqDto } from './dto/request';
+import { AddShiftResDto } from './dto/response';
 import { DatabaseModule } from '../../../src/db/database.module';
 import { ConfigModule } from '@nestjs/config';
 
@@ -25,13 +24,13 @@ describe('ShiftService', () => {
 
   describe('Create new work shift', () => {
     it('should be created', async () => {
-      const result: AddWorkShiftResDto = new AddWorkShiftResDto();
+      const result: AddShiftResDto = new AddShiftResDto();
       result.data = 1;
       result.message = 'Success';
       result.version = 'v1';
       result.status = 201;
-      const dto: AddWorkShiftReqDto = {
-        workShift: {
+      const dto: AddShiftReqDto = {
+        shift: {
           name: 'test',
           repeatDays: [0, 1, 2, 3, 4, 5, 6],
           startTime: '06:00',
@@ -40,9 +39,9 @@ describe('ShiftService', () => {
         },
       };
       jest
-        .spyOn(service, 'createWorkShift')
+        .spyOn(service, 'createShift')
         .mockImplementation(async () => result);
-      expect(await service.createWorkShift(dto)).toEqual({
+      expect(await service.createShift(dto)).toEqual({
         message: 'Success',
         status: 201,
         data: 1,
