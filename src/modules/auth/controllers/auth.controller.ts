@@ -10,7 +10,7 @@ import {
   SigninResDto,
   VerifyOTPResDto,
 } from '../dto/response';
-import { GetAccount } from '../../../core/utils/decorators';
+import { GetAccount } from '@/core/utils/decorators';
 
 @ApiTags('Auth')
 @Controller('auth')
