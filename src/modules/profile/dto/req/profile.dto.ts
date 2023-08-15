@@ -13,11 +13,11 @@ import {
   MaxLength,
   MinLength,
   IsNumber,
+  IsNumberString,
 } from 'class-validator';
-import { DEPARTMENT, GENDER } from '../../../../core/constants';
+import { GENDER } from '../../../../core/constants';
 import { PaginationReqDto } from '../../../../core/shared/request';
 import { IsAfterStartDate } from '../../../../core/utils/decorators/date';
-import { Transform } from 'class-transformer';
 class Sort {
   sortBy: string;
   sortValue: string;
@@ -56,10 +56,20 @@ export class AddProfileReqDto {
   @ApiProperty({ example: 'example@gmail.com' })
   email: string;
 
+  @IsNotEmpty({ message: 'The citizen id is required' })
+  @IsNumberString({}, { message: 'The citizen id must be number' })
+  @ApiProperty({ example: '123456789102' })
+  citizenId: string;
+
   @IsNotEmpty({ message: 'The department id is required' })
   @IsNumber({ allowNaN: false, allowInfinity: false })
-  @ApiProperty({ enum: [...Object.values(DEPARTMENT)] })
+  @ApiProperty({ example: 1 })
   departmentId?: number;
+
+  @IsNotEmpty({ message: 'The position id is required' })
+  @IsNumber({ allowNaN: false, allowInfinity: false })
+  @ApiProperty({ example: 1 })
+  positionId: number;
 
   @IsOptional()
   @IsDateString({}, { message: 'The start date must be date type' })
@@ -102,12 +112,26 @@ export class AddProfileReqDto {
   roleId: number;
 }
 
-export class UpdateProfileReqDto extends PartialType(
+export class GetProfileReqDto extends PartialType(
   OmitType(AddProfileReqDto, [
     'departmentId',
-    'startDate',
-    'endDate',
+    'password',
+    'roleId',
+    'positionId',
   ] as const),
+) {
+  @ApiProperty({ example: 'Bakery' })
+  department: string;
+
+  @ApiProperty({ example: 'Cashier' })
+  position: string;
+
+  @ApiProperty({ example: 'Supervisor' })
+  role: string;
+}
+
+export class UpdateProfileReqDto extends PartialType(
+  OmitType(AddProfileReqDto, ['password'] as const),
 ) {}
 
 export default class GetProfilesReqDto extends PaginationReqDto {
