@@ -543,7 +543,6 @@ export class ProfileService {
         },
         options,
       );
-      ExtraQuery.sortBy<Account>(queries.sort, options);
       ExtraQuery.searchBy<Account>(
         {
           phonenumber: queries.phonenumber,
