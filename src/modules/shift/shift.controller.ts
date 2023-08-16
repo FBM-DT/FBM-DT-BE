@@ -13,16 +13,16 @@ import {
   Patch,
 } from '@nestjs/common';
 import {
-  AddWorkShiftReqDto,
-  GetWorkShiftListReqDto,
-  UpdateWorkShiftReqDto,
+  AddShiftReqDto,
+  GetShiftListReqDto,
+  UpdateShiftReqDto,
 } from './dto/request';
 import {
-  AddWorkShiftResDto,
-  DeleteWorkShiftResDto,
-  GetWorkShiftResDto,
-  GetWorkShiftListResDto,
-  UpdateWorkShiftResDto,
+  AddShiftResDto,
+  DeleteShiftResDto,
+  GetShiftResDto,
+  GetShiftListResDto,
+  UpdateShiftResDto,
 } from './dto/response';
 import { ShiftService } from './shift.service';
 
@@ -35,56 +35,56 @@ export class ShiftController {
   @ApiResponse({
     description: `Create successfully`,
     status: HttpStatus.OK,
-    type: AddWorkShiftResDto,
+    type: AddShiftResDto,
   })
   @Post('create')
   @HttpCode(201)
-  async createWorkShift(
-    @Body() workShiftDto: AddWorkShiftReqDto,
-  ): Promise<AddWorkShiftResDto> {
-    const response: AddWorkShiftResDto =
-      await this.shiftService.createWorkShift(workShiftDto);
+  async createShift(@Body() shiftDto: AddShiftReqDto): Promise<AddShiftResDto> {
+    const response: AddShiftResDto = await this.shiftService.createShift(
+      shiftDto,
+    );
     return response;
   }
 
   @Get('list')
   @HttpCode(200)
-  async getWorkShiftList(
-    @Query() queries: GetWorkShiftListReqDto,
-  ): Promise<GetWorkShiftListResDto> {
-    const response: GetWorkShiftListResDto =
-      await this.shiftService.getWorkShiftList(queries);
+  async getShiftList(
+    @Query() queries: GetShiftListReqDto,
+  ): Promise<GetShiftListResDto> {
+    const response: GetShiftListResDto = await this.shiftService.getShiftList(
+      queries,
+    );
     return response;
   }
 
-  @Get('workshift/:id')
+  @Get('detail/:id')
   @HttpCode(200)
-  async getWorkShift(
+  async getShift(
     @Param('id', ParseIntPipe) id: number,
-  ): Promise<GetWorkShiftResDto> {
-    const response: GetWorkShiftResDto =
-      await this.shiftService.getWorkShift(id);
+  ): Promise<GetShiftResDto> {
+    const response: GetShiftResDto = await this.shiftService.getShift(id);
     return response;
   }
 
   @Delete('delete/:id')
   @HttpCode(200)
-  async deleteWorkShift(
+  async deleteShift(
     @Param('id', ParseIntPipe) id: number,
-  ): Promise<DeleteWorkShiftResDto> {
-    const response: DeleteWorkShiftResDto =
-      await this.shiftService.deleteWorkShift(id);
+  ): Promise<DeleteShiftResDto> {
+    const response: DeleteShiftResDto = await this.shiftService.deleteShift(id);
     return response;
   }
 
-  @Patch('update/:workShiftId')
+  @Patch('update/:shiftId')
   @HttpCode(200)
-  async updateWorkShift(
-    @Body() workShiftDto: UpdateWorkShiftReqDto,
-    @Param('workShiftId', ParseIntPipe) workShiftId: number,
-  ): Promise<UpdateWorkShiftResDto> {
-    const response: UpdateWorkShiftResDto =
-      await this.shiftService.updateWorkShift(workShiftId, workShiftDto);
+  async updateShift(
+    @Body() shiftDto: UpdateShiftReqDto,
+    @Param('shiftId', ParseIntPipe) shiftId: number,
+  ): Promise<UpdateShiftResDto> {
+    const response: UpdateShiftResDto = await this.shiftService.updateShift(
+      shiftId,
+      shiftDto,
+    );
     return response;
   }
 }

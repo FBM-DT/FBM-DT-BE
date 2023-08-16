@@ -15,6 +15,8 @@ import { ErrorHandler } from '../../core/shared/common/error';
 import { IExistDataReturnValue } from './interfaces';
 import { Bcrypt } from '../../core/utils';
 import { IAccountPayload, IUserPayload } from './interfaces';
+import { Department } from '../organisation/entities/department.entity';
+import { Position } from '../organisation/entities/position.entity';
 
 @Injectable()
 export class ProfileService {
@@ -117,7 +119,17 @@ export class ProfileService {
         await querryRunner.release();
       }
     } catch (error) {
-      return AppResponse.setAppErrorResponse<AddProfileResDto>(error.message);
+      return error.detail.includes('departmentId')
+        ? AppResponse.setUserErrorResponse<AddProfileResDto>(
+            ErrorHandler.notFound('Department'),
+            { status: 404 },
+          )
+        : error.detail.includes('positionId')
+        ? AppResponse.setUserErrorResponse<AddProfileResDto>(
+            ErrorHandler.notFound('Position'),
+            { status: 404 },
+          )
+        : AppResponse.setAppErrorResponse<AddProfileResDto>(error.message);
     }
   }
 
@@ -169,7 +181,7 @@ export class ProfileService {
     try {
       const account = await this._dataSource.getRepository(Account).findOne({
         where: { id: accountId },
-        relations: ['user', 'role'],
+        relations: ['user', 'role', 'user.department', 'user.position'],
       });
       if (!account)
         return AppResponse.setAppErrorResponse<GetProfileResDto>(
@@ -179,8 +191,13 @@ export class ProfileService {
           },
         );
 
-      const { id, ...profileData } = {
-        ...account.user,
+      const { phonenumber, user } = account;
+
+      const { id, departmentId, positionId, ...profileData } = {
+        ...user,
+        phonenumber,
+        position: user.position.name,
+        department: user.department.name,
         accountId: account.id,
         userId: account.user.id,
         role: account.role.name,
@@ -204,17 +221,12 @@ export class ProfileService {
       ...rest,
     };
 
-    const account = {
+    const account: IAccountPayload = {
       roleId,
       phonenumber,
     };
 
-    const querryRunner = this._dataSource.createQueryRunner();
-
     try {
-      await querryRunner.connect();
-      await querryRunner.startTransaction('SERIALIZABLE');
-
       const isHaveAccount = await this._dataSource
         .getRepository(Account)
         .findOneBy({
@@ -222,10 +234,38 @@ export class ProfileService {
         });
 
       if (!isHaveAccount) {
-        await querryRunner.rollbackTransaction();
-
         return AppResponse.setAppErrorResponse<UpdateProfileResDto>(
           ErrorHandler.notFound(`Account with id ${accountID}`),
+          {
+            status: 404,
+          },
+        );
+      }
+
+      const isHaveDepartment = await this._dataSource
+        .getRepository(Department)
+        .findOneBy({
+          id: data.departmentId,
+        });
+
+      if (!isHaveDepartment) {
+        return AppResponse.setUserErrorResponse<UpdateProfileResDto>(
+          ErrorHandler.notFound(`Department with id ${data.departmentId}`),
+          {
+            status: 404,
+          },
+        );
+      }
+
+      const isHavePosition = await this._dataSource
+        .getRepository(Position)
+        .findOneBy({
+          id: data.positionId,
+        });
+
+      if (!isHavePosition) {
+        return AppResponse.setUserErrorResponse<UpdateProfileResDto>(
+          ErrorHandler.notFound(`Position with id ${data.positionId}`),
           {
             status: 404,
           },
@@ -238,9 +278,7 @@ export class ProfileService {
         });
 
       if (isExistPhoneNumber.isExist) {
-        await querryRunner.rollbackTransaction();
-
-        return AppResponse.setUserErrorResponse<AddProfileResDto>(
+        return AppResponse.setUserErrorResponse<UpdateProfileResDto>(
           isExistPhoneNumber.message,
         );
       }
@@ -250,46 +288,187 @@ export class ProfileService {
         });
 
       if (isExistEmail.isExist) {
-        await querryRunner.rollbackTransaction();
-
-        return AppResponse.setUserErrorResponse<AddProfileResDto>(
+        return AppResponse.setUserErrorResponse<UpdateProfileResDto>(
           isExistEmail.message,
         );
       }
 
-      const accountUpdateData = await this._dataSource
+      const querryRunner = this._dataSource.createQueryRunner();
+
+      try {
+        await querryRunner.connect();
+        await querryRunner.startTransaction('SERIALIZABLE');
+
+        const accountUpdateData = await this._dataSource
+          .getRepository(Account)
+          .createQueryBuilder()
+          .update(Account)
+          .set(account)
+          .where('id = :id', { id: accountID })
+          .execute();
+
+        const accountAfterUpdate = await this._dataSource
+          .getRepository(Account)
+          .findOne({ where: { id: accountID } });
+
+        const { ...updatedAccountData } = accountAfterUpdate;
+
+        const user = await this._userRepository
+          .createQueryBuilder()
+          .update(User)
+          .set(userData)
+          .where('id = :id', { id: updatedAccountData.userId })
+          .execute();
+
+        await querryRunner.commitTransaction();
+
+        const finalResult = {
+          ...rest,
+          ...account,
+          accountId: updatedAccountData.id,
+          userId: updatedAccountData.userId,
+        };
+
+        return AppResponse.setSuccessResponse<UpdateProfileResDto>(
+          finalResult,
+          {
+            status: 200,
+            message: 'Updated',
+          },
+        );
+      } catch (error) {
+        await querryRunner.rollbackTransaction();
+        throw error;
+      } finally {
+        await querryRunner.release();
+      }
+    } catch (error) {
+      return AppResponse.setAppErrorResponse<AddProfileResDto>(error.message);
+    }
+  }
+
+  async deActiveProfile(userId: number): Promise<UpdateProfileResDto> {
+    const querryRunner = this._dataSource.createQueryRunner();
+    try {
+      await querryRunner.connect();
+      await querryRunner.startTransaction('SERIALIZABLE');
+
+      const user = await this._userRepository.findOne({
+        where: { id: userId },
+      });
+
+      if (!user)
+        return AppResponse.setAppErrorResponse<UpdateProfileResDto>(
+          ErrorHandler.notFound(`User with id ${userId}`),
+          {
+            status: 400,
+          },
+        );
+
+      const account = await this._dataSource
+        .getRepository(Account)
+        .findOne({ where: { userId: user.id } });
+
+      if (!account)
+        return AppResponse.setAppErrorResponse<UpdateProfileResDto>(
+          ErrorHandler.notFound(`Account with user id ${userId}`),
+          {
+            status: 400,
+          },
+        );
+
+      const userUpdate = await this._dataSource
+        .getRepository(User)
+        .createQueryBuilder()
+        .update(User)
+        .set({ isActive: false })
+        .where('id = :id', { id: user.id })
+        .execute();
+
+      const accountUpdate = await this._dataSource
         .getRepository(Account)
         .createQueryBuilder()
         .update(Account)
-        .set(account)
-        .where('id = :id', { id: accountID })
-        .execute();
-
-      const accountAfterUpdate = await this._dataSource
-        .getRepository(Account)
-        .findOne({ where: { id: accountID } });
-
-      const { ...updatedAccountData } = accountAfterUpdate;
-
-      const user = await this._userRepository
-        .createQueryBuilder()
-        .update(User)
-        .set(userData)
-        .where('id = :id', { id: updatedAccountData.userId })
+        .set({ isActive: false })
+        .where('id = :id', { id: account.id })
         .execute();
 
       await querryRunner.commitTransaction();
 
-      const finalResult = {
-        ...rest,
-        ...account,
-        accountId: updatedAccountData.id,
-        userId: updatedAccountData.userId,
+      const result = {
+        user: userUpdate.affected,
+        account: accountUpdate.affected,
       };
 
-      return AppResponse.setSuccessResponse<UpdateProfileResDto>(finalResult, {
+      return AppResponse.setSuccessResponse<UpdateProfileResDto>(result, {
         status: 200,
-        message: 'Updated',
+        message: 'User have been Deactivated',
+      });
+    } catch (error) {
+      await querryRunner.rollbackTransaction();
+      return AppResponse.setAppErrorResponse<UpdateProfileResDto>(
+        error.message,
+      );
+    } finally {
+      await querryRunner.release();
+    }
+  }
+
+  async activeProfile(userId: number): Promise<UpdateProfileResDto> {
+    const querryRunner = this._dataSource.createQueryRunner();
+    try {
+      await querryRunner.connect();
+      await querryRunner.startTransaction('SERIALIZABLE');
+      const user = await this._userRepository.findOne({
+        where: { id: userId },
+      });
+
+      if (!user)
+        return AppResponse.setAppErrorResponse<UpdateProfileResDto>(
+          ErrorHandler.notFound(`User with id ${userId}`),
+          {
+            status: 400,
+          },
+        );
+
+      const account = await this._dataSource
+        .getRepository(Account)
+        .findOne({ where: { userId: user.id } });
+
+      if (!account)
+        return AppResponse.setAppErrorResponse<UpdateProfileResDto>(
+          ErrorHandler.notFound(`Account with user id ${userId}`),
+          {
+            status: 400,
+          },
+        );
+
+      const userUpdate = await this._dataSource
+        .getRepository(User)
+        .createQueryBuilder()
+        .update(User)
+        .set({ isActive: true })
+        .where('id = :id', { id: user.id })
+        .execute();
+
+      const accountUpdate = await this._dataSource
+        .getRepository(Account)
+        .createQueryBuilder()
+        .update(Account)
+        .set({ isActive: true })
+        .where('id = :id', { id: account.id })
+        .execute();
+
+      await querryRunner.commitTransaction();
+
+      const result = {
+        user: userUpdate.affected,
+        account: accountUpdate.affected,
+      };
+
+      return AppResponse.setSuccessResponse<UpdateProfileResDto>(result, {
+        status: 200,
+        message: 'User have been Activated',
       });
     } catch (error) {
       await querryRunner.rollbackTransaction();

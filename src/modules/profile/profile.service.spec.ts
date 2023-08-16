@@ -32,6 +32,9 @@ describe('InventoryService', () => {
       phonenumber: '12345676',
       password: '12345678',
       roleId: 3,
+      positionId: 1,
+      departmentId: 1,
+      citizenId: '123456789',
     };
     const test: AddProfileResDto = new AddProfileResDto();
     test.data = data;

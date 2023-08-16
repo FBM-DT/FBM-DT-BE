@@ -1,6 +1,5 @@
 import { ShareEntity } from '../../core/shared';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
-import { Schedule } from '../shift/entities/schedule.entity';
 import { Position } from '../organisation/entities/position.entity';
 import { Account } from '../auth/account.entity';
 import { GENDER } from '../../core/constants';

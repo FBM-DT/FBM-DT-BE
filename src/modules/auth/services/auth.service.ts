@@ -14,7 +14,7 @@ import {
   RefreshTokenResDto,
   SigninResDto,
 } from '../dto/response';
-import { ErrorMessage } from '../constrants/errorMessages';
+import { ErrorMessage } from '../constants/errorMessages';
 import { ErrorHandler } from '../../../core/shared/common/error';
 
 @Injectable()
@@ -54,7 +54,10 @@ export class AuthService {
       accountId: account['id'],
       fullname: account['user']['fullname'],
       phonenumber: account['phonenumber'],
+      roleId: account['roleId'],
       role: account['role']['name'],
+      isActive: account['isActive'],
+      firstLogin: account['firstLogin'],
     };
   }
 
@@ -64,8 +67,17 @@ export class AuthService {
 
       if (typeof account === 'string') {
         return AppResponse.setUserErrorResponse<SigninResDto>(account, {
-          status: 403,
+          status: 401,
         });
+      }
+
+      if (!account.isActive) {
+        return AppResponse.setUserErrorResponse<SigninResDto>(
+          ErrorMessage.ACCESS_DENIED,
+          {
+            status: 403,
+          },
+        );
       }
 
       const authPayload: IAuthPayload = this.createAuthPayload(account);
