@@ -10,6 +10,9 @@ export interface IUserPayload {
   startDate?: Date;
   endDate?: Date;
   avatar?: string;
+  department?: {
+    name?: string;
+  };
 }
 
 export interface IAccountPayload {
@@ -18,6 +21,6 @@ export interface IAccountPayload {
   password?: string;
 }
 
-export interface IProfile extends IAccountPayload, IUserPayload {
-  departmentName?: string;
+export interface IProfile extends IAccountPayload {
+  user?: IUserPayload;
 }
