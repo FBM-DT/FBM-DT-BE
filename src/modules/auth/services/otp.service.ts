@@ -172,7 +172,9 @@ export class OtpService {
         return response;
       }
     } catch (error) {
-      console.log(error.message);
+      const response: VerifyOTPResDto =
+        AppResponse.setAppErrorResponse<VerifyOTPResDto>(error.message);
+      return response;
     }
   }
 }
