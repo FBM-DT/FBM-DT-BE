@@ -131,15 +131,13 @@ export class GetProfileReqDto extends PartialType(
 }
 
 export class UpdateProfileReqDto extends PartialType(
-  OmitType(AddProfileReqDto, ['password'] as const),
+  OmitType(AddProfileReqDto, ['startDate', 'endDate'] as const),
 ) {}
 
 export default class GetProfilesReqDto extends PaginationReqDto {
   @IsOptional()
-  @IsArray({ message: 'The sort must be an array' })
-  @ArrayMinSize(1)
-  @ValidateNested({ each: true, context: Sort })
-  readonly sort?: Sort[];
+  @IsString({ message: 'The sort must be a string' })
+  readonly sort?: string;
 
   @IsOptional()
   @IsString({ message: 'The email must be a string' })
@@ -153,8 +151,12 @@ export default class GetProfilesReqDto extends PaginationReqDto {
   @IsString({ message: 'The fullname must be a string' })
   readonly fullname?: string;
 
-  @IsOptional()
-  @IsString({ message: 'The gender must be a string' })
+  @IsEnum(GENDER, {
+    message: `The type of gender must be belonged to the enum ${Object.values(
+      GENDER,
+    )}`,
+  })
+  @ApiProperty({ enum: [GENDER.FEMALE, GENDER.MALE, GENDER.OTHER] })
   readonly gender?: string;
 
   @IsOptional()

@@ -5,6 +5,7 @@ import { TYPEORM } from '../../core/constants';
 import { AddProfileReqDto, UpdateProfileReqDto } from './dto/req';
 import {
   AddProfileResDto,
+  GetProfileListResDto,
   GetProfileResDto,
   UpdateProfileResDto,
 } from './dto/res';
@@ -477,6 +478,16 @@ export class ProfileService {
       );
     } finally {
       await querryRunner.release();
+    }
+  }
+
+  async getProfileList(queries: Object): Promise<GetProfileListResDto> {
+    try {
+      
+    } catch (error) {
+      return AppResponse.setAppErrorResponse<GetProfileListResDto>(
+        error.message,
+      );
     }
   }
 }
