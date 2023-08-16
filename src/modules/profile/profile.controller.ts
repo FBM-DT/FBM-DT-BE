@@ -86,14 +86,14 @@ export class ProfileController {
   @Patch(':id/deactivate')
   @Auth(ACCOUNT_ROLE.ADM, ACCOUNT_ROLE.SUPERVISOR)
   async deactivateUser(@Param('id') id: number) {
-    const res = await this.profileService.deActiveProfile(id);
+    const res = await this.profileService.deActivateProfile(id);
     return res;
   }
 
-  @Patch(':id/active')
+  @Patch(':id/activate')
   @Auth(ACCOUNT_ROLE.ADM, ACCOUNT_ROLE.SUPERVISOR)
   async activateUser(@Param('id') id: number) {
-    const res = await this.profileService.activeProfile(id);
+    const res = await this.profileService.activateProfile(id);
     return res;
   }
 }
