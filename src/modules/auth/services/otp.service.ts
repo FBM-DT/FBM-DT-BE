@@ -131,4 +131,48 @@ export class OtpService {
       return response;
     }
   }
+
+  async verifyOtpCode(phonenumber: string, otp: string): Promise<OTPResDto> {
+    try {
+      const account = await this._accountRepository.findOne({
+        where: { phonenumber: phonenumber },
+      });
+
+      if (!account) {
+        const response: OTPResDto = AppResponse.setUserErrorResponse<OTPResDto>(
+          ErrorHandler.notFound(`The phone number ${phonenumber}`),
+        );
+        return response;
+      }
+      const otpBody = JSON.stringify(otp);
+      const jsonData = JSON.parse(otpBody);
+      const otpValue = jsonData.otp;
+
+      const defaultOtp = this.configService.get<string>('OTP_CODE');
+      if (otpValue === defaultOtp) {
+        const confirmOtp = await this._accountRepository
+          .createQueryBuilder()
+          .update(Account)
+          .set({
+            isValidOtp: true,
+          })
+          .where('phonenumber = :phonenumber', { phonenumber: phonenumber })
+          .execute();
+
+        const response: VerifyOTPResDto =
+          AppResponse.setSuccessResponse<VerifyOTPResDto>({
+            status: 'approved',
+            accountId: confirmOtp.affected,
+          });
+        return response;
+      } else {
+        const response: OTPResDto = AppResponse.setUserErrorResponse<OTPResDto>(
+          ErrorHandler.invalid('The OTP'),
+        );
+        return response;
+      }
+    } catch (error) {
+      console.log(error.message);
+    }
+  }
 }
