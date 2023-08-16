@@ -1,20 +1,29 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { User } from '../users/user.entity';
-import { DataSource, Repository } from 'typeorm';
-import { TYPEORM } from '../../core/constants';
-import { AddProfileReqDto, UpdateProfileReqDto } from './dto/req';
+import {
+  DataSource,
+  FindManyOptions,
+  Repository,
+  SelectQueryBuilder,
+} from 'typeorm';
+import { SEARCH_TYPE, TYPEORM } from '../../core/constants';
+import {
+  AddProfileReqDto,
+  UpdateProfileReqDto,
+  GetProfilesReqDto,
+} from './dto/req';
 import {
   AddProfileResDto,
-  GetProfileListResDto,
   GetProfileResDto,
+  GetProfilesResDto,
   UpdateProfileResDto,
 } from './dto/res';
 import { AppResponse } from '../../core/shared/app.response';
 import { AccountService } from '../auth/services';
 import { Account } from '../auth/account.entity';
 import { ErrorHandler } from '../../core/shared/common/error';
-import { IExistDataReturnValue } from './interfaces';
-import { Bcrypt } from '../../core/utils';
+import { IExistDataReturnValue, IProfile } from './interfaces';
+import { Bcrypt, ExtraQuery } from '../../core/utils';
 import { IAccountPayload, IUserPayload } from './interfaces';
 import { Department } from '../organisation/entities/department.entity';
 import { Position } from '../organisation/entities/position.entity';
@@ -481,13 +490,106 @@ export class ProfileService {
     }
   }
 
-  async getProfileList(queries: Object): Promise<GetProfileListResDto> {
+  async getProfiles(queries: GetProfilesReqDto): Promise<GetProfilesResDto> {
     try {
-      
-    } catch (error) {
-      return AppResponse.setAppErrorResponse<GetProfileListResDto>(
-        error.message,
+      if (Object.keys(queries).length === 0) {
+        const result: IProfile[] = await this._dataSource
+          .getRepository(Account)
+          .find({
+            select: {
+              phonenumber: true,
+              user: {
+                fullname: true,
+                email: true,
+                gender: true,
+                dateOfBirth: true,
+                address: true,
+                startDate: true,
+                endDate: true,
+                avatar: true,
+                department: {
+                  name: true,
+                },
+              },
+            },
+            relations: {
+              user: {
+                department: true,
+              },
+            },
+          });
+        // const result: IProfile[] = await query
+        //   .innerJoin('a.user', 'u', 'a.userId = u.id')
+        //   .addSelect([
+        //     'u.fullname',
+        //     'u.gender',
+        //     'u.dateOfBirth',
+        //     'u.address',
+        //     'u.email',
+        //     'u.startDate',
+        //     'u.endDate',
+        //     'u.avatar',
+        //   ])
+        //   .innerJoin('u.department', 'd', 'u.departmentId = d.id')
+        //   .addSelect('d.name')
+        //   .getMany();
+        return AppResponse.setSuccessResponse<GetProfilesResDto>(result);
+      }
+      let options: FindManyOptions = new Object() as FindManyOptions;
+      ExtraQuery.paginateBy(
+        {
+          page: queries.page,
+          pageSize: queries.pageSize,
+        },
+        options,
       );
+      ExtraQuery.sortBy<Account>(queries.sort, options);
+      ExtraQuery.searchBy<Account>(
+        {
+          phonenumber: queries.phonenumber,
+        },
+        options,
+        SEARCH_TYPE.AND,
+      );
+
+      options = Object.assign(options, {
+        relations: {
+          user: {
+            department: true,
+          },
+        },
+        select: {
+          id: true,
+          phonenumber: true,
+          userId: true,
+          user: {
+            fullname: true,
+            email: true,
+            gender: true,
+            dateOfBirth: true,
+            address: true,
+            startDate: true,
+            endDate: true,
+            avatar: true,
+            department: {
+              name: true,
+            },
+          },
+        },
+      });
+      console.log(
+        '🚀 ~ file: profile.service.ts:373 ~ ProfileService ~ getProfiles ~ options:',
+        options,
+      );
+      const result: IProfile[] = await this._dataSource
+        .getRepository(Account)
+        .find(options);
+      return AppResponse.setSuccessResponse<GetProfilesResDto>(result, {
+        page: queries.page,
+        pageSize: queries.pageSize,
+      });
+    } catch (error) {
+      return AppResponse.setAppErrorResponse<GetProfilesResDto>(error.message);
     }
   }
 }

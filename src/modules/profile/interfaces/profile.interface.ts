@@ -17,3 +17,7 @@ export interface IAccountPayload {
   phonenumber?: string;
   password?: string;
 }
+
+export interface IProfile extends IAccountPayload, IUserPayload {
+  departmentName?: string;
+}
