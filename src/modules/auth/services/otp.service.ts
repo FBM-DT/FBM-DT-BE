@@ -165,12 +165,12 @@ export class OtpService {
             accountId: confirmOtp.affected,
           });
         return response;
-      } else {
-        const response: OTPResDto = AppResponse.setUserErrorResponse<OTPResDto>(
-          ErrorHandler.invalid('The OTP'),
-        );
-        return response;
       }
+
+      const response: OTPResDto = AppResponse.setUserErrorResponse<OTPResDto>(
+        ErrorHandler.invalid('The OTP'),
+      );
+      return response;
     } catch (error) {
       const response: VerifyOTPResDto =
         AppResponse.setAppErrorResponse<VerifyOTPResDto>(error.message);
