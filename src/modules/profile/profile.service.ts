@@ -529,7 +529,7 @@ export class ProfileService {
       query = query
         .innerJoin('u.department', 'd', 'u.departmentId = d.id')
         .addSelect(['d.id', 'd.name']);
-      if (queries.sortBy && queries.order) {
+      if (queries.sortBy) {
         const userTableFields: Array<string> = this._dataSource
           .getMetadata(User)
           .columns.map((column) => column.propertyName);
@@ -546,7 +546,7 @@ export class ProfileService {
         
         query = query.orderBy(
           `u.${queries.sortBy}`,
-          queries.order === 'asc' ? 'ASC' : 'DESC',
+          queries.order === 'ASC' ? 'ASC' : 'DESC',
         );
       }
 
