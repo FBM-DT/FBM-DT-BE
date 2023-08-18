@@ -36,7 +36,8 @@ RUN npm install --only=production --ignore-scripts
 # COPY . .
 
 # Copy all from development stage
-COPY --from=development /backend/dt/app/ .
+
+COPY --from=development ./backend/dt/app/ ./
 
 # Run app
 CMD [ "node", "dist/main" ]
