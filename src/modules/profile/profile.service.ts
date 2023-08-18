@@ -529,63 +529,25 @@ export class ProfileService {
       query = query
         .innerJoin('u.department', 'd', 'u.departmentId = d.id')
         .addSelect(['d.id', 'd.name']);
-      if (queries.sort && queries.sort.length > 0) {
-        const sortOptions: Array<string> = queries.sort.split(',');
-        sortOptions.forEach((option, index) => {
-          const sortPair: Array<string> = option.split(':');
-          if (index === 0) {
-            const accountTableFields: Array<string> = this._dataSource
-              .getMetadata(Account)
-              .columns.map((column) => column.propertyName);
-            const userTableFields: Array<string> = this._dataSource
-              .getMetadata(User)
-              .columns.map((column) => column.propertyName);
-            if (accountTableFields.includes(sortPair[0])) {
-              query = query.orderBy(
-                `a.${sortPair[0]}`,
-                sortPair[1].toLowerCase() === 'asc' ? 'ASC' : 'DESC',
-              );
-              return;
-            }
-            if (userTableFields.includes(sortPair[0])) {
-              query = query.orderBy(
-                `u.${sortPair[0]}`,
-                sortPair[1].toLowerCase() === 'asc' ? 'ASC' : 'DESC',
-              );
-              return;
-            }
-            query = query.orderBy(
-              `d.${sortPair[0]}`,
-              sortPair[1].toLowerCase() === 'asc' ? 'ASC' : 'DESC',
-            );
-            return;
-          }
-          const accountTableFields: Array<string> = this._dataSource
-            .getMetadata(Account)
-            .columns.map((column) => column.propertyName);
-          const userTableFields: Array<string> = this._dataSource
-            .getMetadata(User)
-            .columns.map((column) => column.propertyName);
-          if (accountTableFields.includes(sortPair[0])) {
-            query = query.addOrderBy(
-              `a.${sortPair[0]}`,
-              sortPair[1].toLowerCase() === 'asc' ? 'ASC' : 'DESC',
-            );
-            return;
-          }
-          if (userTableFields.includes(sortPair[0])) {
-            query = query.addOrderBy(
-              `u.${sortPair[0]}`,
-              sortPair[1].toLowerCase() === 'asc' ? 'ASC' : 'DESC',
-            );
-            return;
-          }
-          query = query.addOrderBy(
-            `d.${sortPair[0]}`,
-            sortPair[1].toLowerCase() === 'asc' ? 'ASC' : 'DESC',
+      if (queries.sortBy && queries.order) {
+        const userTableFields: Array<string> = this._dataSource
+          .getMetadata(User)
+          .columns.map((column) => column.propertyName);
+        if (!userTableFields.includes(queries.sortBy)) {
+          return AppResponse.setUserErrorResponse<GetProfilesResDto>(
+            ErrorHandler.invalid(queries.sortBy),
           );
-          return;
-        });
+        }
+        if (queries.sortBy === 'citizenId'){
+          return AppResponse.setUserErrorResponse<GetProfilesResDto>(
+            ErrorHandler.notAllow(queries.sortBy),
+          );
+        }
+        
+        query = query.orderBy(
+          `u.${queries.sortBy}`,
+          queries.order === 'asc' ? 'ASC' : 'DESC',
+        );
       }
 
       const result: IProfile[] = await query.getMany();

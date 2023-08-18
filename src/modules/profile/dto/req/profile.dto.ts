@@ -137,10 +137,6 @@ export class UpdateProfileReqDto extends PartialType(
 
 export class GetProfilesReqDto extends PaginationReqDto {
   @IsOptional()
-  @IsString({ message: 'The sort must be a string' })
-  readonly sort?: string;
-
-  @IsOptional()
   @IsString({ message: 'The email must be a string' })
   readonly email?: string;
 
