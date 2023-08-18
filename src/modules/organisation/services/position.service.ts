@@ -11,6 +11,7 @@ import {
 } from '../dto/position/res/position.dto';
 import { CreatePositionReqDto } from '../dto/position/req/position.dto';
 import { ErrorHandler } from 'src/core/shared/common/error';
+import { IPosition } from '../interfaces';
 
 @Injectable()
 export class PositionService {
@@ -24,7 +25,7 @@ export class PositionService {
 
   async getPositions(): Promise<GetPositionsResDto> {
     try {
-      const positions = await this._positionRepository.find();
+      const positions: IPosition[] = await this._positionRepository.find();
       return AppResponse.setSuccessResponse<GetPositionsResDto>(positions);
     } catch (error) {
       return AppResponse.setAppErrorResponse<GetPositionsResDto>(error.message);
@@ -33,7 +34,7 @@ export class PositionService {
 
   async getPosition(id: number): Promise<GetPositionResDto> {
     try {
-      const position = await this._positionRepository.findOne({
+      const position: IPosition = await this._positionRepository.findOne({
         where: { id },
       });
 
@@ -52,7 +53,12 @@ export class PositionService {
     position: CreatePositionReqDto,
   ): Promise<CreatePositionResDto> {
     try {
-      const createdPosition = await this._positionRepository.createQueryBuilder().insert().into(Position).values(position).execute();
+      const createdPosition = await this._positionRepository
+        .createQueryBuilder()
+        .insert()
+        .into(Position)
+        .values(position)
+        .execute();
       return AppResponse.setSuccessResponse<CreatePositionResDto>(
         createdPosition,
       );
