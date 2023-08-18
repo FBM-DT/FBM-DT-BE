@@ -2,7 +2,6 @@ import { Injectable, Inject } from '@nestjs/common';
 import { User } from '../users/user.entity';
 import {
   DataSource,
-  FindManyOptions,
   Repository,
   SelectQueryBuilder,
 } from 'typeorm';
@@ -35,7 +34,6 @@ export class ProfileService {
   constructor(
     @Inject(TYPEORM)
     dataSource: DataSource,
-    private readonly accountService: AccountService,
   ) {
     this._dataSource = dataSource;
     this._userRepository = dataSource.getRepository(User);
@@ -491,98 +489,116 @@ export class ProfileService {
   }
 
   async getProfiles(queries: GetProfilesReqDto): Promise<GetProfilesResDto> {
+    let query: SelectQueryBuilder<User> = this._dataSource
+      .getRepository(User)
+      .createQueryBuilder('u')
+      .select([
+        'u.id',
+        'u.fullname',
+        'u.gender',
+        'u.dateOfBirth',
+        'u.address',
+        'u.email',
+        'u.startDate',
+        'u.endDate',
+        'u.avatar',
+      ]);
     try {
       if (Object.keys(queries).length === 0) {
-        const result: IProfile[] = await this._dataSource
-          .getRepository(Account)
-          .find({
-            select: {
-              phonenumber: true,
-              user: {
-                fullname: true,
-                email: true,
-                gender: true,
-                dateOfBirth: true,
-                address: true,
-                startDate: true,
-                endDate: true,
-                avatar: true,
-                department: {
-                  name: true,
-                },
-              },
-            },
-            relations: {
-              user: {
-                department: true,
-              },
-            },
-          });
-        // const result: IProfile[] = await query
-        //   .innerJoin('a.user', 'u', 'a.userId = u.id')
-        //   .addSelect([
-        //     'u.fullname',
-        //     'u.gender',
-        //     'u.dateOfBirth',
-        //     'u.address',
-        //     'u.email',
-        //     'u.startDate',
-        //     'u.endDate',
-        //     'u.avatar',
-        //   ])
-        //   .innerJoin('u.department', 'd', 'u.departmentId = d.id')
-        //   .addSelect('d.name')
-        //   .getMany();
+        const result: IProfile[] = await query
+          .innerJoin('u.accounts', 'a')
+          .addSelect(['a.phonenumber', 'a.id'])
+          .innerJoin('u.department', 'd', 'u.departmentId = d.id')
+          .addSelect(['d.id', 'd.name'])
+          .getMany();
         return AppResponse.setSuccessResponse<GetProfilesResDto>(result);
       }
-      let options: FindManyOptions = new Object() as FindManyOptions;
-      ExtraQuery.paginateBy(
-        {
-          page: queries.page,
-          pageSize: queries.pageSize,
-        },
-        options,
-      );
-      ExtraQuery.searchBy<Account>(
-        {
-          phonenumber: queries.phonenumber,
-        },
-        options,
-        SEARCH_TYPE.AND,
-      );
+      if (
+        queries.page !== null &&
+        queries.page !== undefined &&
+        queries.pageSize !== null &&
+        queries.pageSize !== undefined
+      ) {
+        query = query
+          .take(queries.pageSize)
+          .skip((queries.page - 1) * queries.pageSize);
+      }
 
-      options = Object.assign(options, {
-        relations: {
-          user: {
-            department: true,
-          },
-        },
-        select: {
-          id: true,
-          phonenumber: true,
-          userId: true,
-          user: {
-            fullname: true,
-            email: true,
-            gender: true,
-            dateOfBirth: true,
-            address: true,
-            startDate: true,
-            endDate: true,
-            avatar: true,
-            department: {
-              name: true,
-            },
-          },
-        },
-      });
-      console.log(
-        '🚀 ~ file: profile.service.ts:373 ~ ProfileService ~ getProfiles ~ options:',
-        options,
-      );
-      const result: IProfile[] = await this._dataSource
-        .getRepository(Account)
-        .find(options);
+      if (queries.phonenumber !== undefined && queries.phonenumber !== null) {
+        query = query
+          .innerJoin('u.accounts', 'a', 'a.phonenumber like :wildcardNumber', {
+            wildcardNumber: `%${queries.phonenumber}%`,
+          })
+          .addSelect(['a.phonenumber', 'a.id']);
+      } else {
+        query = query
+          .innerJoin('u.accounts', 'a')
+          .addSelect(['a.phonenumber', 'a.id']);
+      }
+      
+      query = query
+        .innerJoin('u.department', 'd', 'u.departmentId = d.id')
+        .addSelect(['d.id', 'd.name']);
+      if (queries.sort !== undefined && queries.sort.length > 0) {
+        const sortOptions: Array<string> = queries.sort.split(',');
+        sortOptions.forEach((option, index) => {
+          const sortPair: Array<string> = option.split(':');
+          if (index === 0) {
+            const accountTableFields: Array<string> = this._dataSource
+              .getMetadata(Account)
+              .columns.map((column) => column.propertyName);
+            const userTableFields: Array<string> = this._dataSource
+              .getMetadata(User)
+              .columns.map((column) => column.propertyName);
+            if (accountTableFields.includes(sortPair[0])) {
+              query = query.orderBy(
+                `a.${sortPair[0]}`,
+                sortPair[1].toLowerCase() === 'asc' ? 'ASC' : 'DESC',
+              );
+              return;
+            }
+            if (userTableFields.includes(sortPair[0])) {
+              query = query.orderBy(
+                `u.${sortPair[0]}`,
+                sortPair[1].toLowerCase() === 'asc' ? 'ASC' : 'DESC',
+              );
+              return;
+            }
+            query = query.orderBy(
+              `d.${sortPair[0]}`,
+              sortPair[1].toLowerCase() === 'asc' ? 'ASC' : 'DESC',
+            );
+            return;
+          }
+          const accountTableFields: Array<string> = this._dataSource
+            .getMetadata(Account)
+            .columns.map((column) => column.propertyName);
+          const userTableFields: Array<string> = this._dataSource
+            .getMetadata(User)
+            .columns.map((column) => column.propertyName);
+          if (accountTableFields.includes(sortPair[0])) {
+            query = query.addOrderBy(
+              `a.${sortPair[0]}`,
+              sortPair[1].toLowerCase() === 'asc' ? 'ASC' : 'DESC',
+            );
+            return;
+          }
+          if (userTableFields.includes(sortPair[0])) {
+            query = query.addOrderBy(
+              `u.${sortPair[0]}`,
+              sortPair[1].toLowerCase() === 'asc' ? 'ASC' : 'DESC',
+            );
+            return;
+          }
+          query = query.addOrderBy(
+            `d.${sortPair[0]}`,
+            sortPair[1].toLowerCase() === 'asc' ? 'ASC' : 'DESC',
+          );
+          return;
+        });
+      }
+
+      const result: IProfile[] = await query.getMany();
       return AppResponse.setSuccessResponse<GetProfilesResDto>(result, {
         page: queries.page,
         pageSize: queries.pageSize,

@@ -13,6 +13,7 @@ export interface IUserPayload {
   department?: {
     name?: string;
   };
+  accounts?: IAccountPayload[]
 }
 
 export interface IAccountPayload {
@@ -21,6 +22,5 @@ export interface IAccountPayload {
   password?: string;
 }
 
-export interface IProfile extends IAccountPayload {
-  user?: IUserPayload;
+export interface IProfile extends IUserPayload {
 }
