@@ -52,7 +52,7 @@ export class PositionService {
     position: CreatePositionReqDto,
   ): Promise<CreatePositionResDto> {
     try {
-      const createdPosition = await this._positionRepository.save(position);
+      const createdPosition = await this._positionRepository.createQueryBuilder().insert().into(Position).values(position).execute();
       return AppResponse.setSuccessResponse<CreatePositionResDto>(
         createdPosition,
       );
