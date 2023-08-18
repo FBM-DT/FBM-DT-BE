@@ -1,24 +1,5 @@
-import {
-  ApiTags,
-  ApiOperation,
-  ApiBody,
-  ApiBadRequestResponse,
-  ApiCreatedResponse,
-  ApiOkResponse,
-  ApiForbiddenResponse,
-  ApiNotFoundResponse,
-  ApiBearerAuth,
-} from '@nestjs/swagger';
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  Post,
-  UseGuards,
-  Patch,
-  ParseIntPipe,
-} from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiOkResponse } from '@nestjs/swagger';
+import { Controller, Get } from '@nestjs/common';
 import { RoleService } from './role.service';
 import { GetRolesResDto } from './dto/response/role.dto';
 
