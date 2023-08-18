@@ -31,7 +31,9 @@ export class DepartmentService {
       const data: Department[] = await this._departmentRepository.find();
       return AppResponse.setSuccessResponse<GetDepartmentListResDto>(data);
     } catch (error) {
-      return AppResponse.setAppErrorResponse(error.message);
+      return AppResponse.setAppErrorResponse<GetDepartmentListResDto>(
+        error.message,
+      );
     }
   }
 
@@ -54,7 +56,9 @@ export class DepartmentService {
         message: 'Created',
       });
     } catch (error) {
-      return AppResponse.setAppErrorResponse(error.message);
+      return AppResponse.setAppErrorResponse<AddDepartmentResDto>(
+        error.message,
+      );
     }
   }
 
@@ -68,9 +72,9 @@ export class DepartmentService {
 
     if (!department) {
       return AppResponse.setUserErrorResponse(
-        ErrorHandler.notFound(`Department with id ${departmentId}`),
+        ErrorHandler.invalid(`Department with id ${departmentId}`),
         {
-          status: 404,
+          status: 400,
         },
       );
     }
@@ -107,9 +111,9 @@ export class DepartmentService {
 
     if (!department) {
       return AppResponse.setUserErrorResponse(
-        ErrorHandler.notFound(`Department with id ${departmentId}`),
+        ErrorHandler.invalid(`Department with id ${departmentId}`),
         {
-          status: 404,
+          status: 400,
         },
       );
     }
@@ -129,7 +133,7 @@ export class DepartmentService {
         updatedDepartment,
         {
           status: 200,
-          message: 'Updated',
+          message: 'Updated successfully',
         },
       );
     } catch (error) {
@@ -146,9 +150,9 @@ export class DepartmentService {
 
     if (!department) {
       return AppResponse.setUserErrorResponse(
-        ErrorHandler.notFound(`Department with id ${departmentId}`),
+        ErrorHandler.invalid(`Department with id ${departmentId}`),
         {
-          status: 404,
+          status: 400,
         },
       );
     }
@@ -160,17 +164,10 @@ export class DepartmentService {
         .where('id = :id', { id: departmentId })
         .execute();
 
-      const updatedDepartment = await this._departmentRepository.findOne({
-        where: { id: departmentId },
+      return AppResponse.setSuccessResponse<UpdateDepartmentResDto>({
+        status: 200,
+        message: 'Updated successfully',
       });
-
-      return AppResponse.setSuccessResponse<UpdateDepartmentResDto>(
-        updatedDepartment,
-        {
-          status: 200,
-          message: 'Updated',
-        },
-      );
     } catch (error) {
       return AppResponse.setAppErrorResponse<UpdateDepartmentResDto>(
         error.message,
