@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, Repository, UpdateResult } from 'typeorm';
 import { Department } from '../entities/department.entity';
 import { TYPEORM } from '../../../core/constants';
 import {
@@ -13,6 +13,7 @@ import {
   UpdateDepartmentReqDto,
 } from '../dto/department/req';
 import { ErrorHandler } from '../../../core/shared/common/error';
+import { IDepartmentPayload } from '../interfaces';
 
 @Injectable()
 export class DepartmentService {
@@ -66,9 +67,10 @@ export class DepartmentService {
     departmentId: number,
     data: UpdateDepartmentReqDto,
   ): Promise<UpdateDepartmentResDto> {
-    const department = await this._departmentRepository.findOne({
-      where: { id: departmentId },
-    });
+    const department: IDepartmentPayload =
+      await this._departmentRepository.findOne({
+        where: { id: departmentId },
+      });
 
     if (!department) {
       return AppResponse.setUserErrorResponse(
@@ -86,9 +88,10 @@ export class DepartmentService {
         .where('id = :id', { id: departmentId })
         .execute();
 
-      const updatedDepartment = await this._departmentRepository.findOne({
-        where: { id: departmentId },
-      });
+      const updatedDepartment: IDepartmentPayload =
+        await this._departmentRepository.findOne({
+          where: { id: departmentId },
+        });
 
       return AppResponse.setSuccessResponse<UpdateDepartmentResDto>(
         updatedDepartment,
@@ -105,9 +108,10 @@ export class DepartmentService {
   }
 
   async activeDepartment(departmentId: number) {
-    const department = await this._departmentRepository.findOne({
-      where: { id: departmentId },
-    });
+    const department: IDepartmentPayload =
+      await this._departmentRepository.findOne({
+        where: { id: departmentId },
+      });
 
     if (!department) {
       return AppResponse.setUserErrorResponse(
@@ -125,9 +129,10 @@ export class DepartmentService {
         .where('id = :id', { id: departmentId })
         .execute();
 
-      const updatedDepartment = await this._departmentRepository.findOne({
-        where: { id: departmentId },
-      });
+      const updatedDepartment: IDepartmentPayload =
+        await this._departmentRepository.findOne({
+          where: { id: departmentId },
+        });
 
       return AppResponse.setSuccessResponse<UpdateDepartmentResDto>(
         updatedDepartment,
@@ -144,9 +149,10 @@ export class DepartmentService {
   }
 
   async deActiveDepartment(departmentId: number) {
-    const department = await this._departmentRepository.findOne({
-      where: { id: departmentId },
-    });
+    const department: IDepartmentPayload =
+      await this._departmentRepository.findOne({
+        where: { id: departmentId },
+      });
 
     if (!department) {
       return AppResponse.setUserErrorResponse(

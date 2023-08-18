@@ -74,7 +74,7 @@ export class ProfileController {
     },
   })
   @Patch('update/:id')
-  // @Auth(ACCOUNT_ROLE.SUPERVISOR)
+  @Auth(ACCOUNT_ROLE.SUPERVISOR)
   async updateProfile(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateProfileDto: UpdateProfileReqDto,
