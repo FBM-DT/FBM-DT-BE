@@ -3,7 +3,6 @@ import { DepartmentService } from './department.service';
 import { DatabaseModule } from '../../../../src/db/database.module';
 import { ConfigModule } from '@nestjs/config';
 import { Department } from '../entities/department.entity';
-import { async } from 'rxjs';
 import { AddDepartmentReqDto } from '../dto/department/req';
 import { AddDepartmentResDto } from '../dto/department/res';
 
