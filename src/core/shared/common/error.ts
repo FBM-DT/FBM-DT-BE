@@ -10,4 +10,8 @@ export const ErrorHandler = {
   notFound(message: string) {
     return `${message} does not exist`;
   },
+
+  notAllow(message: string){
+    return `notAllow:The ${message} is not allowed to access`
+  }
 };

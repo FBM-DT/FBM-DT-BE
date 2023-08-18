@@ -86,11 +86,11 @@ export class User extends ShareEntity {
 
   @Column({
     type: 'int',
-    nullable: false,
+    nullable: true,
   })
   positionId: number;
   @ManyToOne(() => Position, (position) => position.users, {
-    onDelete: 'CASCADE',
+    onDelete: 'SET NULL',
   })
   @JoinColumn({ name: 'positionId', referencedColumnName: 'id' })
   position: Position;

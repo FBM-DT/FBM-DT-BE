@@ -14,6 +14,7 @@ import {
   MinLength,
   IsNumber,
   IsNumberString,
+  Matches,
 } from 'class-validator';
 import { GENDER } from '../../../../core/constants';
 import { PaginationReqDto } from '../../../../core/shared/request';
@@ -131,16 +132,10 @@ export class GetProfileReqDto extends PartialType(
 }
 
 export class UpdateProfileReqDto extends PartialType(
-  OmitType(AddProfileReqDto, ['password'] as const),
+  OmitType(AddProfileReqDto, ['startDate', 'endDate'] as const),
 ) {}
 
-export default class GetProfilesReqDto extends PaginationReqDto {
-  @IsOptional()
-  @IsArray({ message: 'The sort must be an array' })
-  @ArrayMinSize(1)
-  @ValidateNested({ each: true, context: Sort })
-  readonly sort?: Sort[];
-
+export class GetProfilesReqDto extends PaginationReqDto {
   @IsOptional()
   @IsString({ message: 'The email must be a string' })
   readonly email?: string;
@@ -154,10 +149,24 @@ export default class GetProfilesReqDto extends PaginationReqDto {
   readonly fullname?: string;
 
   @IsOptional()
-  @IsString({ message: 'The gender must be a string' })
+  @IsEnum(GENDER, {
+    message: `The type of gender must be belonged to the enum ${Object.values(
+      GENDER,
+    )}`,
+  })
+  @ApiProperty({ enum: [GENDER.FEMALE, GENDER.MALE, GENDER.OTHER] })
   readonly gender?: string;
 
   @IsOptional()
-  @IsString({ message: 'The department must be a string' })
+  @IsString({ message: 'phonenumberWrongType:The department must be a string' })
   readonly department?: string;
+
+  @IsOptional()
+  @IsString({
+    message: 'phonenumberWrongType:The phonenumber must be a string',
+  })
+  @MaxLength(10, {
+    message: 'phonenumberTooLong:The phonenumber must contain 10 character',
+  })
+  readonly phonenumber: string;
 }

@@ -1,19 +1,24 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { User } from '../users/user.entity';
-import { DataSource, Repository } from 'typeorm';
-import { TYPEORM } from '../../core/constants';
-import { AddProfileReqDto, UpdateProfileReqDto } from './dto/req';
+import { DataSource, Repository, SelectQueryBuilder } from 'typeorm';
+import { SEARCH_TYPE, TYPEORM } from '../../core/constants';
+import {
+  AddProfileReqDto,
+  UpdateProfileReqDto,
+  GetProfilesReqDto,
+} from './dto/req';
 import {
   AddProfileResDto,
   GetProfileResDto,
+  GetProfilesResDto,
   UpdateProfileResDto,
 } from './dto/res';
 import { AppResponse } from '../../core/shared/app.response';
 import { AccountService } from '../auth/services';
 import { Account } from '../auth/account.entity';
 import { ErrorHandler } from '../../core/shared/common/error';
-import { IExistDataReturnValue } from './interfaces';
-import { Bcrypt } from '../../core/utils';
+import { IExistDataReturnValue, IProfile } from './interfaces';
+import { Bcrypt, ExtraQuery } from '../../core/utils';
 import { IAccountPayload, IUserPayload } from './interfaces';
 import { Department } from '../organisation/entities/department.entity';
 import { Position } from '../organisation/entities/position.entity';
@@ -25,7 +30,6 @@ export class ProfileService {
   constructor(
     @Inject(TYPEORM)
     dataSource: DataSource,
-    private readonly accountService: AccountService,
   ) {
     this._dataSource = dataSource;
     this._userRepository = dataSource.getRepository(User);
@@ -102,13 +106,12 @@ export class ProfileService {
           .execute();
         await querryRunner.commitTransaction();
 
-        const { password, ...createdData } = {
-          ...rest,
-          ...accountData,
+        const data = {
+          userId: addUserProfileResult.identifiers[0].id,
           accountId: addAccountResult.identifiers[0].id,
         };
 
-        return AppResponse.setSuccessResponse<AddProfileResDto>(createdData, {
+        return AppResponse.setSuccessResponse<AddProfileResDto>(data, {
           status: 201,
           message: 'Created',
         });
@@ -187,7 +190,7 @@ export class ProfileService {
         return AppResponse.setAppErrorResponse<GetProfileResDto>(
           ErrorHandler.notFound(`Account ${accountId}`),
           {
-            status: 404,
+            status: 400,
           },
         );
 
@@ -196,11 +199,20 @@ export class ProfileService {
       const { id, departmentId, positionId, ...profileData } = {
         ...user,
         phonenumber,
-        position: user.position.name,
-        department: user.department.name,
+        position: {
+          name: user.position.name,
+          id: user.position.id,
+        },
+        department: {
+          name: user.department.name,
+          id: user.department.id,
+        },
         accountId: account.id,
         userId: account.user.id,
-        role: account.role.name,
+        role: {
+          name: account.role.name,
+          id: account.role.id,
+        },
       };
 
       return AppResponse.setSuccessResponse<GetProfileResDto>(profileData, {
@@ -237,7 +249,7 @@ export class ProfileService {
         return AppResponse.setAppErrorResponse<UpdateProfileResDto>(
           ErrorHandler.notFound(`Account with id ${accountID}`),
           {
-            status: 404,
+            status: 400,
           },
         );
       }
@@ -252,7 +264,7 @@ export class ProfileService {
         return AppResponse.setUserErrorResponse<UpdateProfileResDto>(
           ErrorHandler.notFound(`Department with id ${data.departmentId}`),
           {
-            status: 404,
+            status: 400,
           },
         );
       }
@@ -267,7 +279,7 @@ export class ProfileService {
         return AppResponse.setUserErrorResponse<UpdateProfileResDto>(
           ErrorHandler.notFound(`Position with id ${data.positionId}`),
           {
-            status: 404,
+            status: 400,
           },
         );
       }
@@ -477,6 +489,82 @@ export class ProfileService {
       );
     } finally {
       await querryRunner.release();
+    }
+  }
+
+  async getProfiles(queries: GetProfilesReqDto): Promise<GetProfilesResDto> {
+    let query: SelectQueryBuilder<User> = this._dataSource
+      .getRepository(User)
+      .createQueryBuilder('u')
+      .select([
+        'u.id',
+        'u.fullname',
+        'u.gender',
+        'u.dateOfBirth',
+        'u.address',
+        'u.email',
+        'u.startDate',
+        'u.endDate',
+        'u.avatar',
+      ]);
+    try {
+      if (Object.keys(queries).length === 0) {
+        const result: IProfile[] = await query
+          .innerJoin('u.accounts', 'a')
+          .addSelect(['a.phonenumber', 'a.id'])
+          .innerJoin('u.department', 'd', 'u.departmentId = d.id')
+          .addSelect(['d.id', 'd.name'])
+          .getMany();
+        return AppResponse.setSuccessResponse<GetProfilesResDto>(result);
+      }
+
+      query = query
+        .take(queries.pageSize)
+        .skip((queries.page - 1) * queries.pageSize);
+
+      if (queries.phonenumber) {
+        query = query
+          .innerJoin('u.accounts', 'a', 'a.phonenumber like :wildcardNumber', {
+            wildcardNumber: `%${queries.phonenumber}%`,
+          })
+          .addSelect(['a.phonenumber', 'a.id']);
+      } else {
+        query = query
+          .innerJoin('u.accounts', 'a')
+          .addSelect(['a.phonenumber', 'a.id']);
+      }
+
+      query = query
+        .innerJoin('u.department', 'd', 'u.departmentId = d.id')
+        .addSelect(['d.id', 'd.name']);
+      if (queries.sortBy) {
+        const userTableFields: Array<string> = this._dataSource
+          .getMetadata(User)
+          .columns.map((column) => column.propertyName);
+        if (!userTableFields.includes(queries.sortBy)) {
+          return AppResponse.setUserErrorResponse<GetProfilesResDto>(
+            ErrorHandler.invalid(queries.sortBy),
+          );
+        }
+        if (queries.sortBy === 'citizenId'){
+          return AppResponse.setUserErrorResponse<GetProfilesResDto>(
+            ErrorHandler.notAllow(queries.sortBy),
+          );
+        }
+        
+        query = query.orderBy(
+          `u.${queries.sortBy}`,
+          queries.order === 'ASC' ? 'ASC' : 'DESC',
+        );
+      }
+
+      const result: IProfile[] = await query.getMany();
+      return AppResponse.setSuccessResponse<GetProfilesResDto>(result, {
+        page: queries.page,
+        pageSize: queries.pageSize,
+      });
+    } catch (error) {
+      return AppResponse.setAppErrorResponse<GetProfilesResDto>(error.message);
     }
   }
 }
