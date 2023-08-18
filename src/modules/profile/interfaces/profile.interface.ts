@@ -11,6 +11,7 @@ export interface IUserPayload {
   endDate?: Date;
   avatar?: string;
   department?: {
+    id?: number;
     name?: string;
   };
   accounts?: IAccountPayload[]
