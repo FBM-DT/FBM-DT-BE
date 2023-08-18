@@ -5,24 +5,22 @@ import {
   ParseIntPipe,
   Patch,
   Param,
+  Query,
   Get,
 } from '@nestjs/common';
 import { ProfileService } from './profile.service';
-import {
-  ApiCreatedResponse,
-  ApiOkResponse,
-  ApiTags,
-  getSchemaPath,
-} from '@nestjs/swagger';
+import { ApiCreatedResponse, ApiOkResponse, ApiTags, getSchemaPath } from '@nestjs/swagger';
 import {
   AddProfileReqDto,
-  GetProfileReqDto,
   UpdateProfileReqDto,
+  GetProfilesReqDto,
+  GetProfileReqDto,
 } from './dto/req';
 import {
   AddProfileResDto,
   UpdateProfileResDto,
   GetProfileResDto,
+  GetProfilesResDto,
 } from './dto/res';
 import { ACCOUNT_ROLE } from '../../core/constants';
 import { Auth } from '../../core/utils/decorators';
@@ -95,5 +93,14 @@ export class ProfileController {
   async activateUser(@Param('id') id: number) {
     const res = await this.profileService.activateProfile(id);
     return res;
+  }
+  @Get('list')
+  async getProfiles(
+    @Query() queries: GetProfilesReqDto,
+  ): Promise<GetProfilesResDto> {
+    const response: GetProfilesResDto = await this.profileService.getProfiles(
+      queries,
+    );
+    return response;
   }
 }
