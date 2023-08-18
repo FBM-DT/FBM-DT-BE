@@ -1,10 +1,6 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { User } from '../users/user.entity';
-import {
-  DataSource,
-  Repository,
-  SelectQueryBuilder,
-} from 'typeorm';
+import { DataSource, Repository, SelectQueryBuilder } from 'typeorm';
 import { SEARCH_TYPE, TYPEORM } from '../../core/constants';
 import {
   AddProfileReqDto,
@@ -513,18 +509,12 @@ export class ProfileService {
           .getMany();
         return AppResponse.setSuccessResponse<GetProfilesResDto>(result);
       }
-      if (
-        queries.page !== null &&
-        queries.page !== undefined &&
-        queries.pageSize !== null &&
-        queries.pageSize !== undefined
-      ) {
-        query = query
-          .take(queries.pageSize)
-          .skip((queries.page - 1) * queries.pageSize);
-      }
 
-      if (queries.phonenumber !== undefined && queries.phonenumber !== null) {
+      query = query
+        .take(queries.pageSize)
+        .skip((queries.page - 1) * queries.pageSize);
+
+      if (queries.phonenumber) {
         query = query
           .innerJoin('u.accounts', 'a', 'a.phonenumber like :wildcardNumber', {
             wildcardNumber: `%${queries.phonenumber}%`,
@@ -535,11 +525,11 @@ export class ProfileService {
           .innerJoin('u.accounts', 'a')
           .addSelect(['a.phonenumber', 'a.id']);
       }
-      
+
       query = query
         .innerJoin('u.department', 'd', 'u.departmentId = d.id')
         .addSelect(['d.id', 'd.name']);
-      if (queries.sort !== undefined && queries.sort.length > 0) {
+      if (queries.sort && queries.sort.length > 0) {
         const sortOptions: Array<string> = queries.sort.split(',');
         sortOptions.forEach((option, index) => {
           const sortPair: Array<string> = option.split(':');

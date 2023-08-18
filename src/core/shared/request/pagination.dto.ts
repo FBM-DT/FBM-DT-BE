@@ -6,11 +6,11 @@ export class PaginationReqDto {
   @Transform(({ value }) => parseInt(value))
   @IsInt({ message: 'The page must be a number' })
   @Min(0)
-  readonly page?: number;
+  readonly page?: number = 1 ;
 
   @IsOptional()
   @Transform(({ value }) => parseInt(value))
   @IsInt({ message: 'The size of a page must be a number' })
   @Min(0)
-  readonly pageSize?: number;
+  readonly pageSize?: number = 10;
 }
