@@ -106,13 +106,12 @@ export class ProfileService {
           .execute();
         await querryRunner.commitTransaction();
 
-        const { password, ...createdData } = {
-          ...rest,
-          ...accountData,
+        const data = {
+          userId: addUserProfileResult.identifiers[0].id,
           accountId: addAccountResult.identifiers[0].id,
         };
 
-        return AppResponse.setSuccessResponse<AddProfileResDto>(createdData, {
+        return AppResponse.setSuccessResponse<AddProfileResDto>(data, {
           status: 201,
           message: 'Created',
         });
@@ -200,11 +199,20 @@ export class ProfileService {
       const { id, departmentId, positionId, ...profileData } = {
         ...user,
         phonenumber,
-        position: user.position.name,
-        department: user.department.name,
+        position: {
+          name: user.position.name,
+          id: user.position.id,
+        },
+        department: {
+          name: user.department.name,
+          id: user.department.id,
+        },
         accountId: account.id,
         userId: account.user.id,
-        role: account.role.name,
+        role: {
+          name: account.role.name,
+          id: account.role.id,
+        },
       };
 
       return AppResponse.setSuccessResponse<GetProfileResDto>(profileData, {
