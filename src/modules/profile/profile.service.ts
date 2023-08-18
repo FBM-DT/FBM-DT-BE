@@ -347,7 +347,7 @@ export class ProfileService {
     }
   }
 
-  async deActiveProfile(userId: number): Promise<UpdateProfileResDto> {
+  async deActivateProfile(userId: number): Promise<UpdateProfileResDto> {
     const querryRunner = this._dataSource.createQueryRunner();
     try {
       await querryRunner.connect();
@@ -414,7 +414,7 @@ export class ProfileService {
     }
   }
 
-  async activeProfile(userId: number): Promise<UpdateProfileResDto> {
+  async activateProfile(userId: number): Promise<UpdateProfileResDto> {
     const querryRunner = this._dataSource.createQueryRunner();
     try {
       await querryRunner.connect();

@@ -65,4 +65,14 @@ export class AuthController {
     const response = await this.otpService.verifyOtp(otp, phonenumber);
     return response;
   }
+
+  @Post('/:phonenumber/verify-otp-default')
+  @ApiBody({ type: VerifyOtpReqDto })
+  async getOtpDefault(
+    @Param('phonenumber') phonenumber: string,
+    @Body() otp: string,
+  ): Promise<VerifyOTPResDto> {
+    const res = await this.otpService.verifyOtpCode(phonenumber, otp);
+    return res;
+  }
 }
