@@ -186,7 +186,7 @@ export class ProfileService {
         return AppResponse.setAppErrorResponse<GetProfileResDto>(
           ErrorHandler.notFound(`Account ${accountId}`),
           {
-            status: 404,
+            status: 400,
           },
         );
 
@@ -245,7 +245,7 @@ export class ProfileService {
         return AppResponse.setAppErrorResponse<UpdateProfileResDto>(
           ErrorHandler.notFound(`Account with id ${accountID}`),
           {
-            status: 404,
+            status: 400,
           },
         );
       }
@@ -260,7 +260,7 @@ export class ProfileService {
         return AppResponse.setUserErrorResponse<UpdateProfileResDto>(
           ErrorHandler.notFound(`Department with id ${data.departmentId}`),
           {
-            status: 404,
+            status: 400,
           },
         );
       }
@@ -275,7 +275,7 @@ export class ProfileService {
         return AppResponse.setUserErrorResponse<UpdateProfileResDto>(
           ErrorHandler.notFound(`Position with id ${data.positionId}`),
           {
-            status: 404,
+            status: 400,
           },
         );
       }

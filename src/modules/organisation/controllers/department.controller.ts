@@ -19,6 +19,9 @@ import {
   AddDepartmentReqDto,
   UpdateDepartmentReqDto,
 } from '../dto/department/req';
+import { Auth } from 'src/core/utils/decorators';
+import { ListDepartmentResDto } from '../dto/department/res/swagger.dto';
+import { ACCOUNT_ROLE } from 'src/core/constants';
 
 @ApiTags('Department')
 @Controller('department')
@@ -26,7 +29,8 @@ export class DepartmentController {
   constructor(private readonly departmentService: DepartmentService) {}
 
   @Get('list')
-  @ApiOkResponse({ type: AddDepartmentReqDto })
+  @Auth()
+  @ApiOkResponse({ type: ListDepartmentResDto })
   @HttpCode(200)
   async findAllDepartment(): Promise<GetDepartmentListResDto> {
     const response: GetDepartmentListResDto =
@@ -35,7 +39,8 @@ export class DepartmentController {
   }
 
   @Post('create')
-  @ApiOperation({ description: 'Create a new Inventory' })
+  @Auth(ACCOUNT_ROLE.SUPERVISOR, ACCOUNT_ROLE.ADM)
+  @ApiOperation({ description: 'Create a new Department' })
   @HttpCode(201)
   async createDepartment(
     @Body() DepartmentDto: AddDepartmentReqDto,
@@ -46,6 +51,7 @@ export class DepartmentController {
   }
 
   @Patch('update/:id')
+  @Auth(ACCOUNT_ROLE.SUPERVISOR, ACCOUNT_ROLE.ADM)
   async updateDepartment(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateDepartmentDto: UpdateDepartmentReqDto,
@@ -58,6 +64,7 @@ export class DepartmentController {
   }
 
   @Patch('activate/:id')
+  @Auth(ACCOUNT_ROLE.SUPERVISOR, ACCOUNT_ROLE.ADM)
   async activateDepartment(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<UpdateDepartmentResDto> {
@@ -65,7 +72,8 @@ export class DepartmentController {
     return res;
   }
 
-  @Patch('deactivate/:id')
+  @Patch('deActivate/:id')
+  @Auth(ACCOUNT_ROLE.SUPERVISOR, ACCOUNT_ROLE.ADM)
   async deactivateDepartment(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<UpdateDepartmentResDto> {
