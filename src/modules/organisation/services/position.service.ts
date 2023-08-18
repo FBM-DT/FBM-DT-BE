@@ -74,7 +74,7 @@ export class PositionService {
     name: CreatePositionReqDto,
   ): Promise<UpdatePositionResDto> {
     try {
-      const existPosition = await this._positionRepository.findOne({
+      const existPosition: IPosition = await this._positionRepository.findOne({
         where: { id },
       });
 
