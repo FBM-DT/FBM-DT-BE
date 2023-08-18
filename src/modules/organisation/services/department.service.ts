@@ -29,7 +29,8 @@ export class DepartmentService {
 
   async getAllDepartment(): Promise<GetDepartmentListResDto> {
     try {
-      const data: Department[] = await this._departmentRepository.find();
+      const data: IDepartmentPayload[] =
+        await this._departmentRepository.find();
       return AppResponse.setSuccessResponse<GetDepartmentListResDto>(data);
     } catch (error) {
       return AppResponse.setAppErrorResponse<GetDepartmentListResDto>(

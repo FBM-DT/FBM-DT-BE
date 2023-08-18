@@ -3,4 +3,5 @@ export interface IDepartmentPayload {
   address: string;
   openAt: string;
   closeAt: string;
+  isActive?: boolean;
 }
