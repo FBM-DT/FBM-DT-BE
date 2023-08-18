@@ -162,15 +162,15 @@ export class GetProfilesReqDto extends PaginationReqDto {
   readonly gender?: string;
 
   @IsOptional()
-  @IsString({ message: 'The department must be a string' })
+  @IsString({ message: 'phonenumberWrongType:The department must be a string' })
   readonly department?: string;
 
   @IsOptional()
   @IsString({
-    message: 'PhonenumberWrongType: The phonenumber must be a string',
+    message: 'phonenumberWrongType:The phonenumber must be a string',
   })
   @MaxLength(10, {
-    message: 'PhonenumberTooLong: The phonenumber must contain 10 character',
+    message: 'phonenumberTooLong:The phonenumber must contain 10 character',
   })
   readonly phonenumber: string;
 }
