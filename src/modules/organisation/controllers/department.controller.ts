@@ -51,7 +51,7 @@ export class DepartmentController {
   }
 
   @Patch('update/:id')
-  @Auth(ACCOUNT_ROLE.SUPERVISOR, ACCOUNT_ROLE.ADM)
+  // @Auth(ACCOUNT_ROLE.SUPERVISOR, ACCOUNT_ROLE.ADM)
   async updateDepartment(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateDepartmentDto: UpdateDepartmentReqDto,
