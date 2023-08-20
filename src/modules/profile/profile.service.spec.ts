@@ -77,10 +77,10 @@ describe('InventoryService', () => {
     result.status = 200;
 
     jest
-      .spyOn(profileService, 'getProfile')
+      .spyOn(profileService, 'getAccountProfile')
       .mockImplementation(async () => result);
 
-    expect(await profileService.getProfile(1)).toEqual({
+    expect(await profileService.getAccountProfile(1)).toEqual({
       message: 'Success',
       status: 200,
       data: data,
