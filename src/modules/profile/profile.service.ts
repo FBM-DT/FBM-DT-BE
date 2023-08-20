@@ -22,6 +22,7 @@ import { Bcrypt, ExtraQuery } from '../../core/utils';
 import { IAccountPayload, IUserPayload } from './interfaces';
 import { Department } from '../organisation/entities/department.entity';
 import { Position } from '../organisation/entities/position.entity';
+import { isProfileUpdateAllowedForUserRole } from '../../core/utils/checkUser';
 
 @Injectable()
 export class ProfileService {
@@ -253,18 +254,9 @@ export class ProfileService {
     data: UpdateProfileReqDto,
   ): Promise<UpdateProfileResDto> {
     const userRole = accountData.payload.role;
-    const forbiddenKeys = [
-      'roleId',
-      'departmentId',
-      'positionId',
-      'startDate',
-      'endDate',
-    ];
+    const forbiddenKeys = isProfileUpdateAllowedForUserRole(userRole, data);
 
-    if (
-      userRole === 'user' &&
-      forbiddenKeys.some((key) => data.hasOwnProperty(key))
-    ) {
+    if (forbiddenKeys?.length > 0) {
       return AppResponse.setUserErrorResponse<UpdateProfileResDto>(
         ErrorHandler.notAllow(forbiddenKeys.join(', ')),
       );

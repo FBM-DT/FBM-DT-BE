@@ -27,6 +27,6 @@ export interface IProfile extends IUserPayload {}
 
 export interface IAccountData {
   payload: {
-    role: Object;
+    role: string;
   };
 }
