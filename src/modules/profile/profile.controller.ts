@@ -86,7 +86,7 @@ export class ProfileController {
     },
   })
   @Patch('update/:id')
-  @Auth()
+  // @Auth()
   async updateProfile(
     @Param('id', ParseIntPipe) id: number,
     @GetAccount() account,

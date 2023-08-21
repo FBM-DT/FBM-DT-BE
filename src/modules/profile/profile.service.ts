@@ -253,7 +253,7 @@ export class ProfileService {
     accountData: IAccountData,
     data: UpdateProfileReqDto,
   ): Promise<UpdateProfileResDto> {
-    const userRole = accountData.payload.role;
+    const userRole = accountData?.payload.role;
     const forbiddenKeys = isProfileUpdateAllowedForUserRole(userRole, data);
 
     if (forbiddenKeys?.length > 0) {
@@ -319,24 +319,33 @@ export class ProfileService {
         );
       }
 
-      const isExistPhoneNumber: IExistDataReturnValue =
-        await this.isExistUserProfileData({
-          phonenumber: data.phonenumber,
-        });
-
-      if (isExistPhoneNumber.isExist) {
-        return AppResponse.setUserErrorResponse<UpdateProfileResDto>(
-          isExistPhoneNumber.message,
-        );
-      }
-      const isExistEmail: IExistDataReturnValue =
-        await this.isExistUserProfileData({
+      const isExistEmail = await this._dataSource
+        .getRepository(User)
+        .findOneBy({
           email: data.email,
         });
 
-      if (isExistEmail.isExist) {
+      if (isExistEmail && isExistEmail.id !== isHaveAccount.userId) {
         return AppResponse.setUserErrorResponse<UpdateProfileResDto>(
-          isExistEmail.message,
+          ErrorHandler.alreadyExists('Email'),
+          {
+            status: 400,
+          },
+        );
+      }
+
+      const isExistPhoneNumber = await this._dataSource
+        .getRepository(Account)
+        .findOneBy({
+          phonenumber: data.phonenumber,
+        });
+
+      if (isExistPhoneNumber && isExistPhoneNumber.id !== accountID) {
+        return AppResponse.setUserErrorResponse<UpdateProfileResDto>(
+          ErrorHandler.alreadyExists('Phonenumber'),
+          {
+            status: 400,
+          },
         );
       }
 
@@ -390,7 +399,9 @@ export class ProfileService {
         await querryRunner.release();
       }
     } catch (error) {
-      return AppResponse.setAppErrorResponse<AddProfileResDto>(error.message);
+      return AppResponse.setAppErrorResponse<UpdateProfileResDto>(
+        error.message,
+      );
     }
   }
 
