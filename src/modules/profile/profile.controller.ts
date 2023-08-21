@@ -9,7 +9,12 @@ import {
   Get,
 } from '@nestjs/common';
 import { ProfileService } from './profile.service';
-import { ApiCreatedResponse, ApiOkResponse, ApiTags, getSchemaPath } from '@nestjs/swagger';
+import {
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiTags,
+  getSchemaPath,
+} from '@nestjs/swagger';
 import {
   AddProfileReqDto,
   UpdateProfileReqDto,
@@ -23,7 +28,7 @@ import {
   GetProfilesResDto,
 } from './dto/res';
 import { ACCOUNT_ROLE } from '../../core/constants';
-import { Auth } from '../../core/utils/decorators';
+import { Auth, GetAccount } from '../../core/utils/decorators';
 
 @ApiTags('Profile')
 @Controller('profile')
@@ -44,10 +49,19 @@ export class ProfileController {
 
   @ApiOkResponse({ type: GetProfileReqDto })
   @Get('findOne/:id')
-  async findProfile(
+  async findAccountProfile(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<GetProfileResDto> {
-    const res = await this.profileService.getProfile(id);
+    const res = await this.profileService.getAccountProfile(id);
+    return res;
+  }
+
+  @ApiOkResponse({ type: GetProfileReqDto })
+  @Get('findUser/:id')
+  async findUserProfile(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<GetProfileResDto> {
+    const res = await this.profileService.getUserProfile(id);
     return res;
   }
 
@@ -72,12 +86,17 @@ export class ProfileController {
     },
   })
   @Patch('update/:id')
-  @Auth(ACCOUNT_ROLE.SUPERVISOR)
+  @Auth()
   async updateProfile(
     @Param('id', ParseIntPipe) id: number,
+    @GetAccount() account,
     @Body() updateProfileDto: UpdateProfileReqDto,
   ): Promise<UpdateProfileResDto> {
-    const res = await this.profileService.updateProfile(id, updateProfileDto);
+    const res = await this.profileService.updateProfile(
+      id,
+      account,
+      updateProfileDto,
+    );
     return res;
   }
 

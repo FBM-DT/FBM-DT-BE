@@ -50,10 +50,10 @@ export class DepartmentService {
         .values(data)
         .execute();
 
-      const test = {
+      const createdData = {
         departmentId: result.identifiers[0].id,
       };
-      return AppResponse.setSuccessResponse<AddDepartmentResDto>(test, {
+      return AppResponse.setSuccessResponse<AddDepartmentResDto>(createdData, {
         status: 201,
         message: 'Created',
       });
@@ -89,13 +89,16 @@ export class DepartmentService {
         .where('id = :id', { id: departmentId })
         .execute();
 
-      const updatedDepartment: IDepartmentPayload =
-        await this._departmentRepository.findOne({
-          where: { id: departmentId },
-        });
+      if (result.affected === 0)
+        return AppResponse.setUserErrorResponse(
+          ErrorHandler.invalid(`Department with id ${departmentId}`),
+          {
+            status: 400,
+          },
+        );
 
       return AppResponse.setSuccessResponse<UpdateDepartmentResDto>(
-        updatedDepartment,
+        result.affected,
         {
           status: 200,
           message: 'Updated',
@@ -130,13 +133,17 @@ export class DepartmentService {
         .where('id = :id', { id: departmentId })
         .execute();
 
-      const updatedDepartment: IDepartmentPayload =
-        await this._departmentRepository.findOne({
-          where: { id: departmentId },
-        });
+      if (result.affected === 0) {
+        return AppResponse.setUserErrorResponse(
+          ErrorHandler.invalid(`Department with id ${departmentId}`),
+          {
+            status: 400,
+          },
+        );
+      }
 
       return AppResponse.setSuccessResponse<UpdateDepartmentResDto>(
-        updatedDepartment,
+        result.affected,
         {
           status: 200,
           message: 'Updated successfully',
@@ -171,10 +178,22 @@ export class DepartmentService {
         .where('id = :id', { id: departmentId })
         .execute();
 
-      return AppResponse.setSuccessResponse<UpdateDepartmentResDto>({
-        status: 200,
-        message: 'Updated successfully',
-      });
+      if (result.affected === 0) {
+        return AppResponse.setUserErrorResponse(
+          ErrorHandler.invalid(`Department with id ${departmentId}`),
+          {
+            status: 400,
+          },
+        );
+      }
+
+      return AppResponse.setSuccessResponse<UpdateDepartmentResDto>(
+        result.affected,
+        {
+          status: 200,
+          message: 'Updated successfully',
+        },
+      );
     } catch (error) {
       return AppResponse.setAppErrorResponse<UpdateDepartmentResDto>(
         error.message,
