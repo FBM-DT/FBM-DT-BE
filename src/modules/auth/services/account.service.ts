@@ -80,9 +80,7 @@ export class AccountService {
     }
   }
 
-  async getAccountByPhoneNumber(
-    phoneNumber: string,
-  ): Promise<Account | string> {
+  async getAccountByPhoneNumber(phoneNumber: string): Promise<Account | null> {
     try {
       const response = await this._accountRepository.findOne({
         where: { phonenumber: phoneNumber },

@@ -91,6 +91,7 @@ export class AddProfileReqDto {
 
   @IsNotEmpty({ message: 'The phone number is required' })
   @IsString()
+  @MinLength(10)
   @MaxLength(10)
   @ApiProperty({
     example: '0123456789',
@@ -100,6 +101,7 @@ export class AddProfileReqDto {
   @IsNotEmpty({ message: 'The password is required' })
   @IsString()
   @MinLength(8)
+  @MaxLength(12)
   @ApiProperty({
     example: '12345678',
   })

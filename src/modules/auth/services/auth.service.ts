@@ -35,12 +35,16 @@ export class AuthService {
       const account = await this.accountService.getAccountByPhoneNumber(
         phonenumber,
       );
+      if (!account) {
+        return ErrorHandler.notFound(`The account with ${phonenumber}`);
+      }
+
       const passwordIsValid = await bcrypt.compare(
         password,
         account['password'],
       );
 
-      if (!account || !passwordIsValid) {
+      if (!passwordIsValid) {
         return ErrorHandler.invalid('The phone number or password');
       }
       return account;
@@ -67,7 +71,7 @@ export class AuthService {
 
       if (typeof account === 'string') {
         return AppResponse.setUserErrorResponse<SigninResDto>(account, {
-          status: 401,
+          status: 400,
         });
       }
 
