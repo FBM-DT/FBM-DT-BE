@@ -24,8 +24,6 @@ export interface IAccountPayload {
   password?: string;
 }
 
-export interface IProfile extends IUserPayload {}
-
 export interface IAccountData {
   payload: {
     role: string;
