@@ -30,3 +30,20 @@ export interface IAccountData {
     role: string;
   };
 }
+export interface IProfile {
+  user_fullname: string;
+  user_dateOfBirth: Date;
+  user_gender: GENDER;
+  user_address: string;
+  user_email: string;
+  user_departmentId: number;
+  user_startDate: Date;
+  user_endDate: Date;
+  user_avatar: string;
+  department_id: number;
+  department_name: string;
+  account_id: number;
+  account_roleId: number;
+  account_phonenumber: string;
+  row: number;
+}

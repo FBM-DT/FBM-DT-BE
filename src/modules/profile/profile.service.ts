@@ -599,38 +599,20 @@ export class ProfileService {
           return `${column.propertyName}:${column.type}`;
         });
       let query: SelectQueryBuilder<User> = this._dataSource
-        .getRepository(User)
-        .createQueryBuilder('u')
+        .createQueryBuilder()
         .select([
-          'u.id',
-          'u.fullname',
-          'u.gender',
-          'u.dateOfBirth',
-          'u.address',
-          'u.email',
-          'u.startDate',
-          'u.endDate',
-          'u.avatar',
-        ]);
-      query = query
-        .take(queries.pageSize)
-        .skip((queries.page - 1) * queries.pageSize);
+          'user.id',
+          'user.fullname',
+          'user.gender',
+          'user.dateOfBirth',
+          'user.address',
+          'user.email',
+          'user.startDate',
+          'user.endDate',
+          'user.avatar',
+        ])
+        .from(User, 'user');
 
-      if (queries.phonenumber) {
-        query = query
-          .innerJoin('u.accounts', 'a', 'a.phonenumber like :wildcardNumber', {
-            wildcardNumber: `%${queries.phonenumber}%`,
-          })
-          .addSelect(['a.phonenumber', 'a.id']);
-      } else {
-        query = query
-          .innerJoin('u.accounts', 'a')
-          .addSelect(['a.phonenumber', 'a.id']);
-      }
-
-      query = query
-        .innerJoin('u.department', 'd', 'u.departmentId = d.id')
-        .addSelect(['d.id', 'd.name']);
       if (queries.sortBy) {
         if (!userTableFields.includes(queries.sortBy)) {
           return AppResponse.setUserErrorResponse<GetProfilesResDto>(
@@ -642,12 +624,12 @@ export class ProfileService {
             ErrorHandler.notAllow(queries.sortBy),
           );
         }
-
         query = query.orderBy(
-          `u.${queries.sortBy}`,
+          `user.${queries.sortBy}`,
           queries.order === 'ASC' ? 'ASC' : 'DESC',
         );
       }
+
       query.where('1=1');
       mappingUserFieldType.forEach((field, index) => {
         const keyAndType: Array<string> = field.split(':');
@@ -655,13 +637,16 @@ export class ProfileService {
           return;
         }
         if (keyAndType[1] !== 'varchar') {
-          query = query.andWhere(`u.${keyAndType[0]} = :inputValue${index}`, {
-            ['inputValue' + index]: queries[keyAndType[0]],
-          });
+          query = query.andWhere(
+            `user.${keyAndType[0]} = :inputValue${index}`,
+            {
+              ['inputValue' + index]: queries[keyAndType[0]],
+            },
+          );
         }
         if (keyAndType[1] === 'varchar') {
           query = query.andWhere(
-            `LOWER(u.${keyAndType[0]}) LIKE LOWER(:inputValue${index})`,
+            `LOWER(user.${keyAndType[0]}) LIKE LOWER(:inputValue${index})`,
             {
               ['inputValue' + index]:
                 '%' + queries[keyAndType[0]].toString() + '%',
@@ -669,15 +654,41 @@ export class ProfileService {
           );
         }
       });
-
-      const result: IProfile[] = await ExtraQueryBuilder.paginateData<User>(
+      if (queries.phonenumber) {
+        query = query
+          .innerJoin(
+            'user.accounts',
+            'account',
+            'account.phonenumber like :wildcardNumber',
+            {
+              wildcardNumber: `%${queries.phonenumber}%`,
+            },
+          )
+          .addSelect(['a.phonenumber', 'a.id']);
+      } else {
+        query = query
+          .innerJoin('user.accounts', 'account')
+          .addSelect(['account.phonenumber', 'account.id','account.roleId']);
+      }
+      query = query
+        .innerJoin(
+          'user.department',
+          'department',
+          'user.departmentId = department.id',
+        )
+        .addSelect(['department.id', 'department.name']);
+      const users: IProfile[] = await ExtraQueryBuilder.paginateData<
+        User,
+        IProfile
+      >(
+        { alias: 'user', field: 'id' },
         this._dataSource,
         query,
         queries.page,
         queries.pageSize,
       );
-      // const result: IProfile[] = await query.getMany();
-      return AppResponse.setSuccessResponse<GetProfilesResDto>(result, {
+
+      return AppResponse.setSuccessResponse<GetProfilesResDto>(users, {
         page: queries.page,
         pageSize: queries.pageSize,
       });
