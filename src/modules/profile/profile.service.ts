@@ -612,6 +612,29 @@ export class ProfileService {
           'user.avatar',
         ])
         .from(User, 'user');
+      if (queries.phonenumber) {
+        query = query
+          .innerJoin(
+            'user.accounts',
+            'account',
+            'account.phonenumber like :wildcardNumber',
+            {
+              wildcardNumber: `%${queries.phonenumber}%`,
+            },
+          )
+          .addSelect(['a.phonenumber', 'a.id']);
+      } else {
+        query = query
+          .innerJoin('user.accounts', 'account')
+          .addSelect(['account.phonenumber', 'account.id', 'account.roleId']);
+      }
+      query = query
+        .innerJoin(
+          'user.department',
+          'department',
+          'user.departmentId = department.id',
+        )
+        .addSelect(['department.id', 'department.name']);
 
       if (queries.sortBy) {
         if (!userTableFields.includes(queries.sortBy)) {
@@ -654,30 +677,8 @@ export class ProfileService {
           );
         }
       });
-      if (queries.phonenumber) {
-        query = query
-          .innerJoin(
-            'user.accounts',
-            'account',
-            'account.phonenumber like :wildcardNumber',
-            {
-              wildcardNumber: `%${queries.phonenumber}%`,
-            },
-          )
-          .addSelect(['a.phonenumber', 'a.id']);
-      } else {
-        query = query
-          .innerJoin('user.accounts', 'account')
-          .addSelect(['account.phonenumber', 'account.id','account.roleId']);
-      }
-      query = query
-        .innerJoin(
-          'user.department',
-          'department',
-          'user.departmentId = department.id',
-        )
-        .addSelect(['department.id', 'department.name']);
-      const users: IProfile[] = await ExtraQueryBuilder.paginateData<
+
+      const profileRecords: IProfile[] = await ExtraQueryBuilder.paginateData<
         User,
         IProfile
       >(
@@ -688,7 +689,43 @@ export class ProfileService {
         queries.pageSize,
       );
 
-      return AppResponse.setSuccessResponse<GetProfilesResDto>(users, {
+      let existUser: number[] = [];
+      let formatProfiles: IUserPayload[] = [];
+      profileRecords.forEach((record: IProfile) => {
+        if (existUser?.length === 0 || !existUser.includes(record.row)) {
+          formatProfiles.push({
+            fullname: record.user_fullname,
+            dateOfBirth: record.user_dateOfBirth,
+            gender: record.user_gender,
+            address: record.user_address,
+            email: record.user_email,
+            departmentId: record.user_departmentId,
+            startDate: record.user_startDate,
+            endDate: record.user_endDate,
+            avatar: record.user_avatar,
+            department: {
+              id: record.department_id,
+              name: record.department_name,
+            },
+            accounts: [
+              {
+                phonenumber: record.account_phonenumber,
+                id: record.account_id,
+                roleId: record.account_roleId,
+              },
+            ],
+          });
+          existUser.push(record.row);
+        } else {
+          formatProfiles[formatProfiles?.length-1]?.accounts.push({
+            phonenumber: record.account_phonenumber,
+            id: record.account_id,
+            roleId: record.account_roleId,
+          });
+        }
+      });
+
+      return AppResponse.setSuccessResponse<GetProfilesResDto>(formatProfiles, {
         page: queries.page,
         pageSize: queries.pageSize,
       });

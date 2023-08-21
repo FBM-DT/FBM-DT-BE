@@ -18,6 +18,7 @@ export interface IUserPayload {
 }
 
 export interface IAccountPayload {
+  id?: number;
   roleId?: number;
   phonenumber?: string;
   password?: string;
