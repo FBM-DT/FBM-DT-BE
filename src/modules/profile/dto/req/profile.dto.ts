@@ -132,7 +132,7 @@ export class GetProfileReqDto extends PartialType(
 }
 
 export class UpdateProfileReqDto extends PartialType(
-  OmitType(AddProfileReqDto, ['startDate', 'endDate'] as const),
+  OmitType(AddProfileReqDto, ['password'] as const),
 ) {}
 
 export class GetProfilesReqDto extends PaginationReqDto {

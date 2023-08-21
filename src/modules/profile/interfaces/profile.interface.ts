@@ -14,7 +14,7 @@ export interface IUserPayload {
     id?: number;
     name?: string;
   };
-  accounts?: IAccountPayload[]
+  accounts?: IAccountPayload[];
 }
 
 export interface IAccountPayload {
@@ -23,5 +23,10 @@ export interface IAccountPayload {
   password?: string;
 }
 
-export interface IProfile extends IUserPayload {
+export interface IProfile extends IUserPayload {}
+
+export interface IAccountData {
+  payload: {
+    role: string;
+  };
 }

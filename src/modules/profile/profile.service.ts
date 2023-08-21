@@ -17,11 +17,12 @@ import { AppResponse } from '../../core/shared/app.response';
 import { AccountService } from '../auth/services';
 import { Account } from '../auth/account.entity';
 import { ErrorHandler } from '../../core/shared/common/error';
-import { IExistDataReturnValue, IProfile } from './interfaces';
+import { IAccountData, IExistDataReturnValue, IProfile } from './interfaces';
 import { Bcrypt, ExtraQuery } from '../../core/utils';
 import { IAccountPayload, IUserPayload } from './interfaces';
 import { Department } from '../organisation/entities/department.entity';
 import { Position } from '../organisation/entities/position.entity';
+import { isProfileUpdateAllowedForUserRole } from '../../core/utils/checkUser';
 
 @Injectable()
 export class ProfileService {
@@ -180,7 +181,7 @@ export class ProfileService {
     }
   }
 
-  async getProfile(accountId: number): Promise<GetProfileResDto> {
+  async getAccountProfile(accountId: number): Promise<GetProfileResDto> {
     try {
       const account = await this._dataSource.getRepository(Account).findOne({
         where: { id: accountId },
@@ -223,10 +224,44 @@ export class ProfileService {
     }
   }
 
+  async getUserProfile(userId: number): Promise<GetProfileResDto> {
+    try {
+      const userProfiles = await this._dataSource
+        .getRepository(User)
+        .createQueryBuilder('u')
+        .innerJoin('u.accounts', 'account')
+        .addSelect([
+          'account.phonenumber',
+          'account.id',
+          'account.roleId',
+          'account.isActive',
+          'account.firstLogin',
+        ])
+        .where('u.id = :userId', { userId: userId })
+        .getOne();
+
+      return AppResponse.setSuccessResponse<GetProfileResDto>(userProfiles, {
+        message: 'Success',
+      });
+    } catch (error) {
+      return AppResponse.setAppErrorResponse(error.message);
+    }
+  }
+
   async updateProfile(
     accountID: number,
+    accountData: IAccountData,
     data: UpdateProfileReqDto,
   ): Promise<UpdateProfileResDto> {
+    const userRole = accountData.payload.role;
+    const forbiddenKeys = isProfileUpdateAllowedForUserRole(userRole, data);
+
+    if (forbiddenKeys?.length > 0) {
+      return AppResponse.setUserErrorResponse<UpdateProfileResDto>(
+        ErrorHandler.notAllow(forbiddenKeys.join(', ')),
+      );
+    }
+
     const { roleId, phonenumber, ...rest } = data;
 
     const userData: IUserPayload = {
@@ -546,12 +581,12 @@ export class ProfileService {
             ErrorHandler.invalid(queries.sortBy),
           );
         }
-        if (queries.sortBy === 'citizenId'){
+        if (queries.sortBy === 'citizenId') {
           return AppResponse.setUserErrorResponse<GetProfilesResDto>(
             ErrorHandler.notAllow(queries.sortBy),
           );
         }
-        
+
         query = query.orderBy(
           `u.${queries.sortBy}`,
           queries.order === 'ASC' ? 'ASC' : 'DESC',
