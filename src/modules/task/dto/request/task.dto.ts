@@ -17,7 +17,9 @@ export class AddTaskReqDto {
   @IsString({ message: 'The task name must be a string' })
   name: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    enum: TASKSTATUS,
+  })
   @IsNotEmpty({ message: 'The task status cannot be empty' })
   @IsEnum(TASKSTATUS, {
     message: 'The type of work shift must be belonged to the enum',
