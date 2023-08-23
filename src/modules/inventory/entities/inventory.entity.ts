@@ -18,7 +18,7 @@ export class Inventory extends ShareEntity {
 
   @Column({
     type: 'int',
-    nullable: false,
+    nullable: true,
   })
   updateBy: number;
 
