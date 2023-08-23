@@ -23,7 +23,7 @@ export class Inventory extends ShareEntity {
   updateBy: number;
 
   @ManyToOne(() => Account, (account) => account.inventories, {
-    onDelete: 'CASCADE',
+    onDelete: 'SET NULL',
   })
   @JoinColumn({ name: 'updateBy', referencedColumnName: 'id' })
   account: Account;
