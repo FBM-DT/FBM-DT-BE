@@ -248,6 +248,54 @@ export class ProfileService {
     }
   }
 
+  async checkEmailAlreadyExists(email: string): Promise<GetProfileResDto> {
+    try {
+      const profile = await this._dataSource.getRepository(User).findOne({
+        where: { email },
+      });
+
+      if (profile) {
+        return AppResponse.setUserErrorResponse(
+          ErrorHandler.alreadyExists(`The email ${email}`),
+          {
+            data: { emailExists: !!profile },
+          },
+        );
+      }
+
+      return AppResponse.setSuccessResponse<GetProfileResDto>({
+        emailExists: !!profile,
+      });
+    } catch (error) {
+      return AppResponse.setAppErrorResponse(error.message);
+    }
+  }
+
+  async checkPhoneNumberAlreadyExists(
+    phonenumber: string,
+  ): Promise<GetProfileResDto> {
+    try {
+      const account = await this._dataSource.getRepository(Account).findOne({
+        where: { phonenumber },
+      });
+
+      if (account) {
+        return AppResponse.setUserErrorResponse(
+          ErrorHandler.alreadyExists(`The phone number ${phonenumber}`),
+          {
+            data: { phonenumberExists: !!account },
+          },
+        );
+      }
+
+      return AppResponse.setSuccessResponse<GetProfileResDto>({
+        phonenumberExists: !!account,
+      });
+    } catch (error) {
+      return AppResponse.setAppErrorResponse(error.message);
+    }
+  }
+
   async updateProfile(
     accountID: number,
     accountData: IAccountData,
