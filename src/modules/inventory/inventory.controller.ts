@@ -24,6 +24,8 @@ import {
   GetInventoryResDto,
   UpdateInventoryResDto,
 } from './dto/response';
+import { Auth } from 'src/core/utils/decorators';
+import { ACCOUNT_ROLE } from 'src/core/constants';
 
 @Controller('inventory')
 @ApiTags('Inventory')
@@ -34,6 +36,7 @@ export class InventoryController {
   @ApiOperation({ description: 'Create a new Inventory' })
   @ApiCreatedResponse({ type: CreateInventoryReqDto })
   @HttpCode(201)
+  @Auth(ACCOUNT_ROLE.SUPERVISOR)
   async createInventory(
     @Body() InventoryDto: CreateInventoryReqDto,
   ): Promise<AddInventoryResDto> {
@@ -45,6 +48,7 @@ export class InventoryController {
   @Get('list')
   @ApiOkResponse({ type: CreateInventoryReqDto, isArray: true })
   @HttpCode(200)
+  @Auth(ACCOUNT_ROLE.SUPERVISOR)
   async findAllInventories(): Promise<GetAllInventoryResDto> {
     const response: GetAllInventoryResDto =
       await this.inventoryService.getAllInventories();
@@ -54,6 +58,7 @@ export class InventoryController {
   @Get('findOne/:id')
   @ApiOkResponse({ type: CreateInventoryReqDto })
   @HttpCode(200)
+  @Auth(ACCOUNT_ROLE.SUPERVISOR)
   async findAInventoryById(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<GetInventoryResDto> {
@@ -63,9 +68,23 @@ export class InventoryController {
     return response;
   }
 
+  @Get('findAccount/:id')
+  @ApiOkResponse({ type: CreateInventoryReqDto })
+  @HttpCode(200)
+  @Auth(ACCOUNT_ROLE.SUPERVISOR)
+  async findInventoryByAccountId(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<GetInventoryResDto> {
+    const response: GetInventoryResDto =
+      await this.inventoryService.getInventoryByAccountId(id);
+
+    return response;
+  }
+
   @Patch('update/:id')
   @ApiOkResponse({ type: CreateInventoryReqDto })
   @HttpCode(200)
+  @Auth(ACCOUNT_ROLE.SUPERVISOR)
   async updateInventoryById(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateInventoryDto: UpdateInventoryReqDto,
@@ -79,6 +98,7 @@ export class InventoryController {
   @Delete('delete/:id')
   @ApiOkResponse({ type: CreateInventoryReqDto })
   @HttpCode(200)
+  @Auth(ACCOUNT_ROLE.SUPERVISOR)
   async removeInventoryById(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<DeleteInventoryResDto> {

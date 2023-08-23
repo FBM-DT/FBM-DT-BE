@@ -4,6 +4,7 @@ import { Role } from '../role/role.entity';
 import { User } from '../users/user.entity';
 import { Note } from '../note/note.entity';
 import { Schedule } from '../shift/entities/schedule.entity';
+import { Inventory } from '../inventory/entities/inventory.entity';
 
 @Entity({
   name: 'account',
@@ -76,4 +77,7 @@ export class Account extends ShareEntity {
 
   @OneToMany(() => Schedule, (schedule) => schedule.account)
   schedules: Schedule[];
+
+  @OneToMany(() => Inventory, (inventory) => inventory.account)
+  inventories: Inventory[];
 }
