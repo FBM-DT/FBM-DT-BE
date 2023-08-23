@@ -33,10 +33,6 @@ export class ShiftService {
   }
 
   async createShift(data: AddShiftReqDto): Promise<AddShiftResDto> {
-    console.log(
-      '🚀 ~ file: shift.service.ts:36 ~ ShiftService ~ createShift ~ data:',
-      data,
-    );
     const queryRunner = this._dataSource.createQueryRunner();
 
     try {
