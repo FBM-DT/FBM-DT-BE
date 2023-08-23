@@ -103,9 +103,7 @@ export class ShiftService {
     }
   }
 
-  async getShiftList(
-    queries: GetShiftListReqDto,
-  ): Promise<GetShiftListResDto> {
+  async getShiftList(queries: GetShiftListReqDto): Promise<GetShiftListResDto> {
     try {
       if (Object.keys(queries).length > 0) {
         let options: FindManyOptions = new Object();
@@ -160,9 +158,7 @@ export class ShiftService {
         schedule: deteleScheduleReturn.affected,
       };
       await queryRunner.commitTransaction();
-      return AppResponse.setSuccessResponse<DeleteShiftResDto>(
-        returnValues,
-      );
+      return AppResponse.setSuccessResponse<DeleteShiftResDto>(returnValues);
     } catch (error) {
       return AppResponse.setAppErrorResponse<AddShiftResDto>(error.message);
     }
@@ -179,9 +175,7 @@ export class ShiftService {
         .where('shift.id = :shiftId', { shiftId: shiftId })
         .set(shiftDto)
         .execute();
-      return AppResponse.setSuccessResponse<DeleteShiftResDto>(
-        result.affected,
-      );
+      return AppResponse.setSuccessResponse<DeleteShiftResDto>(result.affected);
     } catch (error) {
       return AppResponse.setAppErrorResponse<AddShiftResDto>(error.message);
     }

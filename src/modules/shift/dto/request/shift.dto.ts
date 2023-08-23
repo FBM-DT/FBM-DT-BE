@@ -18,10 +18,12 @@ import { Exclude, Type } from 'class-transformer';
 import { AddNoteReqDto } from '../../../../modules/note/dto/request';
 
 class AddShift {
+  @ApiProperty()
   @IsNotEmpty({ message: 'The work shift name is required' })
   @IsString({ message: 'The workshift name must be string type' })
   readonly name: string;
 
+  @ApiProperty({ enum: WEEKDAYS, isArray: true })
   @IsNotEmpty({ message: 'The work shift type is required' })
   @IsArray({ message: 'The work shift type is an array' })
   @ArrayMinSize(1)
@@ -32,14 +34,17 @@ class AddShift {
   )
   readonly repeatDays: WEEKDAYS[];
 
+  @ApiProperty()
   @IsNotEmpty({ message: 'The start time must be required' })
   @IsString({ message: 'The start time must be a string' })
   startTime: string;
 
+  @ApiProperty()
   @IsNotEmpty({ message: 'The end time must be required' })
   @IsString({ message: 'The end time must be a string' })
   endTime: string;
 
+  @ApiProperty()
   @IsNotEmpty({
     message: 'The department must be required',
   })
@@ -53,12 +58,12 @@ export class AddShiftReqDto {
   @Type(() => AddShift)
   shift?: AddShift;
 
-  @ApiProperty({ required: false, type: () => AddTaskReqDto })
+  @ApiProperty({ required: false, type: () => AddTaskReqDto, isArray: true })
   @ValidateNested({ each: true })
   @Type(() => AddTaskReqDto)
   task?: Array<AddTaskReqDto>;
 
-  @ApiProperty({ required: false, type: () => AddNoteReqDto })
+  @ApiProperty({ required: false, type: () => AddNoteReqDto, isArray: true })
   @ValidateNested({ each: true })
   @Type(() => AddNoteReqDto)
   note?: Array<AddNoteReqDto>;
