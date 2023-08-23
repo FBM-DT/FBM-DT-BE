@@ -24,8 +24,8 @@ import {
   GetInventoryResDto,
   UpdateInventoryResDto,
 } from './dto/response';
-import { Auth } from 'src/core/utils/decorators';
-import { ACCOUNT_ROLE } from 'src/core/constants';
+import { Auth } from '../../core/utils/decorators';
+import { ACCOUNT_ROLE } from '../../core/constants';
 
 @Controller('inventory')
 @ApiTags('Inventory')
