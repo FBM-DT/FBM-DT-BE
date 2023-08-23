@@ -26,22 +26,17 @@ export class InventoryService {
   async createInventory(
     data: CreateInventoryReqDto,
   ): Promise<AddInventoryResDto> {
-    const queryRunner = this._dataSource.createQueryRunner();
-
-    const isExistAccount = await this._dataSource
-      .getRepository(Account)
-      .findOneBy({ id: data.updateBy });
-
-    if (!isExistAccount) {
-      return AppResponse.setUserErrorResponse(
-        ErrorHandler.notFound(`Account not with id ${data.updateBy}`),
-        { status: 400 },
-      );
-    }
-
     try {
-      await queryRunner.connect();
-      await queryRunner.startTransaction('SERIALIZABLE');
+      const isExistAccount = await this._dataSource
+        .getRepository(Account)
+        .findOneBy({ id: data.updateBy });
+
+      if (!isExistAccount) {
+        return AppResponse.setUserErrorResponse(
+          ErrorHandler.notFound(`Account not with id ${data.updateBy}`),
+          { status: 400 },
+        );
+      }
 
       const result = await this._inventoryRepository
         .createQueryBuilder()
@@ -49,8 +44,6 @@ export class InventoryService {
         .into(Inventory)
         .values(data)
         .execute();
-
-      await queryRunner.commitTransaction();
 
       return AppResponse.setSuccessResponse<AddInventoryResDto>(
         {
@@ -62,10 +55,7 @@ export class InventoryService {
         },
       );
     } catch (error) {
-      await queryRunner.rollbackTransaction();
       return AppResponse.setAppErrorResponse(error.message);
-    } finally {
-      await queryRunner.release();
     }
   }
 
@@ -105,8 +95,8 @@ export class InventoryService {
     try {
       const data = await this._dataSource
         .getRepository(Account)
-        .createQueryBuilder('u')
-        .innerJoin('u.inventories', 'inventory')
+        .createQueryBuilder('a')
+        .innerJoin('s.inventories', 'inventory')
         .addSelect([
           'inventory.id',
           'inventory.name',
@@ -114,7 +104,7 @@ export class InventoryService {
           'inventory.updateBy',
           'inventory.isDeleted',
         ])
-        .where('u.id = :id', { id: accountId })
+        .where('a.id = :id', { id: accountId })
         .getOne();
 
       if (!data) {
