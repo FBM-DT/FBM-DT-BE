@@ -1,7 +1,7 @@
 import { ShareEntity } from '../../core/shared';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
-import { Account } from '../auth/account.entity';
-import { ACCOUNT_ROLE } from '../../core/constants';
+import { Account } from '@BE/modules/auth/account.entity';
+import { ACCOUNT_ROLE } from '@BE/core/constants';
 
 @Entity()
 export class Role extends ShareEntity {

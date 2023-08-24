@@ -1,10 +1,10 @@
-import { WEEKDAYS } from '../../../core/constants';
-import { ShareEntity } from '../../../core/shared';
+import { WEEKDAYS } from '@BE/core/constants';
+import { ShareEntity } from '@BE/core/shared';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { Schedule } from './schedule.entity';
-import { Task } from '../../task/entities/task.entity';
-import { Department } from '../../../modules/organisation/entities/department.entity';
-import { Note } from '../../../modules/note/note.entity';
+import { Task } from '@BE/modules/task/entities/task.entity';
+import { Department } from '@BE/modules/organisation/entities/department.entity';
+import { Note } from '@BE/modules/note/note.entity';
 
 @Entity({
   name: 'shift',
@@ -54,7 +54,7 @@ export class Shift extends ShareEntity {
 
   @OneToMany(() => Schedule, (schedule) => schedule.shift)
   schedules: Schedule[];
-  
+
   @OneToMany(() => Task, (task) => task.shift)
   tasks: Task[];
 

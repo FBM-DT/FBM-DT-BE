@@ -1,4 +1,4 @@
-import { ShareEntity } from '../../core/shared';
+import { ShareEntity } from '@BE/core/shared';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { Role } from '@BE/modules/role/role.entity';
 import { Note } from '@BE/modules/note/note.entity';
