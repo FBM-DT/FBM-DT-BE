@@ -403,7 +403,7 @@ export class ProfileService {
         await querryRunner.connect();
         await querryRunner.startTransaction('SERIALIZABLE');
 
-        const accountUpdateData = await this._dataSource.manager
+        const accountUpdateData = await querryRunner.manager
           .getRepository(Account)
           .createQueryBuilder()
           .update(Account)
@@ -417,7 +417,8 @@ export class ProfileService {
 
         const { ...updatedAccountData } = accountAfterUpdate;
 
-        const user = await this._userRepository.manager
+        const user = await querryRunner.manager
+          .getRepository(User)
           .createQueryBuilder()
           .update(User)
           .set(userData)
@@ -471,7 +472,7 @@ export class ProfileService {
           },
         );
 
-      const account = await this._dataSource.manager
+      const account = await this._dataSource
         .getRepository(Account)
         .findOne({ where: { userId: user.id } });
 
@@ -483,7 +484,7 @@ export class ProfileService {
           },
         );
 
-      const userUpdate = await this._dataSource.manager
+      const userUpdate = await this._dataSource
         .getRepository(User)
         .createQueryBuilder()
         .update(User)
@@ -491,7 +492,7 @@ export class ProfileService {
         .where('id = :id', { id: user.id })
         .execute();
 
-      const accountUpdate = await this._dataSource.manager
+      const accountUpdate = await this._dataSource
         .getRepository(Account)
         .createQueryBuilder()
         .update(Account)

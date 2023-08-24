@@ -96,7 +96,7 @@ export class InventoryService {
       const data = await this._dataSource
         .getRepository(Account)
         .createQueryBuilder('a')
-        .innerJoin('s.inventories', 'inventory')
+        .innerJoin('a.inventories', 'inventory')
         .addSelect([
           'inventory.id',
           'inventory.name',
