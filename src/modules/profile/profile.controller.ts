@@ -10,8 +10,10 @@ import {
 } from '@nestjs/common';
 import { ProfileService } from './profile.service';
 import {
+  ApiBadRequestResponse,
   ApiCreatedResponse,
   ApiOkResponse,
+  ApiOperation,
   ApiTags,
   getSchemaPath,
 } from '@nestjs/swagger';
@@ -20,6 +22,10 @@ import {
   UpdateProfileReqDto,
   GetProfilesReqDto,
   GetProfileReqDto,
+  PhoneNumberExistsResDto,
+  PhoneNumberNotExistsResDto,
+  EmailNotExistsResDto,
+  EmailExistsResDto,
 } from './dto/req';
 import {
   AddProfileResDto,
@@ -100,16 +106,46 @@ export class ProfileController {
     return res;
   }
 
+  @ApiOperation({ summary: 'Check email already exists' })
+  @ApiOkResponse({ type: EmailNotExistsResDto })
+  @ApiBadRequestResponse({
+    description: 'Bad Request',
+    type: EmailExistsResDto,
+  })
+  @Get('email-already-exists')
+  async checkEmailAlreadyExists(
+    @Query('email') email: string,
+  ): Promise<GetProfileResDto> {
+    const res = await this.profileService.checkEmailAlreadyExists(email);
+    return res;
+  }
+
+  @ApiOperation({ summary: 'Check phone number already exists' })
+  @ApiOkResponse({ type: PhoneNumberNotExistsResDto })
+  @ApiBadRequestResponse({
+    description: 'Bad Request',
+    type: PhoneNumberExistsResDto,
+  })
+  @Get('phonenumber-already-exists')
+  async checkPhonenumberAlreadyExists(
+    @Query('phonenumber') phonenumber: string,
+  ): Promise<GetProfileResDto> {
+    const res = await this.profileService.checkPhoneNumberAlreadyExists(
+      phonenumber,
+    );
+    return res;
+  }
+
   @Patch(':id/deactivate')
   @Auth(ACCOUNT_ROLE.ADM, ACCOUNT_ROLE.SUPERVISOR)
-  async deactivateUser(@Param('id') id: number) {
+  async deactivateUser(@Param('id') id: number): Promise<UpdateProfileResDto> {
     const res = await this.profileService.deActivateProfile(id);
     return res;
   }
 
   @Patch(':id/activate')
   @Auth(ACCOUNT_ROLE.ADM, ACCOUNT_ROLE.SUPERVISOR)
-  async activateUser(@Param('id') id: number) {
+  async activateUser(@Param('id') id: number): Promise<UpdateProfileResDto> {
     const res = await this.profileService.activateProfile(id);
     return res;
   }
