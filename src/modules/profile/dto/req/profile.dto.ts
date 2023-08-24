@@ -16,9 +16,9 @@ import {
   IsNumberString,
   Matches,
 } from 'class-validator';
-import { PaginationReqDto } from '@core/shared/request';
-import { IsAfterStartDate } from '@core/utils/decorators/date';
-import { GENDER } from '@core/constants';
+import { PaginationReqDto } from '@BE/core/shared/request';
+import { IsAfterStartDate } from '@BE/core/utils/decorators/date';
+import { GENDER } from '@BE/core/constants';
 class Sort {
   sortBy: string;
   sortValue: string;
