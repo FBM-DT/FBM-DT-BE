@@ -1,7 +1,7 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { User } from '../users/user.entity';
 import { DataSource, Repository, SelectQueryBuilder } from 'typeorm';
-import { SEARCH_TYPE, TYPEORM } from '@/core/constants';
+import { SEARCH_TYPE, TYPEORM } from '@BE/core/constants';
 import {
   AddProfileReqDto,
   UpdateProfileReqDto,
@@ -13,15 +13,15 @@ import {
   GetProfilesResDto,
   UpdateProfileResDto,
 } from './dto/res';
-import { AppResponse } from '@/core/shared/app.response';
+import { AppResponse } from '@BE/core/shared/app.response';
 import { AccountService } from '../auth/services';
-import { ErrorHandler } from '@/core/shared/common/error';
+import { ErrorHandler } from '@BE/core/shared/common/error';
 import { IAccountData, IExistDataReturnValue, IProfile } from './interfaces';
-import { Bcrypt, ExtraQuery } from '@/core/utils';
+import { Bcrypt, ExtraQuery } from '@BE/core/utils';
 import { IAccountPayload, IUserPayload } from './interfaces';
 import { Department } from '../organisation/entities/department.entity';
 import { Position } from '../organisation/entities/position.entity';
-import { isProfileUpdateAllowedForUserRole } from '@/core/utils/checkUser';
+import { isProfileUpdateAllowedForUserRole } from '@BE/core/utils/checkUser';
 import { Account } from '../auth/account.entity';
 
 @Injectable()

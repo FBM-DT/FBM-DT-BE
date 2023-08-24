@@ -1,8 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { TYPEORM } from '@/core/constants';
+import { TYPEORM } from '@BE/core/constants';
 import { DataSource, Repository } from 'typeorm';
 import { Inventory } from './entities/inventory.entity';
-import { AppResponse } from '@/core/shared/app.response';
+import { AppResponse } from '@BE/core/shared/app.response';
 import { CreateInventoryReqDto, UpdateInventoryReqDto } from './dto/request';
 import {
   AddInventoryResDto,

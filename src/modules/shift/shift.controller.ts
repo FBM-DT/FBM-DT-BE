@@ -25,8 +25,8 @@ import {
   UpdateShiftResDto,
 } from './dto/response';
 import { ShiftService } from './shift.service';
-import { ACCOUNT_ROLE } from '../../core/constants';
-import { Auth } from '../../core/utils/decorators';
+import { ACCOUNT_ROLE } from '@BE/core/constants';
+import { Auth } from '@BE/core/utils/decorators';
 
 @ApiTags('Work shift')
 @Controller('shift')
@@ -62,6 +62,7 @@ export class ShiftController {
 
   @Get('detail/:id')
   @HttpCode(200)
+  @Auth(ACCOUNT_ROLE.ADM, ACCOUNT_ROLE.SUPERVISOR)
   async getShift(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<GetShiftResDto> {

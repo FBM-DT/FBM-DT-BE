@@ -82,10 +82,10 @@
       "json",
       "ts"
     ],
-    "moduleNameMapper": {
-      "^@/(.*)": "<rootDir>/$1"
-    },
     "rootDir": "src",
+    "moduleNameMapper": {
+      "^@BE/(.*)": "<rootDir>/$1"
+    },
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"

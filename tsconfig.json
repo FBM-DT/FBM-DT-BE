@@ -11,7 +11,7 @@
     "outDir": "./dist",
     "baseUrl": "./",
     "paths": {
-      "@/*": [
+      "@BE*": [
         "src/*"
       ]
     },

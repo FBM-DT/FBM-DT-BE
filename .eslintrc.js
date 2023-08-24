@@ -20,7 +20,7 @@ module.exports = {
     'no-restricted-imports': [
       'error',
       {
-        patterns: ['!@/*'],
+        patterns: ['@/*'],
       },
     ],
     '@typescript-eslint/interface-name-prefix': 'off',
