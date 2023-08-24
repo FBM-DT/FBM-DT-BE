@@ -1,6 +1,6 @@
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
-import { ShareEntity } from '../../../core/shared';
-import { Account } from '../../auth/account.entity';
+import { ShareEntity } from '@BE/core/shared';
+import { Account } from '@BE/modules/auth/account.entity';
 
 @Entity()
 export class Inventory extends ShareEntity {

@@ -1,10 +1,10 @@
 import { ShareEntity } from '../../core/shared';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
-import { Role } from '../role/role.entity';
-import { User } from '../users/user.entity';
-import { Note } from '../note/note.entity';
-import { Schedule } from '../shift/entities/schedule.entity';
-import { Inventory } from '../inventory/entities/inventory.entity';
+import { Role } from '@BE/modules/role/role.entity';
+import { Note } from '@BE/modules/note/note.entity';
+import { Schedule } from '@BE/modules/shift/entities/schedule.entity';
+import { Inventory } from '@BE/modules/inventory/entities/inventory.entity';
+import { User } from '@BE/modules/users/user.entity';
 
 @Entity({
   name: 'account',

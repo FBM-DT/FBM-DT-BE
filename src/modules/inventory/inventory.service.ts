@@ -11,8 +11,8 @@ import {
   GetInventoryResDto,
   UpdateInventoryResDto,
 } from './dto/response';
-import { ErrorHandler } from '../../core/shared/common/error';
-import { Account } from '../auth/account.entity';
+import { ErrorHandler } from '@BE/core/shared/common/error';
+import { Account } from '@BE/modules/auth/account.entity';
 
 @Injectable()
 export class InventoryService {
