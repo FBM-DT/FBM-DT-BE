@@ -1,8 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { TYPEORM } from '../../core/constants';
+import { TYPEORM } from '@BE/core/constants';
 import { DataSource, Repository } from 'typeorm';
 import { Inventory } from './entities/inventory.entity';
-import { AppResponse } from '../../core/shared/app.response';
+import { AppResponse } from '@BE/core/shared/app.response';
 import { CreateInventoryReqDto, UpdateInventoryReqDto } from './dto/request';
 import {
   AddInventoryResDto,
@@ -11,18 +11,33 @@ import {
   GetInventoryResDto,
   UpdateInventoryResDto,
 } from './dto/response';
-import { ErrorHandler } from '../../core/shared/common/error';
+import { ErrorHandler } from '@BE/core/shared/common/error';
+import { Account } from '@BE/modules/auth/account.entity';
 
 @Injectable()
 export class InventoryService {
   private _inventoryRepository: Repository<Inventory>;
+  private _dataSource: DataSource;
+
   constructor(@Inject(TYPEORM) dataSource: DataSource) {
+    this._dataSource = dataSource;
     this._inventoryRepository = dataSource.getRepository(Inventory);
   }
   async createInventory(
     data: CreateInventoryReqDto,
   ): Promise<AddInventoryResDto> {
     try {
+      const isExistAccount = await this._dataSource
+        .getRepository(Account)
+        .findOneBy({ id: data.updateBy });
+
+      if (!isExistAccount) {
+        return AppResponse.setUserErrorResponse(
+          ErrorHandler.notFound(`Account not with id ${data.updateBy}`),
+          { status: 400 },
+        );
+      }
+
       const result = await this._inventoryRepository
         .createQueryBuilder()
         .insert()
@@ -31,7 +46,9 @@ export class InventoryService {
         .execute();
 
       return AppResponse.setSuccessResponse<AddInventoryResDto>(
-        result.identifiers[0].id,
+        {
+          inventoryId: result.identifiers[0].id,
+        },
         {
           status: 201,
           message: 'Created',
@@ -62,7 +79,38 @@ export class InventoryService {
       if (!data) {
         return AppResponse.setUserErrorResponse(
           ErrorHandler.notFound('Inventory with id ${inventoryId}'),
-          { status: 404 },
+          { status: 400 },
+        );
+      }
+
+      return AppResponse.setSuccessResponse<GetInventoryResDto>(data);
+    } catch (error) {
+      return AppResponse.setAppErrorResponse(error.message);
+    }
+  }
+
+  async getInventoryByAccountId(
+    accountId: number,
+  ): Promise<GetInventoryResDto> {
+    try {
+      const data = await this._dataSource
+        .getRepository(Account)
+        .createQueryBuilder('a')
+        .innerJoin('a.inventories', 'inventory')
+        .addSelect([
+          'inventory.id',
+          'inventory.name',
+          'inventory.quantity',
+          'inventory.updateBy',
+          'inventory.isDeleted',
+        ])
+        .where('a.id = :id', { id: accountId })
+        .getOne();
+
+      if (!data) {
+        return AppResponse.setUserErrorResponse(
+          ErrorHandler.notFound(`Inventory with id ${accountId}`),
+          { status: 400 },
         );
       }
 
@@ -83,7 +131,7 @@ export class InventoryService {
     if (!inventory) {
       return AppResponse.setUserErrorResponse(
         ErrorHandler.notFound(`Inventory not with id ${inventoryId} found`),
-        { status: 404 },
+        { status: 400 },
       );
     }
 
@@ -119,7 +167,7 @@ export class InventoryService {
       if (inventory.isDeleted === true) {
         return AppResponse.setUserErrorResponse(
           ErrorHandler.notFound(`Inventory not with id ${inventoryId}`),
-          { status: 404 },
+          { status: 400 },
         );
       }
 
@@ -134,7 +182,7 @@ export class InventoryService {
       if (deletedInventory.affected === 0) {
         return AppResponse.setUserErrorResponse(
           ErrorHandler.notFound(`Inventory not with id ${inventoryId}`),
-          { status: 404 },
+          { status: 400 },
         );
       }
 

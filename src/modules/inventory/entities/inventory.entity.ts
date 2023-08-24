@@ -1,5 +1,6 @@
-import { Column, Entity } from 'typeorm';
-import { ShareEntity } from '../../../core/shared';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { ShareEntity } from '@BE/core/shared';
+import { Account } from '@BE/modules/auth/account.entity';
 
 @Entity()
 export class Inventory extends ShareEntity {
@@ -17,9 +18,15 @@ export class Inventory extends ShareEntity {
 
   @Column({
     type: 'int',
-    nullable: false,
+    nullable: true,
   })
   updateBy: number;
+
+  @ManyToOne(() => Account, (account) => account.inventories, {
+    onDelete: 'SET NULL',
+  })
+  @JoinColumn({ name: 'updateBy', referencedColumnName: 'id' })
+  account: Account;
 
   @Column({
     type: 'boolean',

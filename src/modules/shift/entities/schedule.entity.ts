@@ -1,7 +1,7 @@
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { Shift } from './shift.entity';
-import { ShareEntity } from '../../../core/shared';
-import { Account } from '../../../modules/auth/account.entity';
+import { ShareEntity } from '@BE/core/shared';
+import { Account } from '@BE/modules/auth/account.entity';
 
 @Entity({
   name: 'schedule',
@@ -62,7 +62,7 @@ export class Schedule extends ShareEntity {
 
   @Column({
     type: 'boolean',
-    nullable: true
+    nullable: true,
   })
   isLate: boolean;
 }

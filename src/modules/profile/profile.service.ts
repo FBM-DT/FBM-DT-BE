@@ -1,7 +1,7 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { User } from '../users/user.entity';
+import { User } from '@BE/modules/users/user.entity';
 import { DataSource, Repository, SelectQueryBuilder } from 'typeorm';
-import { SEARCH_TYPE, TYPEORM } from '../../core/constants';
+import { SEARCH_TYPE, TYPEORM } from '@BE/core/constants';
 import {
   AddProfileReqDto,
   UpdateProfileReqDto,
@@ -13,16 +13,16 @@ import {
   GetProfilesResDto,
   UpdateProfileResDto,
 } from './dto/res';
-import { AppResponse } from '../../core/shared/app.response';
-import { AccountService } from '../auth/services';
-import { Account } from '../auth/account.entity';
-import { ErrorHandler } from '../../core/shared/common/error';
+import { AppResponse } from '@BE/core/shared/app.response';
+import { AccountService } from '@BE/modules/auth/services';
+import { ErrorHandler } from '@BE/core/shared/common/error';
 import { IAccountData, IExistDataReturnValue, IProfile } from './interfaces';
-import { Bcrypt, ExtraQuery } from '../../core/utils';
+import { Bcrypt, ExtraQuery } from '@BE/core/utils';
 import { IAccountPayload, IUserPayload } from './interfaces';
-import { Department } from '../organisation/entities/department.entity';
-import { Position } from '../organisation/entities/position.entity';
-import { isProfileUpdateAllowedForUserRole } from '../../core/utils/checkUser';
+import { Department } from '@BE/modules/organisation/entities/department.entity';
+import { Position } from '@BE/modules/organisation/entities/position.entity';
+import { isProfileUpdateAllowedForUserRole } from '@BE/core/utils/checkUser';
+import { Account } from '@BE/modules/auth/account.entity';
 
 @Injectable()
 export class ProfileService {
@@ -403,7 +403,7 @@ export class ProfileService {
         await querryRunner.connect();
         await querryRunner.startTransaction('SERIALIZABLE');
 
-        const accountUpdateData = await this._dataSource
+        const accountUpdateData = await querryRunner.manager
           .getRepository(Account)
           .createQueryBuilder()
           .update(Account)
@@ -417,7 +417,8 @@ export class ProfileService {
 
         const { ...updatedAccountData } = accountAfterUpdate;
 
-        const user = await this._userRepository
+        const user = await querryRunner.manager
+          .getRepository(User)
           .createQueryBuilder()
           .update(User)
           .set(userData)
