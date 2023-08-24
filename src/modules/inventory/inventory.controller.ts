@@ -35,7 +35,7 @@ export class InventoryController {
   @ApiOperation({ description: 'Create a new Inventory' })
   @ApiCreatedResponse({ type: CreateInventoryReqDto })
   @HttpCode(201)
-  @Auth()
+  // @Auth()
   async createInventory(
     @Body() InventoryDto: CreateInventoryReqDto,
   ): Promise<AddInventoryResDto> {
