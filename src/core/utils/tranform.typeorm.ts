@@ -7,7 +7,6 @@ import {
 } from 'typeorm';
 import { PaginationReqDto } from '../shared/request';
 import { ShareEntity } from '../shared';
-import { ISort } from '../abstract/interface';
 import { SEARCH_TYPE } from '../constants';
 
 export const ExtraQuery = {

@@ -1,7 +1,7 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { User } from '@BE/modules/users/user.entity';
+import { User } from '../users/user.entity';
 import { DataSource, Repository, SelectQueryBuilder } from 'typeorm';
-import { SEARCH_TYPE, TYPEORM } from '@BE/core/constants';
+import { TYPEORM } from '../../core/constants';
 import {
   AddProfileReqDto,
   UpdateProfileReqDto,
@@ -14,15 +14,15 @@ import {
   UpdateProfileResDto,
 } from './dto/res';
 import { AppResponse } from '@BE/core/shared/app.response';
-import { AccountService } from '@BE/modules/auth/services';
 import { ErrorHandler } from '@BE/core/shared/common/error';
 import { IAccountData, IExistDataReturnValue, IProfile } from './interfaces';
-import { Bcrypt, ExtraQuery } from '@BE/core/utils';
+import { Bcrypt } from '@BE/core/utils';
 import { IAccountPayload, IUserPayload } from './interfaces';
 import { Department } from '@BE/modules/organisation/entities/department.entity';
 import { Position } from '@BE/modules/organisation/entities/position.entity';
 import { isProfileUpdateAllowedForUserRole } from '@BE/core/utils/checkUser';
 import { Account } from '@BE/modules/auth/account.entity';
+import { ExtraQueryBuilder } from '@BE/core/utils/querybuilder.typeorm';
 
 @Injectable()
 export class ProfileService {
@@ -588,54 +588,74 @@ export class ProfileService {
   }
 
   async getProfiles(queries: GetProfilesReqDto): Promise<GetProfilesResDto> {
-    let query: SelectQueryBuilder<User> = this._dataSource
-      .getRepository(User)
-      .createQueryBuilder('u')
-      .select([
-        'u.id',
-        'u.fullname',
-        'u.gender',
-        'u.dateOfBirth',
-        'u.address',
-        'u.email',
-        'u.startDate',
-        'u.endDate',
-        'u.avatar',
-      ]);
     try {
-      if (Object.keys(queries).length === 0) {
-        const result: IProfile[] = await query
-          .innerJoin('u.accounts', 'a')
-          .addSelect(['a.phonenumber', 'a.id'])
-          .innerJoin('u.department', 'd', 'u.departmentId = d.id')
-          .addSelect(['d.id', 'd.name'])
-          .getMany();
-        return AppResponse.setSuccessResponse<GetProfilesResDto>(result);
-      }
+      const userTableFields: Array<string> = this._dataSource
+        .getMetadata(User)
+        .columns.map((column) => column.propertyName);
+      const mappingUserFieldType: Array<string> = this._dataSource
+        .getMetadata(User)
+        .columns.map((column) => {
+          return `${column.propertyName}:${column.type}`;
+        });
+      let query: SelectQueryBuilder<User> = this._dataSource
+        .createQueryBuilder()
+        .select([
+          'user.id',
+          'user.fullname',
+          'user.gender',
+          'user.dateOfBirth',
+          'user.address',
+          'user.email',
+          'user.startDate',
+          'user.endDate',
+          'user.avatar',
+          'user.createdAt',
+          'user.isActive',
+          'user.citizenId',
+          'account.phonenumber',
+          'account.id',
+          'account.isActive',
+          'department.id',
+          'department.name',
+          'department.isActive',
+          'role.roleId',
+          'role.name',
+          'position.id',
+          'position.name',
+        ])
+        .from(User, 'user')
+        .innerJoin(
+          'user.department',
+          'department',
+          'user.departmentId = department.id',
+        )
+        .innerJoin('user.position', 'position', 'user.positionId = position.id')
+        .innerJoin('user.accounts', 'account')
+        .innerJoin('account.role', 'role', 'account.roleId = role.roleId');
+      query = ExtraQueryBuilder.addWhereAnd<User>(
+        query,
+        mappingUserFieldType,
+        queries,
+        'user',
+      );
 
-      query = query
-        .take(queries.pageSize)
-        .skip((queries.page - 1) * queries.pageSize);
-
-      if (queries.phonenumber) {
-        query = query
-          .innerJoin('u.accounts', 'a', 'a.phonenumber like :wildcardNumber', {
-            wildcardNumber: `%${queries.phonenumber}%`,
-          })
-          .addSelect(['a.phonenumber', 'a.id']);
-      } else {
-        query = query
-          .innerJoin('u.accounts', 'a')
-          .addSelect(['a.phonenumber', 'a.id']);
-      }
-
-      query = query
-        .innerJoin('u.department', 'd', 'u.departmentId = d.id')
-        .addSelect(['d.id', 'd.name']);
+      query = ExtraQueryBuilder.addWhereOr<User>(
+        query,
+        [
+          'user.fullname',
+          'user.gender',
+          'user.dateOfBirth',
+          'user.citizenId',
+          'user.email',
+          'account.phonenumber',
+          'role.name',
+          'department.name',
+          'user.startDate',
+          'user.endDate',
+        ],
+        queries,
+      );
       if (queries.sortBy) {
-        const userTableFields: Array<string> = this._dataSource
-          .getMetadata(User)
-          .columns.map((column) => column.propertyName);
         if (!userTableFields.includes(queries.sortBy)) {
           return AppResponse.setUserErrorResponse<GetProfilesResDto>(
             ErrorHandler.invalid(queries.sortBy),
@@ -646,17 +666,26 @@ export class ProfileService {
             ErrorHandler.notAllow(queries.sortBy),
           );
         }
-
-        query = query.orderBy(
-          `u.${queries.sortBy}`,
+        query.orderBy(
+          `user.${queries.sortBy}`,
           queries.order === 'ASC' ? 'ASC' : 'DESC',
         );
+      } else {
+        query.orderBy('user.createdAt', 'DESC');
       }
-
-      const result: IProfile[] = await query.getMany();
-      return AppResponse.setSuccessResponse<GetProfilesResDto>(result, {
+      const { fullQuery, pages, nextPage, totalDocs, prevPage } =
+        await ExtraQueryBuilder.paginateBy<User>(query, {
+          page: queries.page,
+          pageSize: queries.pageSize,
+        });
+      const profiles: IProfile[] = await fullQuery.getMany();
+      return AppResponse.setSuccessResponse<GetProfilesResDto>(profiles, {
         page: queries.page,
         pageSize: queries.pageSize,
+        totalPages: pages,
+        nextPage: nextPage,
+        prevPage: prevPage,
+        totalDocs: totalDocs,
       });
     } catch (error) {
       return AppResponse.setAppErrorResponse<GetProfilesResDto>(error.message);

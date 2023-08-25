@@ -18,15 +18,16 @@ export interface IUserPayload {
 }
 
 export interface IAccountPayload {
+  id?: number;
   roleId?: number;
   phonenumber?: string;
   password?: string;
 }
 
-export interface IProfile extends IUserPayload {}
-
 export interface IAccountData {
   payload: {
     role: string;
   };
+}
+export interface IProfile extends IUserPayload {
 }

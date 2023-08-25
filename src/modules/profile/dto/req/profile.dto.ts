@@ -6,19 +6,16 @@ import {
   IsString,
   IsEmail,
   IsDateString,
-  ValidateNested,
-  IsArray,
-  ArrayMinSize,
   IsInt,
   MaxLength,
   MinLength,
   IsNumber,
   IsNumberString,
-  Matches,
 } from 'class-validator';
 import { PaginationReqDto } from '@BE/core/shared/request';
 import { IsAfterStartDate } from '@BE/core/utils/decorators/date';
 import { GENDER } from '@BE/core/constants';
+import { Transform } from 'class-transformer';
 class Sort {
   sortBy: string;
   sortValue: string;
@@ -139,16 +136,8 @@ export class UpdateProfileReqDto extends PartialType(
 
 export class GetProfilesReqDto extends PaginationReqDto {
   @IsOptional()
-  @IsString({ message: 'The email must be a string' })
-  readonly email?: string;
-
-  @IsOptional()
-  @IsString({ message: 'The address must be a string' })
-  readonly address?: string;
-
-  @IsOptional()
-  @IsString({ message: 'The fullname must be a string' })
-  readonly fullname?: string;
+  @IsString({message: 'The search text must be a string'})
+  searchText: string; 
 
   @IsOptional()
   @IsEnum(GENDER, {
@@ -160,15 +149,24 @@ export class GetProfilesReqDto extends PaginationReqDto {
   readonly gender?: string;
 
   @IsOptional()
-  @IsString({ message: 'phonenumberWrongType:The department must be a string' })
-  readonly department?: string;
+  @Transform(({ value }) => parseInt(value))
+  @IsNumber(
+    { allowNaN: false, allowInfinity: false },
+    { message: 'The department id must be a number' },
+  )
+  @ApiProperty({
+    example: 1,
+  })
+  readonly departmentId?: number;
 
   @IsOptional()
-  @IsString({
-    message: 'phonenumberWrongType:The phonenumber must be a string',
+  @Transform(({ value }) => parseInt(value))
+  @IsNumber(
+    { allowNaN: false, allowInfinity: false },
+    { message: 'The role id must be a number' },
+  )
+  @ApiProperty({
+    example: 1,
   })
-  @MaxLength(10, {
-    message: 'phonenumberTooLong:The phonenumber must contain 10 character',
-  })
-  readonly phonenumber: string;
+  readonly roleId: number;
 }
