@@ -3,16 +3,22 @@ export const ExtraQueryBuilder = {
   async paginateBy<T extends BaseEntity>(
     query: SelectQueryBuilder<T>,
     pagination: { page: number; pageSize: number },
-  ): Promise<{ fullQuery: SelectQueryBuilder<T>; pages: number }> {
+  ): Promise<{
+    fullQuery: SelectQueryBuilder<T>;
+    pages: number;
+    totalDocs: number;
+    prevPage: number | null;
+    nextPage: number | null;
+  }> {
     let totalPage: number;
-    const records: number = await query.getCount();
-    if (records <= pagination.pageSize) {
+    const totalDocs: number = await query.getCount();
+    if (totalDocs <= pagination.pageSize) {
       totalPage = 1;
     } else {
-      if (records % pagination.pageSize === 0) {
-        totalPage = records / pagination.pageSize;
+      if (totalDocs % pagination.pageSize === 0) {
+        totalPage = totalDocs / pagination.pageSize;
       } else {
-        totalPage = Math.ceil(records / pagination.pageSize);
+        totalPage = Math.ceil(totalDocs / pagination.pageSize);
       }
     }
 
@@ -22,6 +28,9 @@ export const ExtraQueryBuilder = {
     return {
       fullQuery: child,
       pages: totalPage,
+      totalDocs: totalDocs,
+      prevPage: pagination.page === 1 ? null : pagination.page - 1,
+      nextPage: pagination.page === totalPage ? null : pagination.page + 1,
     };
   },
   addWhereAnd<T extends BaseEntity>(
@@ -47,7 +56,7 @@ export const ExtraQueryBuilder = {
         query = query.andWhere(
           `LOWER(CAST(${alias}.${keyAndType[0]}) AS VARCHAR) LIKE LOWER(:inputValue${keyAndType[1]}And)`,
           {
-            ['inputValue' + keyAndType[1]+ 'And']:
+            ['inputValue' + keyAndType[1] + 'And']:
               '%' + queries[keyAndType[0]].toString() + '%',
           },
         );

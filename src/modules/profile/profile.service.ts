@@ -674,18 +674,19 @@ export class ProfileService {
       } else {
         query.orderBy('user.createdAt', 'DESC');
       }
-      const { fullQuery, pages } = await ExtraQueryBuilder.paginateBy<User>(
-        query,
-        {
+      const { fullQuery, pages, nextPage, totalDocs, prevPage } =
+        await ExtraQueryBuilder.paginateBy<User>(query, {
           page: queries.page,
           pageSize: queries.pageSize,
-        },
-      );
+        });
       const profiles = await fullQuery.getMany();
       return AppResponse.setSuccessResponse<GetProfilesResDto>(profiles, {
         page: queries.page,
         pageSize: queries.pageSize,
         totalPages: pages,
+        nextPage: nextPage,
+        prevPage: prevPage,
+        totalDocs: totalDocs,
       });
     } catch (error) {
       return AppResponse.setAppErrorResponse<GetProfilesResDto>(error.message);
