@@ -32,7 +32,7 @@ export class ShiftService {
     this._shiftRepository = dataSource.getRepository(Shift);
   }
 
-  async createShift(data: AddShiftReqDto): Promise<AddShiftResDto> {
+  async createShift(inputPayload: AddShiftReqDto): Promise<AddShiftResDto> {
     const queryRunner = this._dataSource.createQueryRunner();
 
     try {
@@ -43,39 +43,44 @@ export class ShiftService {
         .createQueryBuilder()
         .insert()
         .into(Shift)
-        .values(data.shift)
+        .values(inputPayload.shift)
         .execute();
 
-      data.task.forEach((task) => {
-        task = Object.assign(task, {
-          shiftId: addShiftResult.identifiers[0].id,
+      if (inputPayload.task && inputPayload.task?.length > 0) {
+        inputPayload.task.forEach((task) => {
+          task = Object.assign(task, {
+            shiftId: addShiftResult.identifiers[0].id,
+          });
         });
-      });
-      data.note.forEach((note) => {
-        note = Object.assign(note, {
-          shiftId: addShiftResult.identifiers[0].id,
+        var addTaskResult = await queryRunner.manager
+          .getRepository(Task)
+          .createQueryBuilder()
+          .insert()
+          .into(Task)
+          .values(inputPayload.task)
+          .execute();
+      }
+
+      if (inputPayload.note && inputPayload.note?.length > 0) {
+        inputPayload.note.forEach((note) => {
+          note = Object.assign(note, {
+            shiftId: addShiftResult.identifiers[0].id,
+          });
         });
-      });
 
-      const addTaskResult = await queryRunner.manager
-        .getRepository(Task)
-        .createQueryBuilder()
-        .insert()
-        .into(Task)
-        .values(data.task)
-        .execute();
+        var addNoteResult = await queryRunner.manager
+          .getRepository(Note)
+          .createQueryBuilder()
+          .insert()
+          .into(Note)
+          .values(inputPayload.note)
+          .execute();
+      }
 
-      const addNoteResult = await queryRunner.manager
-        .getRepository(Note)
-        .createQueryBuilder()
-        .insert()
-        .into(Note)
-        .values(data.note)
-        .execute();
       await queryRunner.commitTransaction();
       return AppResponse.setSuccessResponse<AddShiftResDto>(
         {
-          shift: addShiftResult.identifiers,
+          shift: addShiftResult.identifiers[0].id,
           task: addTaskResult.identifiers,
           note: addNoteResult.identifiers,
         },
