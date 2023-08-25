@@ -95,11 +95,18 @@ export class ShiftService {
   async getShift(shiftId: number): Promise<GetShiftResDto> {
     try {
       const result: Shift = await this._shiftRepository
-        .createQueryBuilder('s')
-        .innerJoin('s.tasks', 't')
-        .innerJoin('s.notes', 'n')
-        .addSelect(['t', 'n'])
-        .where('s.id = :shiftId', { shiftId: shiftId })
+        .createQueryBuilder('shift')
+        .innerJoin('shift.tasks', 'task')
+        .innerJoin('shift.notes', 'note')
+        .addSelect([
+          'task.shiftId',
+          'task.name',
+          'task.status',
+          'note.context',
+          'note.shiftId',
+          'note.createdBy',
+        ])
+        .where('shift.id = :shiftId', { shiftId: shiftId })
         .getOne();
 
       return AppResponse.setSuccessResponse<GetShiftResDto>(result);
