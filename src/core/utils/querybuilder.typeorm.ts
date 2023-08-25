@@ -54,7 +54,7 @@ export const ExtraQueryBuilder = {
       }
       if (keyAndType[1] === 'varchar') {
         query = query.andWhere(
-          `LOWER(CAST(${alias}.${keyAndType[0]}) AS VARCHAR) LIKE LOWER(:inputValue${keyAndType[1]}And)`,
+          `LOWER(${alias}.${keyAndType[0]}) LIKE LOWER(:inputValue${keyAndType[1]}And)`,
           {
             ['inputValue' + keyAndType[1] + 'And']:
               '%' + queries[keyAndType[0]].toString() + '%',
