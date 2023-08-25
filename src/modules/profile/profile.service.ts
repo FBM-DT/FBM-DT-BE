@@ -14,10 +14,9 @@ import {
   UpdateProfileResDto,
 } from './dto/res';
 import { AppResponse } from '@BE/core/shared/app.response';
-import { AccountService } from '@BE/modules/auth/services';
 import { ErrorHandler } from '@BE/core/shared/common/error';
 import { IAccountData, IExistDataReturnValue, IProfile } from './interfaces';
-import { Bcrypt, ExtraQuery } from '@BE/core/utils';
+import { Bcrypt } from '@BE/core/utils';
 import { IAccountPayload, IUserPayload } from './interfaces';
 import { Department } from '@BE/modules/organisation/entities/department.entity';
 import { Position } from '@BE/modules/organisation/entities/position.entity';
@@ -679,7 +678,7 @@ export class ProfileService {
           page: queries.page,
           pageSize: queries.pageSize,
         });
-      const profiles = await fullQuery.getMany();
+      const profiles: IProfile[] = await fullQuery.getMany();
       return AppResponse.setSuccessResponse<GetProfilesResDto>(profiles, {
         page: queries.page,
         pageSize: queries.pageSize,
