@@ -136,16 +136,8 @@ export class UpdateProfileReqDto extends PartialType(
 
 export class GetProfilesReqDto extends PaginationReqDto {
   @IsOptional()
-  @IsString({ message: 'The email must be a string' })
-  readonly email?: string;
-
-  @IsOptional()
-  @IsString({ message: 'The address must be a string' })
-  readonly address?: string;
-
-  @IsOptional()
-  @IsString({ message: 'The fullname must be a string' })
-  readonly fullname?: string;
+  @IsString({message: 'The search text must be a string'})
+  searchText: string; 
 
   @IsOptional()
   @IsEnum(GENDER, {
@@ -168,15 +160,6 @@ export class GetProfilesReqDto extends PaginationReqDto {
   readonly departmentId?: number;
 
   @IsOptional()
-  @IsString({
-    message: 'phonenumberWrongType:The phonenumber must be a string',
-  })
-  @MaxLength(10, {
-    message: 'phonenumberTooLong:The phonenumber must contain 10 character',
-  })
-  readonly phonenumber: string;
-
-  @IsOptional()
   @Transform(({ value }) => parseInt(value))
   @IsNumber(
     { allowNaN: false, allowInfinity: false },
@@ -186,9 +169,4 @@ export class GetProfilesReqDto extends PaginationReqDto {
     example: 1,
   })
   readonly roleId: number;
-
-  @IsOptional()
-  @IsDateString({}, { message: 'The start date must be date type' })
-  @ApiProperty({ example: '2021-01-01' })
-  startDate?: Date;
 }

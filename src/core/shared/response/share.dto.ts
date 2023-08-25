@@ -6,4 +6,5 @@ export class ShareResDto {
   public exception?: string;
   public page?: number;
   public pageSize?: number;
+  public totalPages?: number;
 }

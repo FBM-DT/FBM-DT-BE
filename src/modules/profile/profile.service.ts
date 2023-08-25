@@ -1,7 +1,7 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { User } from '@BE/modules/users/user.entity';
+import { User } from '../users/user.entity';
 import { DataSource, Repository, SelectQueryBuilder } from 'typeorm';
-import { SEARCH_TYPE, TYPEORM } from '@BE/core/constants';
+import { TYPEORM } from '../../core/constants';
 import {
   AddProfileReqDto,
   UpdateProfileReqDto,
@@ -610,32 +610,52 @@ export class ProfileService {
           'user.startDate',
           'user.endDate',
           'user.avatar',
+          'user.createdAt',
+          'user.isActive',
+          'user.citizenId',
+          'account.phonenumber',
+          'account.id',
+          'account.isActive',
+          'department.id',
+          'department.name',
+          'department.isActive',
+          'role.roleId',
+          'role.name',
+          'position.id',
+          'position.name',
         ])
-        .from(User, 'user');
-      if (queries.phonenumber) {
-        query = query
-          .innerJoin(
-            'user.accounts',
-            'account',
-            'account.phonenumber like :wildcardNumber',
-            {
-              wildcardNumber: `%${queries.phonenumber}%`,
-            },
-          )
-          .addSelect(['a.phonenumber', 'a.id']);
-      } else {
-        query = query
-          .innerJoin('user.accounts', 'account')
-          .addSelect(['account.phonenumber', 'account.id', 'account.roleId']);
-      }
-      query = query
+        .from(User, 'user')
         .innerJoin(
           'user.department',
           'department',
           'user.departmentId = department.id',
         )
-        .addSelect(['department.id', 'department.name']);
+        .innerJoin('user.position', 'position', 'user.positionId = position.id')
+        .innerJoin('user.accounts', 'account')
+        .innerJoin('account.role', 'role', 'account.roleId = role.roleId');
+      query = ExtraQueryBuilder.addWhereAnd<User>(
+        query,
+        mappingUserFieldType,
+        queries,
+        'user',
+      );
 
+      query = ExtraQueryBuilder.addWhereOr<User>(
+        query,
+        [
+          'user.fullname',
+          'user.gender',
+          'user.dateOfBirth',
+          'user.citizenId',
+          'user.email',
+          'account.phonenumber',
+          'role.name',
+          'department.name',
+          'user.startDate',
+          'user.endDate',
+        ],
+        queries,
+      );
       if (queries.sortBy) {
         if (!userTableFields.includes(queries.sortBy)) {
           return AppResponse.setUserErrorResponse<GetProfilesResDto>(
@@ -647,87 +667,25 @@ export class ProfileService {
             ErrorHandler.notAllow(queries.sortBy),
           );
         }
-        query = query.orderBy(
+        query.orderBy(
           `user.${queries.sortBy}`,
           queries.order === 'ASC' ? 'ASC' : 'DESC',
         );
+      } else {
+        query.orderBy('user.createdAt', 'DESC');
       }
-
-      query.where('1=1');
-      mappingUserFieldType.forEach((field, index) => {
-        const keyAndType: Array<string> = field.split(':');
-        if (!queries[keyAndType[0]]) {
-          return;
-        }
-        if (keyAndType[1] !== 'varchar') {
-          query = query.andWhere(
-            `user.${keyAndType[0]} = :inputValue${index}`,
-            {
-              ['inputValue' + index]: queries[keyAndType[0]],
-            },
-          );
-        }
-        if (keyAndType[1] === 'varchar') {
-          query = query.andWhere(
-            `LOWER(user.${keyAndType[0]}) LIKE LOWER(:inputValue${index})`,
-            {
-              ['inputValue' + index]:
-                '%' + queries[keyAndType[0]].toString() + '%',
-            },
-          );
-        }
-      });
-
-      const profileRecords: IProfile[] = await ExtraQueryBuilder.paginateData<
-        User,
-        IProfile
-      >(
-        { alias: 'user', field: 'id' },
-        this._dataSource,
+      const { fullQuery, pages } = await ExtraQueryBuilder.paginateBy<User>(
         query,
-        queries.page,
-        queries.pageSize,
+        {
+          page: queries.page,
+          pageSize: queries.pageSize,
+        },
       );
-
-      let existUser: number[] = [];
-      let formatProfiles: IUserPayload[] = [];
-      profileRecords.forEach((record: IProfile) => {
-        if (existUser?.length === 0 || !existUser.includes(record.row)) {
-          formatProfiles.push({
-            fullname: record.user_fullname,
-            dateOfBirth: record.user_dateOfBirth,
-            gender: record.user_gender,
-            address: record.user_address,
-            email: record.user_email,
-            departmentId: record.user_departmentId,
-            startDate: record.user_startDate,
-            endDate: record.user_endDate,
-            avatar: record.user_avatar,
-            department: {
-              id: record.department_id,
-              name: record.department_name,
-            },
-            accounts: [
-              {
-                phonenumber: record.account_phonenumber,
-                id: record.account_id,
-                roleId: record.account_roleId,
-              },
-            ],
-          });
-          existUser.push(record.row);
-        } else {
-          formatProfiles[formatProfiles?.length-1]?.accounts.push({
-            phonenumber: record.account_phonenumber,
-            id: record.account_id,
-            roleId: record.account_roleId,
-          });
-        }
-      });
-
-      return AppResponse.setSuccessResponse<GetProfilesResDto>(formatProfiles, {
+      const profiles = await fullQuery.getMany();
+      return AppResponse.setSuccessResponse<GetProfilesResDto>(profiles, {
         page: queries.page,
         pageSize: queries.pageSize,
+        totalPages: pages,
       });
     } catch (error) {
       return AppResponse.setAppErrorResponse<GetProfilesResDto>(error.message);
