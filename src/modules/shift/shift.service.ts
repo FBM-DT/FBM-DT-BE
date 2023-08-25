@@ -11,14 +11,14 @@ import {
   DeleteShiftResDto,
   AddShiftResDto,
 } from './dto/response';
-import { SEARCH_TYPE, TYPEORM } from '../../core/constants';
+import { SEARCH_TYPE, TYPEORM } from '@BE/core/constants';
 import { DataSource, FindManyOptions, Repository } from 'typeorm';
 import { Shift } from './entities/shift.entity';
-import { AppResponse } from '../../core/shared/app.response';
+import { AppResponse } from '@BE/core/shared/app.response';
 import { Schedule } from './entities/schedule.entity';
-import { Task } from '../task/entities';
-import { ExtraQuery } from '../../core/utils';
-import { Note } from '../note/note.entity';
+import { Task } from '@BE/modules/task/entities';
+import { ExtraQuery } from '@BE/core/utils';
+import { Note } from '@BE/modules/note/note.entity';
 
 @Injectable()
 export class ShiftService {
@@ -94,9 +94,21 @@ export class ShiftService {
 
   async getShift(shiftId: number): Promise<GetShiftResDto> {
     try {
-      const result: Shift = await this._shiftRepository.findOneBy({
-        id: shiftId,
-      });
+      const result: Shift = await this._shiftRepository
+        .createQueryBuilder('shift')
+        .innerJoin('shift.tasks', 'task')
+        .innerJoin('shift.notes', 'note')
+        .addSelect([
+          'task.shiftId',
+          'task.name',
+          'task.status',
+          'note.context',
+          'note.shiftId',
+          'note.createdBy',
+        ])
+        .where('shift.id = :shiftId', { shiftId: shiftId })
+        .getOne();
+
       return AppResponse.setSuccessResponse<GetShiftResDto>(result);
     } catch (error) {
       return AppResponse.setAppErrorResponse<AddShiftResDto>(error.message);
