@@ -33,8 +33,8 @@ import {
   GetProfileResDto,
   GetProfilesResDto,
 } from './dto/res';
-import { ACCOUNT_ROLE } from '../../core/constants';
-import { Auth, GetAccount } from '../../core/utils/decorators';
+import { ACCOUNT_ROLE } from '@BE/core/constants';
+import { Auth, GetAccount } from '@BE/core/utils/decorators';
 
 @ApiTags('Profile')
 @Controller('profile')

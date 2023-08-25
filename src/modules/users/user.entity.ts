@@ -1,9 +1,9 @@
-import { ShareEntity } from '../../core/shared';
+import { ShareEntity } from '@BE/core/shared';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
-import { Position } from '../organisation/entities/position.entity';
-import { Account } from '../auth/account.entity';
-import { GENDER } from '../../core/constants';
-import { Department } from '../organisation/entities/department.entity';
+import { Position } from '@BE/modules/organisation/entities/position.entity';
+import { Account } from '@BE/modules/auth/account.entity';
+import { GENDER } from '@BE/core/constants';
+import { Department } from '@BE/modules/organisation/entities/department.entity';
 
 @Entity({
   name: 'user',

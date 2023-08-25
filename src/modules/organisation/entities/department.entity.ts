@@ -1,7 +1,7 @@
-import { User } from '../../../modules/users/user.entity';
-import { ShareEntity } from '../../../core/shared';
+import { User } from '@BE/modules/users/user.entity';
+import { ShareEntity } from '@BE/core/shared';
 import { Column, Entity, OneToMany } from 'typeorm';
-import { Shift } from '../../../modules/shift/entities/shift.entity';
+import { Shift } from '@BE/modules/shift/entities/shift.entity';
 
 @Entity({
   name: 'department',

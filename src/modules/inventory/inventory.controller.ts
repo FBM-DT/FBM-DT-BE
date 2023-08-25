@@ -24,6 +24,7 @@ import {
   GetInventoryResDto,
   UpdateInventoryResDto,
 } from './dto/response';
+import { Auth } from '@BE/core/utils/decorators';
 
 @Controller('inventory')
 @ApiTags('Inventory')
@@ -34,6 +35,7 @@ export class InventoryController {
   @ApiOperation({ description: 'Create a new Inventory' })
   @ApiCreatedResponse({ type: CreateInventoryReqDto })
   @HttpCode(201)
+  @Auth()
   async createInventory(
     @Body() InventoryDto: CreateInventoryReqDto,
   ): Promise<AddInventoryResDto> {
@@ -45,6 +47,7 @@ export class InventoryController {
   @Get('list')
   @ApiOkResponse({ type: CreateInventoryReqDto, isArray: true })
   @HttpCode(200)
+  @Auth()
   async findAllInventories(): Promise<GetAllInventoryResDto> {
     const response: GetAllInventoryResDto =
       await this.inventoryService.getAllInventories();
@@ -54,6 +57,7 @@ export class InventoryController {
   @Get('findOne/:id')
   @ApiOkResponse({ type: CreateInventoryReqDto })
   @HttpCode(200)
+  @Auth()
   async findAInventoryById(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<GetInventoryResDto> {
@@ -63,9 +67,23 @@ export class InventoryController {
     return response;
   }
 
+  @Get('findAccount/:id')
+  @ApiOkResponse({ type: CreateInventoryReqDto })
+  @HttpCode(200)
+  @Auth()
+  async findInventoryByAccountId(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<GetInventoryResDto> {
+    const response: GetInventoryResDto =
+      await this.inventoryService.getInventoryByAccountId(id);
+
+    return response;
+  }
+
   @Patch('update/:id')
   @ApiOkResponse({ type: CreateInventoryReqDto })
   @HttpCode(200)
+  @Auth()
   async updateInventoryById(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateInventoryDto: UpdateInventoryReqDto,
@@ -79,6 +97,7 @@ export class InventoryController {
   @Delete('delete/:id')
   @ApiOkResponse({ type: CreateInventoryReqDto })
   @HttpCode(200)
+  @Auth()
   async removeInventoryById(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<DeleteInventoryResDto> {

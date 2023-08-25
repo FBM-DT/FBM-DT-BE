@@ -1,7 +1,7 @@
-import { Account } from '../auth/account.entity';
-import { ShareEntity } from '../../core/shared';
+import { Account } from '@BE/modules/auth/account.entity';
+import { ShareEntity } from '@BE/core/shared';
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
-import { Shift } from '../shift/entities/shift.entity';
+import { Shift } from '@BE/modules/shift/entities/shift.entity';
 
 @Entity()
 export class Note extends ShareEntity {

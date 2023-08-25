@@ -1,9 +1,10 @@
-import { ShareEntity } from '../../core/shared';
+import { ShareEntity } from '@BE/core/shared';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
-import { Role } from '../role/role.entity';
-import { User } from '../users/user.entity';
-import { Note } from '../note/note.entity';
-import { Schedule } from '../shift/entities/schedule.entity';
+import { Role } from '@BE/modules/role/role.entity';
+import { Note } from '@BE/modules/note/note.entity';
+import { Schedule } from '@BE/modules/shift/entities/schedule.entity';
+import { Inventory } from '@BE/modules/inventory/entities/inventory.entity';
+import { User } from '@BE/modules/users/user.entity';
 
 @Entity({
   name: 'account',
@@ -76,4 +77,7 @@ export class Account extends ShareEntity {
 
   @OneToMany(() => Schedule, (schedule) => schedule.account)
   schedules: Schedule[];
+
+  @OneToMany(() => Inventory, (inventory) => inventory.account)
+  inventories: Inventory[];
 }
