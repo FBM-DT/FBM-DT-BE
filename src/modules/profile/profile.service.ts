@@ -23,6 +23,7 @@ import { Department } from '@BE/modules/organisation/entities/department.entity'
 import { Position } from '@BE/modules/organisation/entities/position.entity';
 import { isProfileUpdateAllowedForUserRole } from '@BE/core/utils/checkUser';
 import { Account } from '@BE/modules/auth/account.entity';
+import { ExtraQueryBuilder } from '@BE/core/utils/querybuilder.typeorm';
 
 @Injectable()
 export class ProfileService {
@@ -588,31 +589,29 @@ export class ProfileService {
   }
 
   async getProfiles(queries: GetProfilesReqDto): Promise<GetProfilesResDto> {
-    let query: SelectQueryBuilder<User> = this._dataSource
-      .getRepository(User)
-      .createQueryBuilder('u')
-      .select([
-        'u.id',
-        'u.fullname',
-        'u.gender',
-        'u.dateOfBirth',
-        'u.address',
-        'u.email',
-        'u.startDate',
-        'u.endDate',
-        'u.avatar',
-      ]);
     try {
-      if (Object.keys(queries).length === 0) {
-        const result: IProfile[] = await query
-          .innerJoin('u.accounts', 'a')
-          .addSelect(['a.phonenumber', 'a.id'])
-          .innerJoin('u.department', 'd', 'u.departmentId = d.id')
-          .addSelect(['d.id', 'd.name'])
-          .getMany();
-        return AppResponse.setSuccessResponse<GetProfilesResDto>(result);
-      }
-
+      const userTableFields: Array<string> = this._dataSource
+        .getMetadata(User)
+        .columns.map((column) => column.propertyName);
+      const mappingUserFieldType: Array<string> = this._dataSource
+        .getMetadata(User)
+        .columns.map((column) => {
+          return `${column.propertyName}:${column.type}`;
+        });
+      let query: SelectQueryBuilder<User> = this._dataSource
+        .getRepository(User)
+        .createQueryBuilder('u')
+        .select([
+          'u.id',
+          'u.fullname',
+          'u.gender',
+          'u.dateOfBirth',
+          'u.address',
+          'u.email',
+          'u.startDate',
+          'u.endDate',
+          'u.avatar',
+        ]);
       query = query
         .take(queries.pageSize)
         .skip((queries.page - 1) * queries.pageSize);
@@ -633,9 +632,6 @@ export class ProfileService {
         .innerJoin('u.department', 'd', 'u.departmentId = d.id')
         .addSelect(['d.id', 'd.name']);
       if (queries.sortBy) {
-        const userTableFields: Array<string> = this._dataSource
-          .getMetadata(User)
-          .columns.map((column) => column.propertyName);
         if (!userTableFields.includes(queries.sortBy)) {
           return AppResponse.setUserErrorResponse<GetProfilesResDto>(
             ErrorHandler.invalid(queries.sortBy),
@@ -652,8 +648,35 @@ export class ProfileService {
           queries.order === 'ASC' ? 'ASC' : 'DESC',
         );
       }
+      query.where('1=1');
+      mappingUserFieldType.forEach((field, index) => {
+        const keyAndType: Array<string> = field.split(':');
+        if (!queries[keyAndType[0]]) {
+          return;
+        }
+        if (keyAndType[1] !== 'varchar') {
+          query = query.andWhere(`u.${keyAndType[0]} = :inputValue${index}`, {
+            ['inputValue' + index]: queries[keyAndType[0]],
+          });
+        }
+        if (keyAndType[1] === 'varchar') {
+          query = query.andWhere(
+            `LOWER(u.${keyAndType[0]}) LIKE LOWER(:inputValue${index})`,
+            {
+              ['inputValue' + index]:
+                '%' + queries[keyAndType[0]].toString() + '%',
+            },
+          );
+        }
+      });
 
-      const result: IProfile[] = await query.getMany();
+      const result: IProfile[] = await ExtraQueryBuilder.paginateData<User>(
+        this._dataSource,
+        query,
+        queries.page,
+        queries.pageSize,
+      );
+      // const result: IProfile[] = await query.getMany();
       return AppResponse.setSuccessResponse<GetProfilesResDto>(result, {
         page: queries.page,
         pageSize: queries.pageSize,

@@ -6,19 +6,16 @@ import {
   IsString,
   IsEmail,
   IsDateString,
-  ValidateNested,
-  IsArray,
-  ArrayMinSize,
   IsInt,
   MaxLength,
   MinLength,
   IsNumber,
   IsNumberString,
-  Matches,
 } from 'class-validator';
 import { PaginationReqDto } from '@BE/core/shared/request';
 import { IsAfterStartDate } from '@BE/core/utils/decorators/date';
 import { GENDER } from '@BE/core/constants';
+import { Transform } from 'class-transformer';
 class Sort {
   sortBy: string;
   sortValue: string;
@@ -160,8 +157,15 @@ export class GetProfilesReqDto extends PaginationReqDto {
   readonly gender?: string;
 
   @IsOptional()
-  @IsString({ message: 'phonenumberWrongType:The department must be a string' })
-  readonly department?: string;
+  @Transform(({ value }) => parseInt(value))
+  @IsNumber(
+    { allowNaN: false, allowInfinity: false },
+    { message: 'The department id must be a number' },
+  )
+  @ApiProperty({
+    example: 1,
+  })
+  readonly departmentId?: number;
 
   @IsOptional()
   @IsString({
@@ -171,4 +175,20 @@ export class GetProfilesReqDto extends PaginationReqDto {
     message: 'phonenumberTooLong:The phonenumber must contain 10 character',
   })
   readonly phonenumber: string;
+
+  @IsOptional()
+  @Transform(({ value }) => parseInt(value))
+  @IsNumber(
+    { allowNaN: false, allowInfinity: false },
+    { message: 'The role id must be a number' },
+  )
+  @ApiProperty({
+    example: 1,
+  })
+  readonly roleId: number;
+
+  @IsOptional()
+  @IsDateString({}, { message: 'The start date must be date type' })
+  @ApiProperty({ example: '2021-01-01' })
+  startDate?: Date;
 }
