@@ -1,4 +1,4 @@
-import { DatabaseModule } from '../../../../src/db/database.module';
+import { DatabaseModule } from '@BE/db/database.module';
 import { ConfigModule } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { PositionService } from './position.service';
@@ -98,5 +98,35 @@ describe('PositionServiceTestCase', () => {
     const result = await service.getPosition(positionId);
 
     expect(result).toEqual(responseData);
+  });
+
+  it('should update the position name when given a valid id and name', async () => {
+    const id = 1;
+    const name: any = 'New Position Name';
+    const existPosition: IPosition = { id: 1, name: 'Old Position Name' };
+
+    const findPosition: GetPositionResDto = new GetPositionResDto();
+    findPosition.data = existPosition;
+    findPosition.message = 'Success';
+    findPosition.status = 200;
+    findPosition.version = 'v1';
+
+    const updatedPositionRes: UpdatePositionResDto = new UpdatePositionResDto();
+    updatedPositionRes.data = { affected: 1 };
+    updatedPositionRes.message = 'Success';
+    updatedPositionRes.status = 200;
+    updatedPositionRes.version = 'v1';
+
+    jest
+      .spyOn(service, 'getPosition')
+      .mockImplementation(async () => findPosition);
+
+    expect(await service.getPosition(id)).toEqual(findPosition);
+
+    jest
+      .spyOn(service, 'updatePosition')
+      .mockImplementation(async () => updatedPositionRes);
+
+    expect(await service.updatePosition(id, name)).toEqual(updatedPositionRes);
   });
 });
