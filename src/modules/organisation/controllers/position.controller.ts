@@ -15,8 +15,8 @@ import {
   GetPositionResDto,
   GetPositionsResDto,
 } from '../dto/position/res/position.dto';
-import { Auth } from '../../../core/utils/decorators';
-import { ACCOUNT_ROLE } from '../../../core/constants';
+import { Auth } from '@BE/core/utils/decorators';
+import { ACCOUNT_ROLE } from '@BE/core/constants';
 
 @ApiTags('position')
 @Controller('position')

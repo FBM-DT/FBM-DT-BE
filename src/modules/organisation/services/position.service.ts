@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
-import { TYPEORM } from '../../../core/constants';
-import { AppResponse } from '../../../core/shared/app.response';
+import { TYPEORM } from '@BE/core/constants';
+import { AppResponse } from '@BE/core/shared/app.response';
 import { Position } from '../entities/position.entity';
 import {
   CreatePositionResDto,
@@ -10,7 +10,7 @@ import {
   UpdatePositionResDto,
 } from '../dto/position/res/position.dto';
 import { CreatePositionReqDto } from '../dto/position/req/position.dto';
-import { ErrorHandler } from 'src/core/shared/common/error';
+import { ErrorHandler } from '@BE/core/shared/common/error';
 import { IPosition } from '../interfaces';
 
 @Injectable()

@@ -1,6 +1,6 @@
 import { ConfigModule } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
-import { DatabaseModule } from '../../../../src/db/database.module';
+import { DatabaseModule } from '@BE/db/database.module';
 import { AuthModule } from '../auth.module';
 import { AccountService } from './account.service';
 import { CreateAccountReqDto } from '../dto/request';

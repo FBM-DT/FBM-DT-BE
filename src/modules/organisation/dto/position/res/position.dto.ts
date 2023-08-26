@@ -1,4 +1,4 @@
-import { ShareResDto } from '../../../../../core/shared/response';
+import { ShareResDto } from '@BE/core/shared/response';
 
 export class GetPositionsResDto extends ShareResDto {}
 export class GetPositionResDto extends ShareResDto {}

@@ -9,7 +9,7 @@ import {
 } from 'class-validator';
 import { PartialType } from '@nestjs/mapped-types';
 import { ApiProperty } from '@nestjs/swagger';
-import { ACCOUNT_ROLE } from '../../../../core/constants';
+import { ACCOUNT_ROLE } from '@BE/core/constants';
 
 export class CreateAccountReqDto {
   @IsNotEmpty({ message: 'The phone number is required' })
