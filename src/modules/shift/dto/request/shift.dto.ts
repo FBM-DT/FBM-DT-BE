@@ -61,12 +61,12 @@ export class AddShiftReqDto {
   @ApiProperty({ required: false, type: () => AddTaskReqDto, isArray: true })
   @ValidateNested({ each: true })
   @Type(() => AddTaskReqDto)
-  task?: Array<AddTaskReqDto>;
+  task?: Array<AddTaskReqDto> = [];
 
   @ApiProperty({ required: false, type: () => AddNoteReqDto, isArray: true })
   @ValidateNested({ each: true })
   @Type(() => AddNoteReqDto)
-  note?: Array<AddNoteReqDto>;
+  note?: Array<AddNoteReqDto> = [];
 }
 
 export class GetShiftListReqDto extends PaginationReqDto {
