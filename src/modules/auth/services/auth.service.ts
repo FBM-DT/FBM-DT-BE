@@ -1,13 +1,13 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
-import { TYPEORM } from '../../../core/constants';
+import { TYPEORM } from '@BE/core/constants';
 import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { AccountService } from './account.service';
 import { Account } from '../account.entity';
 import { IAuthPayload } from '../interfaces';
-import { AppResponse } from '../../../core/shared/app.response';
+import { AppResponse } from '@BE/core/shared/app.response';
 import { SigninReqDto } from '../dto/request';
 import {
   LogoutResDto,
@@ -15,7 +15,7 @@ import {
   SigninResDto,
 } from '../dto/response';
 import { ErrorMessage } from '../constants/errorMessages';
-import { ErrorHandler } from '../../../core/shared/common/error';
+import { ErrorHandler } from '@BE/core/shared/common/error';
 
 @Injectable()
 export class AuthService {

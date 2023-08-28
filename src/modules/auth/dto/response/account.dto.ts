@@ -1,4 +1,4 @@
-import { ShareResDto } from '../../../../core/shared/response';
+import { ShareResDto } from '@BE/core/shared/response';
 
 export class CreateAccountResDto extends ShareResDto {}
 export class GetAllAccountsResDto extends ShareResDto {}
