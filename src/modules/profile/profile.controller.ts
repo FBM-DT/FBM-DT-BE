@@ -45,7 +45,7 @@ export class ProfileController {
   @ApiCreatedResponse({
     type: AddProfileReqDto,
   })
-  @Auth(ACCOUNT_ROLE.SUPERVISOR)
+  @Auth(ACCOUNT_ROLE.ADM, ACCOUNT_ROLE.SUPERVISOR)
   async createProfile(
     @Body() createProfileDto: AddProfileReqDto,
   ): Promise<AddProfileResDto> {
