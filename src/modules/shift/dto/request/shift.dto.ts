@@ -10,12 +10,12 @@ import {
   MinLength,
   ValidateNested,
 } from 'class-validator';
-import { WEEKDAYS } from '../../../../core/constants';
-import { PaginationReqDto } from '../../../../core/shared/request';
-import { AddTaskReqDto } from '../../../task/dto/request';
 import { ApiProperty, OmitType, PartialType } from '@nestjs/swagger';
-import { Exclude, Type } from 'class-transformer';
-import { AddNoteReqDto } from '../../../../modules/note/dto/request';
+import { Exclude, Transform, Type } from 'class-transformer';
+import { WEEKDAYS } from '@BE/core/constants';
+import { AddNoteReqDto } from '@BE/modules/note/dto/request';
+import { AddTaskReqDto } from '@BE/modules/task/dto/request';
+import { PaginationReqDto } from '@BE/core/shared/request';
 
 class AddShift {
   @ApiProperty()
@@ -71,24 +71,19 @@ export class AddShiftReqDto {
 
 export class GetShiftListReqDto extends PaginationReqDto {
   @IsOptional()
-  @IsString({ message: 'The sort must be a string' })
-  readonly sort?: string;
+  @IsString({ message: 'The search text must be a string' })
+  searchText: string;
 
   @IsOptional()
-  @IsString({ message: 'The type must be a string' })
-  readonly type?: string;
-
-  @IsOptional()
-  @IsString({ message: 'The address must be a string' })
-  readonly address?: string;
-
-  @IsOptional()
-  @IsString({ message: 'The name must be a string' })
-  readonly name?: string;
-
-  @IsOptional()
-  @IsString({ message: 'The position must be a string' })
-  readonly position?: string;
+  @Transform(({ value }) => parseInt(value))
+  @IsNumber(
+    { allowNaN: false, allowInfinity: false },
+    { message: 'The department id must be a number' },
+  )
+  @ApiProperty({
+    example: 1,
+  })
+  readonly departmentId?: number;
 }
 
 export class UpdateShiftReqDto extends OmitType(AddShift, ['departmentId']) {

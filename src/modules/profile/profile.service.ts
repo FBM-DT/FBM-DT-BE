@@ -591,12 +591,15 @@ export class ProfileService {
     try {
       const userTableFields: Array<string> = this._dataSource
         .getMetadata(User)
-        .columns.map((column) => column.propertyName);
+        .columns.map((column) => {
+          return column.propertyName;
+        });
       const mappingUserFieldType: Array<string> = this._dataSource
         .getMetadata(User)
         .columns.map((column) => {
           return `${column.propertyName}:${column.type}`;
         });
+
       let query: SelectQueryBuilder<User> = this._dataSource
         .createQueryBuilder()
         .select([
@@ -632,6 +635,7 @@ export class ProfileService {
         .innerJoin('user.position', 'position', 'user.positionId = position.id')
         .innerJoin('user.accounts', 'account')
         .innerJoin('account.role', 'role', 'account.roleId = role.roleId');
+
       query = ExtraQueryBuilder.addWhereAnd<User>(
         query,
         mappingUserFieldType,
